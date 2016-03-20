@@ -24,33 +24,36 @@ import java.util.stream.Stream;
 // TODO : Zaimplementować error
 public class LearningAlgorithm {
 
-    private final Random random = new Random();
-    private final Configuration cfg = new Configuration();
-    
+    private static final Random random = new Random();
+    private static final Configuration cfg = new Configuration();
+
     boolean converged = false;
     double sigma = 0.5;
+    int currentEpoch = 0;
+
     DoubleMatrix2D W = DoubleFactory2D.dense.random(cfg.numdims, cfg.numhid); //randMatrinx(numdims, numhid);
     DoubleMatrix1D vbias = DoubleFactory1D.dense.random(cfg.numdims); // randnBooleanVector(numdims); // ci
     DoubleMatrix1D hbias = DoubleFactory1D.dense.random(cfg.numhid); // randnBooleanVector(numhid);  // bi
-   
-    // Load data
+
     TrainingSet trainingSet = new TrainingSet(cfg.numdims, cfg.numsamples);
 
-    public void learn() {
+    public void train() {
 
-        //[W , hbias, vbias]  = train_rbm(data, W, hbias, vbias, σ, alpha)
-        while (!converged) {
-            // for each training  batch XnumdimsxbatchSize 
-            // (randomly sample batchSize patches from data w / o replacement)
+        //# [W , hbias, vbias]  = train_rbm(data, W, hbias, vbias, σ, alpha)
+        // TODO: Do wyjaśnienia. Kiedy uważamy że ta flaga jest true?
+        // Liczba epok ?
+        while (currentEpoch < cfg.numberOfEpochs) {
+            //# for each training  batch XnumdimsxbatchSize 
+            //# (randomly sample batchSize patches from data w / o replacement)
             DoubleMatrix1D[] batchOffRandomlySamples = trainingSet.getBatchOffRandomlySamples(cfg.batchSize);
             for (DoubleMatrix1D sample : batchOffRandomlySamples) {
-                // poshidprobs := hidden unit probabilities given X (use Equation 3)
+                //# poshidprobs := hidden unit probabilities given X (use Equation 3)
                 DoubleMatrix1D poshidprobs = computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
                         cfg.numhid, sample, W, hbias, cfg.lambda, sigma, cfg.beta
                 );
-                // poshidstates:= sample using poshidprobs
+                //# poshidstates:= sample using poshidprobs
                 DoubleMatrix1D poshidstates = computeStatesFromProbabilities(poshidprobs);
-                // negdata:= reconstruction of visible values given poshidstates(use Equation 2)
+                //# negdata:= reconstruction of visible values given poshidstates(use Equation 2)
                 DoubleMatrix1D negdata = computeVisibleLayerReconstructionForGivenHiddenLayerStates(
                         cfg.numdims,
                         cfg.numhid,
@@ -60,24 +63,27 @@ public class LearningAlgorithm {
                         cfg.mi,
                         cfg.lambda,
                         sigma);
-                // neghidprobs:= hidden unit probabilities given negdata (use Equation 3)
+                //# neghidprobs:= hidden unit probabilities given negdata (use Equation 3)
                 DoubleMatrix1D neghidprobs = computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
                         cfg.numhid, negdata, W, hbias, cfg.lambda, sigma, cfg.beta
                 );
-                // W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
+                //# W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
                 W = computeWCorrection(W, sample, poshidprobs, negdata, neghidprobs, cfg.alpha, cfg.batchSize);
-                // vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
+                //# vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
                 vbias = computeVbiasCorrection(vbias, sample, negdata, cfg.alpha, cfg.batchSize);
-                // error := SquaredDiff(X, negdata)
-            }// end for
-            // update hbias  (use Equation  6) 
-            hbias = updateHbias(hbias, cfg.learningRate, cfg.numsamples, batchOffRandomlySamples);
-            // if (sigma > 0.05) sigma:= sigma * 0.99
-            converged = true;
-        }//while end  
-        //train_rbm
-
-    }
+                //# error := SquaredDiff(X, negdata)
+            }//# end for
+            //# update hbias  (use Equation  6) 
+            // hbias = updateHbias(hbias, cfg.learningRate, cfg.numsamples, batchOffRandomlySamples);
+            //# if (sigma > 0.05) sigma:= sigma * 0.99
+            // TODO : Magic numbers
+            if (sigma > 0.05) {
+                sigma = sigma * 0.99;
+            }
+            System.out.println(W);
+            currentEpoch++;
+        }//#while end  
+    }//#train_rbm
 
     //TODO: validacja na bias->len do hsize, hsize do W itp
     //TODO: uzyć funkcyjnych elementów dla macierzy (append function)
