@@ -22,74 +22,58 @@ import java.util.stream.Stream;
 // TODO : usunąć colta
 // TODO : wprowadzic lambdy + stream API z jdk8
 // TODO : Zaimplementować error
-public class SrbmNetwork {
+public class LearningAlgorithm {
 
+    private final Random random = new Random();
+    private final Configuration cfg = new Configuration();
     
-    private static Random random = new Random();
+    boolean converged = false;
+    double sigma = 0.5;
+    DoubleMatrix2D W = DoubleFactory2D.dense.random(cfg.numdims, cfg.numhid); //randMatrinx(numdims, numhid);
+    DoubleMatrix1D vbias = DoubleFactory1D.dense.random(cfg.numdims); // randnBooleanVector(numdims); // ci
+    DoubleMatrix1D hbias = DoubleFactory1D.dense.random(cfg.numhid); // randnBooleanVector(numhid);  // bi
+   
+    // Load data
+    TrainingSet trainingSet = new TrainingSet(cfg.numdims, cfg.numsamples);
 
-    static public void main(String[] args) {
-
-        final int numsamples = 100;   //# of image patch samples 
-        final int numdims = 20;    //# of visible units 
-        final int numhid = 5;     //# of hidden units 
-        final double alpha = 0.01;
-
-        final int batchSize = 200;
-        DoubleMatrix2D W     = DoubleFactory2D.dense.random(numdims,numhid); //randMatrinx(numdims, numhid);
-        DoubleMatrix1D vbias = DoubleFactory1D.dense.random(numdims); // randnBooleanVector(numdims); // ci
-        DoubleMatrix1D hbias = DoubleFactory1D.dense.random(numhid); // randnBooleanVector(numhid);  // bi
-        double sigma = 0.5;
-        
-        System.out.println(W.toString());
-        System.out.println(vbias);
-        System.out.println(hbias);
-        
-        // Dodaane zmienne
-        boolean converged = false;
-        final double lambda = 1;
-        final double beta = 0.5;
-        final double mi = 0.5;
-        final double learningRate = 0.1;
-        
-        // Load data
-        GeneratedTrainingSet trainingSet = new GeneratedTrainingSet(numdims, numsamples);
+    public void learn() {
 
         //[W , hbias, vbias]  = train_rbm(data, W, hbias, vbias, σ, alpha)
         while (!converged) {
             // for each training  batch XnumdimsxbatchSize 
             // (randomly sample batchSize patches from data w / o replacement)
-            DoubleMatrix1D[] batchOffRandomlySamples = trainingSet.getBatchOffRandomlySamples(batchSize);
-            for (DoubleMatrix1D sample :batchOffRandomlySamples ) {
+            DoubleMatrix1D[] batchOffRandomlySamples = trainingSet.getBatchOffRandomlySamples(cfg.batchSize);
+            for (DoubleMatrix1D sample : batchOffRandomlySamples) {
                 // poshidprobs := hidden unit probabilities given X (use Equation 3)
                 DoubleMatrix1D poshidprobs = computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
-                        numhid, sample, W,  hbias, lambda, sigma, beta
+                        cfg.numhid, sample, W, hbias, cfg.lambda, sigma, cfg.beta
                 );
                 // poshidstates:= sample using poshidprobs
                 DoubleMatrix1D poshidstates = computeStatesFromProbabilities(poshidprobs);
                 // negdata:= reconstruction of visible values given poshidstates(use Equation 2)
                 DoubleMatrix1D negdata = computeVisibleLayerReconstructionForGivenHiddenLayerStates(
-                        numdims, 
-                        numhid, 
-                        vbias.toArray(), 
-                        W.toArray(), 
+                        cfg.numdims,
+                        cfg.numhid,
+                        vbias.toArray(),
+                        W.toArray(),
                         poshidstates.toArray(),
-                        mi, 
-                        lambda, 
+                        cfg.mi,
+                        cfg.lambda,
                         sigma);
                 // neghidprobs:= hidden unit probabilities given negdata (use Equation 3)
                 DoubleMatrix1D neghidprobs = computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
-                        numhid,negdata, W, hbias, lambda, sigma, beta
+                        cfg.numhid, negdata, W, hbias, cfg.lambda, sigma, cfg.beta
                 );
                 // W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-                W = computeWCorrection(W,sample,poshidprobs,negdata,neghidprobs,alpha,batchSize);
+                W = computeWCorrection(W, sample, poshidprobs, negdata, neghidprobs, cfg.alpha, cfg.batchSize);
                 // vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
-                vbias = computeVbiasCorrection(vbias,sample,negdata,alpha,batchSize);
+                vbias = computeVbiasCorrection(vbias, sample, negdata, cfg.alpha, cfg.batchSize);
                 // error := SquaredDiff(X, negdata)
             }// end for
             // update hbias  (use Equation  6) 
-            hbias = updateHbias(hbias,learningRate,numsamples,batchOffRandomlySamples);
+            hbias = updateHbias(hbias, cfg.learningRate, cfg.numsamples, batchOffRandomlySamples);
             // if (sigma > 0.05) sigma:= sigma * 0.99
-            converged=true;
+            converged = true;
         }//while end  
         //train_rbm
 
@@ -99,13 +83,13 @@ public class SrbmNetwork {
     //TODO: uzyć funkcyjnych elementów dla macierzy (append function)
     private static DoubleMatrix1D computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
             int numhid,
-            DoubleMatrix1D v, 
-            DoubleMatrix2D W, 
-            DoubleMatrix1D hbias, 
-            double lambda, 
-            double sigma, 
+            DoubleMatrix1D v,
+            DoubleMatrix2D W,
+            DoubleMatrix1D hbias,
+            double lambda,
+            double sigma,
             double beta
-    ) {        
+    ) {
         double[] posHidProbs = new double[numhid];
         for (int j = 0; j < posHidProbs.length; j++) {
             posHidProbs[j] = prob_Hj_v_eq3(hbias.get(j), W.toArray(), v.toArray(), j, lambda, sigma, beta);
@@ -140,26 +124,24 @@ public class SrbmNetwork {
         return poshidprobs.assign(new DoubleFunction() {
             @Override
             public double apply(double d) {
-                    return d > random.nextDouble() ? 1 : 0;
+                return d > random.nextDouble() ? 1 : 0;
             }
         });
-        
+
     }
 
     //TODO: use colt
     private static DoubleMatrix1D computeVisibleLayerReconstructionForGivenHiddenLayerStates(
-            int numdims, 
-            int numhid, 
-            double[] vbias, 
-            double[][] W, 
+            int numdims,
+            int numhid,
+            double[] vbias,
+            double[][] W,
             double[] poshidstates,
             double mi,
-            double lambda, 
+            double lambda,
             double sigma
     ) {
 
-        
-        
         double[] negdataProbs = new double[numdims];
 
         for (int i = 0; i < negdataProbs.length; i++) {
@@ -199,11 +181,11 @@ public class SrbmNetwork {
     // ----------------------------------------------------------
     // W obecnej wersji zakładam że to iloczyn skalarny. (co jest troche bez sensu)
     private static DoubleMatrix2D computeWCorrection(
-            DoubleMatrix2D W, 
-            final DoubleMatrix1D sample, 
-            final DoubleMatrix1D poshidprobs, 
-            final DoubleMatrix1D negdata, 
-            final DoubleMatrix1D neghidprobs, 
+            DoubleMatrix2D W,
+            final DoubleMatrix1D sample,
+            final DoubleMatrix1D poshidprobs,
+            final DoubleMatrix1D negdata,
+            final DoubleMatrix1D neghidprobs,
             final double alpha,
             final int batchSize) {
 
@@ -211,33 +193,33 @@ public class SrbmNetwork {
         return W.assign(new DoubleFunction() {
             @Override
             public double apply(double d) {
-                      return d + alpha*(sample.zDotProduct(poshidprobs)-negdata.zDotProduct(neghidprobs))/batchSize;
+                return d + alpha * (sample.zDotProduct(poshidprobs) - negdata.zDotProduct(neghidprobs)) / batchSize;
             }
         });
     }
 
     private static DoubleMatrix1D computeVbiasCorrection(
-            final DoubleMatrix1D vbias, 
-            final DoubleMatrix1D sample, 
-            final DoubleMatrix1D negdata, 
-            final double alpha, 
+            final DoubleMatrix1D vbias,
+            final DoubleMatrix1D sample,
+            final DoubleMatrix1D negdata,
+            final double alpha,
             final int batchSize
     ) {
-        
+
         // vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
         return vbias.assign(new DoubleFunction() {
             @Override
             public double apply(double d) {
-                return d + alpha*(sample.zSum() - negdata.zSum())/batchSize;
+                return d + alpha * (sample.zSum() - negdata.zSum()) / batchSize;
             }
         });
-    
+
     }
 
     private static DoubleMatrix1D updateHbias(DoubleMatrix1D hbias, double learningRate, int numsamples, DoubleMatrix1D[] batchOffRandomlySamples) {
-   
+
         return null;
-    
+
     }
 
 }

@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author koperix
  */
-class GeneratedTrainingSet {
+class TrainingSet {
 
     final DoubleMatrix1D[] data;
     final int numdims;
@@ -59,7 +59,7 @@ class GeneratedTrainingSet {
 
     }
 
-    public GeneratedTrainingSet(int numdims, int setSize) {
+    public TrainingSet(int numdims, int setSize) {
         data = genData();
         this.numdims = numdims;
         this.setSize = setSize;
