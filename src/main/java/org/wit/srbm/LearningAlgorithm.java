@@ -27,13 +27,12 @@ public class LearningAlgorithm {
     private static final Random random = new Random();
     private static final Configuration cfg = new Configuration();
 
-    boolean converged = false;
     double sigma = 0.5;
     int currentEpoch = 0;
 
-    DoubleMatrix2D W = DoubleFactory2D.dense.random(cfg.numdims, cfg.numhid); //randMatrinx(numdims, numhid);
-    DoubleMatrix1D vbias = DoubleFactory1D.dense.random(cfg.numdims); // randnBooleanVector(numdims); // ci
-    DoubleMatrix1D hbias = DoubleFactory1D.dense.random(cfg.numhid); // randnBooleanVector(numhid);  // bi
+    DoubleMatrix2D W = DoubleFactory2D.dense.random(cfg.numdims, cfg.numhid); 
+    DoubleMatrix1D vbias = DoubleFactory1D.dense.random(cfg.numdims); 
+    DoubleMatrix1D hbias = DoubleFactory1D.dense.random(cfg.numhid); 
 
     TrainingSet trainingSet = new TrainingSet(cfg.numdims, cfg.numsamples);
 
