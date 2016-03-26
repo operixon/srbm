@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.wit.srbm;
+package org.wit.snr.nn.srbm;
 
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -17,7 +17,7 @@ import java.util.Arrays;
  *
  * @author koperix
  */
-public class Minst {
+public class MinstImageLoader {
 
     String imagesPath = "/home/koperix/Pobrane/minst/t10k-images-idx3-ubyte";
 

@@ -5,6 +5,7 @@
  */
 package org.wit.srbm;
 
+import org.wit.snr.nn.srbm.MinstImageLoader;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -38,12 +39,11 @@ public class MinstNGTest {
     }
 
     /**
-     * Test of load method, of class Minst.
+     * Test of load method, of MinstImageLoader Minst.
      */
     @Test
     public void testLoad() throws Exception {
-        System.out.println("load");
-        Minst instance = new Minst();
+        System.out.println("loadMinstLoader       MinMinstLoaderstance = new Minst();
         instance.load();
         // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");

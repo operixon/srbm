@@ -5,6 +5,7 @@
  */
 package org.wit.srbm;
 
+import org.wit.snr.nn.srbm.LearningAlgorithm;
 import static org.testng.Assert.*;
 
 /**
