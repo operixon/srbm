@@ -32,7 +32,7 @@ public class MinstImageLoader extends IdxFileInMemory {
         for (int i = 0; i < getNumberOfImages(); i++) {
             for (int r = 0; r < getNumberOfRows(); r++) {
                 int offset = i * getBytesPerImage() + r * getBytesPerRow();
-                System.arraycopy(d, offset, images[i][r], 0, images[i][r].length);
+                System.arraycopy(d, offset, images[i][r], 0, getNumberOfColumns());
             }
         }
 
