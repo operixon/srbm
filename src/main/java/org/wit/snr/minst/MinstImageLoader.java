@@ -31,10 +31,8 @@ public class MinstImageLoader extends IdxFileInMemory {
         images = new int[getNumberOfImages()][getNumberOfRows()][getNumberOfColumns()];
         for (int i = 0; i < getNumberOfImages(); i++) {
             for (int r = 0; r < getNumberOfRows(); r++) {
-                for (int c = 0; c < getNumberOfColumns(); c++) {
-                    int offset = i * getBytesPerImage() + r * getBytesPerRow();
-                    System.arraycopy(d, offset, images[i][r],0,images[i][r].length);
-                }
+                int offset = i * getBytesPerImage() + r * getBytesPerRow();
+                System.arraycopy(d, offset, images[i][r], 0, images[i][r].length);
             }
         }
 
@@ -52,15 +50,15 @@ public class MinstImageLoader extends IdxFileInMemory {
         return fileMetadata.getSizeInDimension()[2];
     }
 
-    private  int getBytesPerRow() {
+    private int getBytesPerRow() {
         return fileMetadata.getTypeOfData().getNumOfBytes() * getNumberOfRows();
     }
 
-    private  int getBytesPerColumn() {
+    private int getBytesPerColumn() {
         return fileMetadata.getTypeOfData().getNumOfBytes() * getNumberOfColumns();
     }
 
-    private  int getBytesPerImage() {
+    private int getBytesPerImage() {
         return fileMetadata.getTypeOfData().getNumOfBytes() * getNumberOfColumns() * getNumberOfRows();
     }
 
