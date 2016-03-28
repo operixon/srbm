@@ -27,12 +27,17 @@ public class MinstImageLoader extends IdxFileInMemory {
     }
 
     private void loadImages() throws IOException {
-        byte[] d = super.getData();
-        images = new int[getNumberOfImages()][getNumberOfRows()][getNumberOfColumns()];
-        for (int i = 0; i < getNumberOfImages(); i++) {
-            for (int r = 0; r < getNumberOfRows(); r++) {
-                int offset = i * getBytesPerImage() + r * getBytesPerRow();
-                System.arraycopy(d, offset, images[i][r], 0, getNumberOfColumns());
+        final byte[] d = super.getData();
+        final int numImg = getNumberOfImages();
+        final int numCol = getNumberOfColumns();
+        final int numRow = getNumberOfRows();
+        final int bytesPerImg = getBytesPerImage();
+        final int bytesPerRow = getBytesPerRow();
+        images = new int[numImg][numRow][numCol];
+        for (int i = 0; i < numImg; i++) {
+            for (int r = 0; r < numRow; r++) {
+                int offset = i * bytesPerImg + r * bytesPerRow;
+                System.arraycopy(d, offset, images[i][r], 0, bytesPerRow);
             }
         }
 
