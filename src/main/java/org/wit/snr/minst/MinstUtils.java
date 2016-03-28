@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.wit.snr.nn.srbm;
+package org.wit.snr.minst;
 
+import org.wit.snr.minst.TypeOfData;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class MinstUtils {
         if (codeToEnumCache.containsKey(code)) {
             return codeToEnumCache.get(code);
         } else {
-            throw new IllegalArgumentException(String.format("Ni ma takiego kodu %02x", code));
+            throw new IllegalArgumentException(String.format("Ni ma takiego kodu %02x. A to bardzo niedobrze.", code));
         }
     }
 

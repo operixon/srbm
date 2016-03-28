@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.wit.srbm;
+package org.wit.snr.minst;
 
-import org.wit.snr.nn.srbm.MinstImageLoader;
+import org.wit.snr.minst.MinstUtils;
+import org.wit.snr.minst.TypeOfData;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -17,9 +18,9 @@ import org.testng.annotations.Test;
  *
  * @author koperix
  */
-public class MinstNGTest {
+public class MinstUtilsNGTest {
     
-    public MinstNGTest() {
+    public MinstUtilsNGTest() {
     }
 
     @BeforeClass
@@ -39,14 +40,18 @@ public class MinstNGTest {
     }
 
     /**
-     * Test of load method, of MinstImageLoader Minst.
+     * Test of getTypeOfDataByCode method, of class MinstUtils.
      */
     @Test
-    public void testLoad() throws Exception {
-       // System.out.println("loadMinstLoader       MinMinstLoaderstance = new Minst();
-       // instance.load();
-        // TODO review the generated test code and remove the default call to fail.
-        //fail("The test case is a prototype.");
+    public void testGetTypeOfDataByCode() {
+        
+        for(TypeOfData tod : TypeOfData.values()){
+            // When
+            TypeOfData typeOfDataByCode = MinstUtils.getTypeOfDataByCode(tod.getCode());
+            //Then
+            assertEquals(typeOfDataByCode, tod);
+        }
     }
+
     
 }

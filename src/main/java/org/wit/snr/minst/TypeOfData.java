@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.wit.snr.nn.srbm;
+package org.wit.snr.minst;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author koperix
  */
-enum TypeOfData {
+public enum TypeOfData {
 
     UNSIGNED_BYTE(1, 0x08),
     SIGNED_BYTE(1, 0x09),
