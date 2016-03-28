@@ -50,11 +50,11 @@ public class MinstImageLoader extends IdxFileInMemory {
         return fileMetadata.getSizeInDimension()[2];
     }
 
-    private int getBytesPerRow() {
+    private int getBytesPerColumn() {
         return fileMetadata.getTypeOfData().getNumOfBytes() * getNumberOfRows();
     }
 
-    private int getBytesPerColumn() {
+    private int getBytesPerRow() {
         return fileMetadata.getTypeOfData().getNumOfBytes() * getNumberOfColumns();
     }
 
