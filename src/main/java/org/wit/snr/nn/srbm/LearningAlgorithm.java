@@ -10,10 +10,7 @@ import cern.colt.matrix.DoubleFactory1D;
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-import com.sun.xml.internal.ws.util.StreamUtils;
 import java.util.Random;
-import java.util.stream.Stream;
 
 /**
  *

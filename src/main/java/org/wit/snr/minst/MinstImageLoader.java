@@ -19,7 +19,7 @@ import java.util.Arrays;
  */
 public class MinstImageLoader extends IdxFileInMemory {
 
-    private int[][][] images;
+    private byte[][][] images;
 
     public MinstImageLoader(String imagesPath) throws IOException {
         super(imagesPath);
@@ -33,7 +33,7 @@ public class MinstImageLoader extends IdxFileInMemory {
         final int numRow = getNumberOfRows();
         final int bytesPerImg = getBytesPerImage();
         final int bytesPerRow = getBytesPerRow();
-        images = new int[numImg][numRow][numCol];
+        images = new byte[numImg][numRow][numCol];
         for (int i = 0; i < numImg; i++) {
             for (int r = 0; r < numRow; r++) {
                 int offset = i * bytesPerImg + r * bytesPerRow;
@@ -67,11 +67,11 @@ public class MinstImageLoader extends IdxFileInMemory {
         return fileMetadata.getTypeOfData().getNumOfBytes() * getNumberOfColumns() * getNumberOfRows();
     }
 
-    public int[][] getImage(int imageIdx) {
+    public byte[][] getImage(int imageIdx) {
         return images[imageIdx];
     }
 
-    public int[][][] getImages() {
+    public byte[][][] getImages() {
         return images;
     }
 
