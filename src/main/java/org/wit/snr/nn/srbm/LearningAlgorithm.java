@@ -7,14 +7,17 @@ package org.wit.snr.nn.srbm;
 
 import cern.colt.function.DoubleFunction;
 import cern.colt.matrix.DoubleFactory1D;
-import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
- *
  * @author koperix
  */
 // TODO : Zaimplementować error
@@ -24,7 +27,7 @@ public class LearningAlgorithm {
     static final Configuration cfg = new Configuration();
     double sigma = 0.5;
     int currentEpoch = 0;
-    Layer layer = new Layer(cfg.numdims,cfg.numhid);
+    Layer layer = new Layer(cfg.numdims, cfg.numhid);
     TrainingSet<Boolean> trainingSet = new TrainingSetMock_DIM20_BOOLEAN();
 
     public void train() {
@@ -34,28 +37,17 @@ public class LearningAlgorithm {
         while (currentEpoch < cfg.numberOfEpochs) {
             //# for each training  batch XnumdimsxbatchSize 
             //# (randomly sample batchSize patches from data w / o replacement)
-            List<Boolean>[] trainingBatch = trainingSet.getBatchOffRandomlySamples(cfg.batchSize);
+            List<Boolean>[] trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
             for (List<Boolean> sample : trainingBatch) {
                 //# poshidprobs := hidden unit probabilities given X (use Equation 3)
-                DoubleMatrix1D poshidprobs = computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
-                        cfg.numhid, sample, W, hbias, cfg.lambda, sigma, cfg.beta
-                );
+                double[] hiddenUnitProbabilities = equation3(layer, cfg, sample, sigma);
                 //# poshidstates:= sample using poshidprobs
-                DoubleMatrix1D poshidstates = computeStatesFromProbabilities(poshidprobs);
+                List<Boolean> hiddenUnitStates = gibsSampling(hiddenUnitProbabilities);
                 //# negdata:= reconstruction of visible values given poshidstates(use Equation 2)
-                DoubleMatrix1D negdata = computeVisibleLayerReconstructionForGivenHiddenLayerStates(
-                        cfg.numdims,
-                        cfg.numhid,
-                        vbias.toArray(),
-                        W.toArray(),
-                        poshidstates.toArray(),
-                        cfg.mi,
-                        cfg.lambda,
-                        sigma);
+                double[] negdataProbs = equation2(layer, cfg, hiddenUnitStates, sigma);
                 //# neghidprobs:= hidden unit probabilities given negdata (use Equation 3)
-                DoubleMatrix1D neghidprobs = computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
-                        cfg.numhid, negdata, W, hbias, cfg.lambda, sigma, cfg.beta
-                );
+                List<Boolean> negdataStates = gibsSampling(negdataProbs);
+                double[] neghidprobs = equation3(layer, cfg, negdataStates, sigma);
                 //# W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
                 W = computeWCorrection(W, sample, poshidprobs, negdata, neghidprobs, cfg.alpha, cfg.batchSize);
                 //# vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
@@ -74,86 +66,55 @@ public class LearningAlgorithm {
         }//#while end  
     }//#train_rbm
 
-    //TODO: validacja na bias->len do hsize, hsize do W itp
-    //TODO: uzyć funkcyjnych elementów dla macierzy (append function)
-    private static DoubleMatrix1D computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
-            int numhid,
-            DoubleMatrix1D v,
-            DoubleMatrix2D W,
-            DoubleMatrix1D hbias,
-            double lambda,
-            double sigma,
-            double beta
-    ) {
-        double[] posHidProbs = new double[numhid];
-        for (int j = 0; j < posHidProbs.length; j++) {
-            posHidProbs[j] = prob_Hj_v_eq3(hbias.get(j), W.toArray(), v.toArray(), j, lambda, sigma, beta);
-        }
-        return DoubleFactory1D.dense.make(posHidProbs);
+
+    private double sigmoid(double t) {
+        return 1 / (1 + Math.pow(Math.E, -t));
     }
 
-    private static double prob_Hj_v_eq3(double bj, double[][] W, double[] v, int j, double lambda, double sigma, double beta) {
-        double sum_i = 0;
-        for (int i = 0; i < v.length; i++) {
-            sum_i = sum_i + W[i][j] * v[i];
-        }
-        return logisticFunction(
-                (lambda / Math.pow(sigma, 2)) * (bj + sum_i), beta
-        );
-    }
-
-    private static double logisticFunction(double x, double beta) {
-        return 1 / (1 + Math.pow(Math.E, -2 * beta * x));
-    }
-
-    private static DoubleMatrix2D randMatrinx(int numdims, int numhid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private static DoubleMatrix1D randnBooleanVector(int numdims) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private static DoubleMatrix1D computeStatesFromProbabilities(DoubleMatrix1D poshidprobs) {
-
-        return poshidprobs.assign(new DoubleFunction() {
-            @Override
-            public double apply(double d) {
-                return d > random.nextDouble() ? 1 : 0;
+    private double[] equation3(
+            Layer layer,
+            Configuration cfg,
+            List<Boolean> sample,
+            double sigma) {
+        double[] h = new double[cfg.numhid]; // Wynik
+        final double cnst = (cfg.alpha / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
+        for (int j = 0; j < cfg.numhid; j++) { // iterujemy po indeksach warstwy ukrytej
+            double sumWijVi = 0; // wynik sumy iloczynu W V po i
+            for (int i = 0; i < cfg.numdims; i++) { // iterujemy po i, i sumujemy
+                sumWijVi += layer.W[i][j] * (sample.get(i) == true ? 1.0 : 0);
             }
-        });
-
+            h[j] = sigmoid(cnst * (layer.hbias[j] + sumWijVi);
+        }
     }
 
-    //TODO: use colt
-    private static DoubleMatrix1D computeVisibleLayerReconstructionForGivenHiddenLayerStates(
-            int numdims,
-            int numhid,
-            double[] vbias,
-            double[][] W,
-            double[] poshidstates,
-            double mi,
-            double lambda,
+
+    private static List<Boolean> gibsSampling(double[] in) {
+
+        return Arrays.stream(in)
+                .mapToObj(d -> d > random.nextDouble())
+                .collect(toList());
+    }
+
+
+    private static double[] equation2(
+            Layer layer,
+            Configuration cfg,
+            List<Boolean> hiddenUnitStates,
             double sigma
     ) {
-
-        double[] negdataProbs = new double[numdims];
-
-        for (int i = 0; i < negdataProbs.length; i++) {
-            double sum_j = 0;
-            for (int j = 0; j < numhid; j++) {
-                sum_j = sum_j + W[i][j] * poshidstates[j];
+        double[] negdataProbs = new double[cfg.numdims]; // Wektor prawdopodobieństw aktywacji dla rekonstrukcji warstwy widocznej
+        for (int i = 0; i < cfg.numdims; i++) { // iterujemy po wszystkich jednostkach warstwy widocznej
+            double sumWijhj = 0; // element sumy wystepujacej w rownaniu
+            for (int j = 0; j < cfg.numhid; j++) {
+                sumWijhj += layer.W[i][j] * (hiddenUnitStates.get(j) ? 1.0 : 0.0);
             }
             negdataProbs[i] = gausianDensity(
-                    lambda * (vbias[i] + sum_j),
-                    mi,
+                    cfg.lambda * (layer.vbias[i] + sumWijhj),
+                    cfg.mi,
                     Math.pow(sigma, 2)
             );
         }
-        //TODO : Do wyjasnienia. Jest niezgodność w algorytmie. Równanie nr 2 ma sygnature Double -> Double
-        // Tym czasem neg data to wartości zrekonstruowanego wejścia czyli powinny być 0,1
-        // Zakładam że równanie zwraca prawdopodobieństwa które nalerzy potem przeliczyć na wartości.
-        return computeStatesFromProbabilities(DoubleFactory1D.dense.make(negdataProbs));
+        return negdataProbs;
 
     }
 
@@ -212,7 +173,6 @@ public class LearningAlgorithm {
     }
 
     private static DoubleMatrix1D updateHbias(DoubleMatrix1D hbias, double learningRate, int numsamples, DoubleMatrix1D[] batchOffRandomlySamples) {
-
 
 
     }

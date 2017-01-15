@@ -23,5 +23,5 @@ class Configuration {
     final double mi = 0.5;
     final double learningRate = 0.1;
     final double lambda = 1;
-    final int numberOfEpochs  = 1000;
+    final int numberOfEpochs  = 100000;
 }
