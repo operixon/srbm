@@ -10,39 +10,32 @@ import cern.colt.matrix.DoubleFactory1D;
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
-import java.util.Random;
+
+import java.util.*;
 
 /**
  *
  * @author koperix
  */
-// TODO : usunąć colta
-// TODO : wprowadzic lambdy + stream API z jdk8
 // TODO : Zaimplementować error
 public class LearningAlgorithm {
 
-    private static final Random random = new Random();
-    private static final Configuration cfg = new Configuration();
-
+    static final Random random = new Random();
+    static final Configuration cfg = new Configuration();
     double sigma = 0.5;
     int currentEpoch = 0;
-
-    DoubleMatrix2D W = DoubleFactory2D.dense.random(cfg.numdims, cfg.numhid); 
-    DoubleMatrix1D vbias = DoubleFactory1D.dense.random(cfg.numdims); 
-    DoubleMatrix1D hbias = DoubleFactory1D.dense.random(cfg.numhid); 
-
-    TrainingSet trainingSet = new TrainingSet(cfg.numdims, cfg.numsamples);
+    Layer layer = new Layer(cfg.numdims,cfg.numhid);
+    TrainingSet<Boolean> trainingSet = new TrainingSetMock_DIM20_BOOLEAN();
 
     public void train() {
-
         //# [W , hbias, vbias]  = train_rbm(data, W, hbias, vbias, σ, alpha)
         // TODO: Do wyjaśnienia. Kiedy uważamy że ta flaga jest true?
         // Liczba epok ?
         while (currentEpoch < cfg.numberOfEpochs) {
             //# for each training  batch XnumdimsxbatchSize 
             //# (randomly sample batchSize patches from data w / o replacement)
-            DoubleMatrix1D[] batchOffRandomlySamples = trainingSet.getBatchOffRandomlySamples(cfg.batchSize);
-            for (DoubleMatrix1D sample : batchOffRandomlySamples) {
+            List<Boolean>[] trainingBatch = trainingSet.getBatchOffRandomlySamples(cfg.batchSize);
+            for (List<Boolean> sample : trainingBatch) {
                 //# poshidprobs := hidden unit probabilities given X (use Equation 3)
                 DoubleMatrix1D poshidprobs = computeHiddenLayerStatesProbabilitiesForGivenVisibleLayer(
                         cfg.numhid, sample, W, hbias, cfg.lambda, sigma, cfg.beta
@@ -68,11 +61,11 @@ public class LearningAlgorithm {
                 //# vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
                 vbias = computeVbiasCorrection(vbias, sample, negdata, cfg.alpha, cfg.batchSize);
                 //# error := SquaredDiff(X, negdata)
+                //TODO : error
             }//# end for
             //# update hbias  (use Equation  6) 
-            // hbias = updateHbias(hbias, cfg.learningRate, cfg.numsamples, batchOffRandomlySamples);
+            hbias = updateHbias(hbias, cfg.learningRate, cfg.numsamples, trainingBatch);
             //# if (sigma > 0.05) sigma:= sigma * 0.99
-            // TODO : Magic numbers
             if (sigma > 0.05) {
                 sigma = sigma * 0.99;
             }
@@ -220,7 +213,7 @@ public class LearningAlgorithm {
 
     private static DoubleMatrix1D updateHbias(DoubleMatrix1D hbias, double learningRate, int numsamples, DoubleMatrix1D[] batchOffRandomlySamples) {
 
-        return null;
+
 
     }
 
