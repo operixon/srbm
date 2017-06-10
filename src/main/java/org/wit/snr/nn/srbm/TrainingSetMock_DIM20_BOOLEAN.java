@@ -13,10 +13,9 @@ import java.util.*;
 /**
  * @author koperix
  */
-class TrainingSetMock_DIM20_BOOLEAN implements TrainingSet<Boolean> {
+class TrainingSetMock_DIM20_BOOLEAN implements TrainingSet<List<Boolean>> {
 
-
-    private static final Map<Integer, ArrayList<Boolean>> types = new HashMap<>();
+    private static final Map<Integer, List<Boolean>> types = new HashMap<>();
 
     static {
         types.put(1, new ArrayList<>(Arrays.asList(
@@ -43,16 +42,13 @@ class TrainingSetMock_DIM20_BOOLEAN implements TrainingSet<Boolean> {
                 FALSE, FALSE, FALSE, TRUE, FALSE,//
                 FALSE, FALSE, FALSE, TRUE, FALSE//
         )));
-
     }
 
     @Override
-    public List<Boolean>[] getTrainingBatch(int batchSize) {
-
-        List<Boolean>[] s = new ArrayList[batchSize];
-        Arrays.fill(s, types.get(0));
-        return s;
-
+    public List<List<Boolean>> getTrainingBatch(int batchSize) {
+        List<List<Boolean>> batch = new ArrayList<>(batchSize);
+        Collections.fill(batch,types.get(0));
+        return batch;
     }
 
 

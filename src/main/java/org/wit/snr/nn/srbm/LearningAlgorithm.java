@@ -28,8 +28,7 @@ public class LearningAlgorithm {
     double sigma = 0.5;
     int currentEpoch = 0;
     Layer layer = new Layer(cfg.numdims, cfg.numhid);
-    TrainingSet<Boolean> trainingSet = new TrainingSetMock_DIM20_BOOLEAN();
-
+    TrainingSet<BitSet> trainingSet = new TrainingSetMock_DIM20_BOOLEAN();
     public void train() {
         //# [W , hbias, vbias]  = train_rbm(data, W, hbias, vbias, σ, alpha)
         // TODO: Do wyjaśnienia. Kiedy uważamy że ta flaga jest true?
@@ -49,7 +48,7 @@ public class LearningAlgorithm {
                 List<Boolean> negdataStates = gibsSampling(negdataProbs);
                 double[] neghidprobs = equation3(layer, cfg, negdataStates, sigma);
                 //# W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-                W = computeWCorrection(W, sample, poshidprobs, negdata, neghidprobs, cfg.alpha, cfg.batchSize);
+                layer.W = computeWCorrection(layer.W, sample, poshidprobs, negdata, neghidprobs, );
                 //# vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
                 vbias = computeVbiasCorrection(vbias, sample, negdata, cfg.alpha, cfg.batchSize);
                 //# error := SquaredDiff(X, negdata)
