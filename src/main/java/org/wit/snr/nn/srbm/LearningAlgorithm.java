@@ -28,27 +28,36 @@ public class LearningAlgorithm {
     double sigma = 0.5;
     int currentEpoch = 0;
     Layer layer = new Layer(cfg.numdims, cfg.numhid);
-    TrainingSet<BitSet> trainingSet = new TrainingSetMock_DIM20_BOOLEAN();
+    TrainingSet<List<Boolean>> trainingSet = new TrainingSetMock_DIM20_BOOLEAN();
+
     public void train() {
+
+
         //# [W , hbias, vbias]  = train_rbm(data, W, hbias, vbias, σ, alpha)
-        // TODO: Do wyjaśnienia. Kiedy uważamy że ta flaga jest true?
-        // Liczba epok ?
+        // TODO : Wprowadzic warunek zbieznosci
         while (currentEpoch < cfg.numberOfEpochs) {
             //# for each training  batch XnumdimsxbatchSize 
             //# (randomly sample batchSize patches from data w / o replacement)
-            List<Boolean>[] trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
+            List<List<Boolean>> trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
             for (List<Boolean> sample : trainingBatch) {
                 //# poshidprobs := hidden unit probabilities given X (use Equation 3)
-                double[] hiddenUnitProbabilities = equation3(layer, cfg, sample, sigma);
+                double[] possitivePhaseHiddenUnitProb = equation3(layer, cfg, sample, sigma);
                 //# poshidstates:= sample using poshidprobs
-                List<Boolean> hiddenUnitStates = gibsSampling(hiddenUnitProbabilities);
+                List<Boolean> possitivePhaseHiddenUnitState = gibsSampling(possitivePhaseHiddenUnitProb);
                 //# negdata:= reconstruction of visible values given poshidstates(use Equation 2)
-                double[] negdataProbs = equation2(layer, cfg, hiddenUnitStates, sigma);
+                double[] reconstructionPhaseVisibleUnitProb = equation2(layer, cfg, possitivePhaseHiddenUnitState, sigma);
                 //# neghidprobs:= hidden unit probabilities given negdata (use Equation 3)
-                List<Boolean> negdataStates = gibsSampling(negdataProbs);
-                double[] neghidprobs = equation3(layer, cfg, negdataStates, sigma);
+                List<Boolean> reconstructionPhaseVisibleUnitState = gibsSampling(reconstructionPhaseVisibleUnitProb);
+                double[] reconstructionPhaseHiddenUnitProb = equation3(layer, cfg, reconstructionPhaseVisibleUnitState, sigma);
                 //# W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-                layer.W = computeWCorrection(layer.W, sample, poshidprobs, negdata, neghidprobs, );
+                double[][] newWeights = wCorrection(
+                        layer.W,                             // W
+                        cfg.alpha,                           // α
+                        sample,                              // X
+                        possitivePhaseHiddenUnitProb,        // poshidprobs
+                        reconstructionPhaseVisibleUnitState, // negdata
+                        reconstructionPhaseHiddenUnitProb,   // neghidprobs
+                        cfg.batchSize);                      // bathSize
                 //# vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
                 vbias = computeVbiasCorrection(vbias, sample, negdata, cfg.alpha, cfg.batchSize);
                 //# error := SquaredDiff(X, negdata)
@@ -64,6 +73,48 @@ public class LearningAlgorithm {
             currentEpoch++;
         }//#while end  
     }//#train_rbm
+
+    /**
+     * <pre>
+     * Contrastive divergence weights correction based on positive phase and negative phase data.
+     * Given with equation :
+     * <code>W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize</code>
+     * </pre>
+     *
+     * @param w current weights between visible and hidden layer
+     * @param alpha const factor
+     * @param X visible unit states
+     * @param poshidprobs possitive phase hidden unit prob
+     * @param negdata reconstruction phase visible unit state
+     * @param neghidprobs reconstruction phase hidden unit prob
+     * @param batchSize
+     * @return
+     */
+    private double[][] wCorrection(double[][] W,
+                                   double alpha,
+                                   List<Boolean> X,
+                                   double[] poshidprobs,
+                                   List<Boolean> negdata,
+                                   double[] neghidprobs,
+                                   int batchSize) {
+        Matrix wMatrix = new Matrix(W);
+        Vector xVector = new Vector(X);
+        Vector poshidprobsVector = new Vector(poshidprobs);
+        Vector negdataVector = new Vector(negdata);
+        Vector neghidprobsVector = new Vector(neghidprobs);
+
+        Matrix X_x_poshidprobsT = xVector.multiplyByTransposed(poshidprobsVector);
+        Matrix negdata_x_neghidprobsT = negdataVector.multiplyByTransposed(neghidprobsVector);
+        X_x_poshidprobsT
+                .substract(negdata_x_neghidprobsT)
+                .scalarDivide(batchSize)
+                .scalarMultiply(alpha);
+        wMatrix.matrixSum(X_x_poshidprobsT);
+
+
+        return wMatrix.getDoubleArrays();
+
+    }
 
 
     private double sigmoid(double t) {
@@ -135,23 +186,24 @@ public class LearningAlgorithm {
     // w rzeciwnym wypadku do macierzy dodajemy liczbę (skalar)
     // ----------------------------------------------------------
     // W obecnej wersji zakładam że to iloczyn skalarny. (co jest troche bez sensu)
-    private static DoubleMatrix2D computeWCorrection(
-            DoubleMatrix2D W,
-            final DoubleMatrix1D sample,
-            final DoubleMatrix1D poshidprobs,
-            final DoubleMatrix1D negdata,
-            final DoubleMatrix1D neghidprobs,
-            final double alpha,
-            final int batchSize) {
 
-        //W + alpha(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-        return W.assign(new DoubleFunction() {
-            @Override
-            public double apply(double d) {
-                return d + alpha * (sample.zDotProduct(poshidprobs) - negdata.zDotProduct(neghidprobs)) / batchSize;
-            }
-        });
-    }
+    /**
+     * W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
+     */
+    private static DoubleMatrix2D computeWCorrection(
+            W
+                    alpha, X, poshidprobs, negdata, neghidprobsT)/batchSize)
+
+            //W + alpha(X * poshidprobsT – negdata * neghidprobsT)/batchSize
+            return W.assign(new
+
+    DoubleFunction() {
+        @Override
+        public double apply ( double d){
+            return d + alpha * (sample.zDotProduct(poshidprobs) - negdata.zDotProduct(neghidprobs)) / batchSize;
+        }
+    });
+}
 
     private static DoubleMatrix1D computeVbiasCorrection(
             final DoubleMatrix1D vbias,

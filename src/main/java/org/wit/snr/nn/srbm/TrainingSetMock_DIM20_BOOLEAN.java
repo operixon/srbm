@@ -47,7 +47,7 @@ class TrainingSetMock_DIM20_BOOLEAN implements TrainingSet<List<Boolean>> {
     @Override
     public List<List<Boolean>> getTrainingBatch(int batchSize) {
         List<List<Boolean>> batch = new ArrayList<>(batchSize);
-        Collections.fill(batch,types.get(0));
+        Collections.fill(batch, types.get(0));
         return batch;
     }
 
