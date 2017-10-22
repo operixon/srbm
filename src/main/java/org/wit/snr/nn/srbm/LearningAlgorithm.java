@@ -5,15 +5,7 @@
  */
 package org.wit.snr.nn.srbm;
 
-import cern.colt.function.DoubleFunction;
-import cern.colt.matrix.DoubleFactory1D;
-import cern.colt.matrix.DoubleMatrix1D;
-import cern.colt.matrix.DoubleMatrix2D;
-
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -38,38 +30,34 @@ public class LearningAlgorithm {
         while (currentEpoch < cfg.numberOfEpochs) {
             //# for each training  batch XnumdimsxbatchSize 
             //# (randomly sample batchSize patches from data w / o replacement)
-            List<List<Boolean>> trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
+            List<List<Boolean>> trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);// X
             for (List<Boolean> sample : trainingBatch) {
-                //# poshidprobs := hidden unit probabilities given X (use Equation 3)
-                double[] possitivePhaseHiddenUnitProb = equation3(layer, cfg, sample, sigma);
-                //# poshidstates:= sample using poshidprobs
-                List<Boolean> possitivePhaseHiddenUnitState = gibsSampling(possitivePhaseHiddenUnitProb);
-                //# negdata:= reconstruction of visible values given poshidstates(use Equation 2)
-                double[] reconstructionPhaseVisibleUnitProb = equation2(layer, cfg, possitivePhaseHiddenUnitState, sigma);
-                //# neghidprobs:= hidden unit probabilities given negdata (use Equation 3)
-                List<Boolean> reconstructionPhaseVisibleUnitState = gibsSampling(reconstructionPhaseVisibleUnitProb);
-                double[] reconstructionPhaseHiddenUnitProb = equation3(layer, cfg, reconstructionPhaseVisibleUnitState, sigma);
+                List<Double>  positivePhaseHiddenUnitProb   = equation3(layer, cfg, sample, sigma); //# poshidprobs := hidden unit probabilities given X (use Equation 3)
+                List<Boolean> positivePhaseHiddenUnitState = gibsSampling(positivePhaseHiddenUnitProb); //# poshidstates:= sample using poshidprobs
+                List<Double> reconstructionPhaseVisibleUnitProb = equation2(layer, cfg, positivePhaseHiddenUnitState, sigma);//# negdata:= reconstruction of visible values given poshidstates(use Equation 2)
+                List<Boolean> reconstructionPhaseVisibleUnitState = gibsSampling(reconstructionPhaseVisibleUnitProb);//# neghidprobs:= hidden unit probabilities given negdata (use Equation 3)
+                List<Double> reconstructionPhaseHiddenUnitProb = equation3(layer, cfg, reconstructionPhaseVisibleUnitState, sigma);
                 //# W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-                double[][] newWeights = wCorrection(
-                        layer.W,                             // W
+                List<List<Double>> newWeights = wCorrection(
+                        layer.Wij,                           // W
                         cfg.alpha,                           // α
-                        sample,                              // X
-                        possitivePhaseHiddenUnitProb,        // poshidprobs
+                        trainingBatch,                              // X === BLAD !!
+                        // X jest macierza to sa wszystkie sample z paczki
+                        positivePhaseHiddenUnitProb,        // poshidprobs
                         reconstructionPhaseVisibleUnitState, // negdata
                         reconstructionPhaseHiddenUnitProb,   // neghidprobs
                         cfg.batchSize);                      // bathSize
-                //# vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
-                vbias = computeVbiasCorrection(vbias, sample, negdata, cfg.alpha, cfg.batchSize);
+                //vbias:= vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize
+                layer.updateVisualLayerBias();
                 //# error := SquaredDiff(X, negdata)
                 //TODO : error
             }//# end for
             //# update hbias  (use Equation  6) 
-            hbias = updateHbias(hbias, cfg.learningRate, cfg.numsamples, trainingBatch);
             //# if (sigma > 0.05) sigma:= sigma * 0.99
             if (sigma > 0.05) {
                 sigma = sigma * 0.99;
             }
-            System.out.println(W);
+            // System.out.println(W);
             currentEpoch++;
         }//#while end  
     }//#train_rbm
@@ -81,88 +69,97 @@ public class LearningAlgorithm {
      * <code>W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize</code>
      * </pre>
      *
-     * @param w current weights between visible and hidden layer
-     * @param alpha const factor
-     * @param X visible unit states
+     * @param W           current weights between visible and hidden layer
+     * @param alpha       const factor
+     * @param X           visible unit states
      * @param poshidprobs possitive phase hidden unit prob
-     * @param negdata reconstruction phase visible unit state
+     * @param negdata     reconstruction phase visible unit state
      * @param neghidprobs reconstruction phase hidden unit prob
      * @param batchSize
+     * @return corected weights matrix collection
+     */
+    private List<List<Double>> wCorrection(List<List<Double>> W,
+                                           double alpha,
+                                           List<List<Boolean>> X, // NUMDIMSxBATCHSIZE
+                                           List<Double> poshidprobs,
+                                           List<Boolean> negdata,
+                                           List<Double> neghidprobs,
+                                           int batchSize
+    ) {
+        Matrix wMatrix = new Matrix(W);
+        Matrix X       = new Matrix(X);
+        Matrix poshidprobsVector = new Matrix(Arrays.asList(poshidprobs));
+        Matrix negdataVector = new Matrix(negdata);
+        Matrix neghidprobsVector = new Matrix(neghidprobs);
+
+        Matrix X_x_poshidprobsT = X.multiplyByTransposedVector(poshidprobsVector); // X * poshidprobsT
+        Matrix negdata_x_neghidprobsT = negdataVector.multiplyByTransposedVector(neghidprobsVector); // negdata * neghidprobsT
+        X_x_poshidprobsT
+                .substract(negdata_x_neghidprobsT) // X * poshidprobsT – negdata * neghidprobsT
+                .scalarDivide(batchSize) // (X * poshidprobsT – negdata * neghidprobsT)/batchSize
+                .scalarMultiply(alpha); // α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
+        wMatrix.matrixAdd(X_x_poshidprobsT); // W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
+
+
+        return wMatrix.getData();
+
+    }
+
+
+    private double sigmoid(double z) {
+        return 1 / (1 + Math.pow(Math.E, -z));
+    }
+
+    /**
+     * P(hi|v) =g(lambda/sigma^2(bj+sum_i wij*vi)).
+     * <pre>
+     *     Probability of value eq 1 for hidden unit.
+     * </pre>
+     *
+     * @param layer
+     * @param cfg
+     * @param sample
+     * @param sigma
      * @return
      */
-    private double[][] wCorrection(double[][] W,
-                                   double alpha,
-                                   List<Boolean> X,
-                                   double[] poshidprobs,
-                                   List<Boolean> negdata,
-                                   double[] neghidprobs,
-                                   int batchSize) {
-        Matrix wMatrix = new Matrix(W);
-        Vector xVector = new Vector(X);
-        Vector poshidprobsVector = new Vector(poshidprobs);
-        Vector negdataVector = new Vector(negdata);
-        Vector neghidprobsVector = new Vector(neghidprobs);
-
-        Matrix X_x_poshidprobsT = xVector.multiplyByTransposed(poshidprobsVector);
-        Matrix negdata_x_neghidprobsT = negdataVector.multiplyByTransposed(neghidprobsVector);
-        X_x_poshidprobsT
-                .substract(negdata_x_neghidprobsT)
-                .scalarDivide(batchSize)
-                .scalarMultiply(alpha);
-        wMatrix.matrixSum(X_x_poshidprobsT);
-
-
-        return wMatrix.getDoubleArrays();
-
-    }
-
-
-    private double sigmoid(double t) {
-        return 1 / (1 + Math.pow(Math.E, -t));
-    }
-
-    private double[] equation3(
+    private List<Double> equation3(
             Layer layer,
             Configuration cfg,
             List<Boolean> sample,
             double sigma) {
-        double[] h = new double[cfg.numhid]; // Wynik
-        final double cnst = (cfg.alpha / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
-        for (int j = 0; j < cfg.numhid; j++) { // iterujemy po indeksach warstwy ukrytej
-            double sumWijVi = 0; // wynik sumy iloczynu W V po i
-            for (int i = 0; i < cfg.numdims; i++) { // iterujemy po i, i sumujemy
-                sumWijVi += layer.W[i][j] * (sample.get(i) == true ? 1.0 : 0);
-            }
-            h[j] = sigmoid(cnst * (layer.hbias[j] + sumWijVi);
+        List<Double> h = new ArrayList<Double>(cfg.numhid); // Wynik, czyli wektor prawdopodobieństw że dany neuron warstwy ukrytej ma wartość 1
+        final double cnst = (cfg.lambda / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
+        for (int j = 0; j < cfg.numhid; j++) { // iterujemy po neuronach warstwy ukrytej
+            double z = cnst * (layer.getActivationSignalForHiddenUnit(sample, j));
+            h.add(j, sigmoid(z));
         }
+        return h;
     }
 
 
-    private static List<Boolean> gibsSampling(double[] in) {
+    private static List<Boolean> gibsSampling(List<Double> in) {
 
-        return Arrays.stream(in)
-                .mapToObj(d -> d > random.nextDouble())
+        return in.stream()
+                .map(d -> d > random.nextDouble())
                 .collect(toList());
     }
 
 
-    private static double[] equation2(
+    private static List<Double> equation2(
             Layer layer,
             Configuration cfg,
             List<Boolean> hiddenUnitStates,
             double sigma
     ) {
-        double[] negdataProbs = new double[cfg.numdims]; // Wektor prawdopodobieństw aktywacji dla rekonstrukcji warstwy widocznej
+        List<Double> negdataProbs = new ArrayList<Double>(cfg.numdims); // Wektor prawdopodobieństw aktywacji dla rekonstrukcji warstwy widocznej
         for (int i = 0; i < cfg.numdims; i++) { // iterujemy po wszystkich jednostkach warstwy widocznej
-            double sumWijhj = 0; // element sumy wystepujacej w rownaniu
-            for (int j = 0; j < cfg.numhid; j++) {
-                sumWijhj += layer.W[i][j] * (hiddenUnitStates.get(j) ? 1.0 : 0.0);
-            }
-            negdataProbs[i] = gausianDensity(
-                    cfg.lambda * (layer.vbias[i] + sumWijhj),
-                    cfg.mi,
-                    Math.pow(sigma, 2)
-            );
+            negdataProbs.add(
+                    i,
+                    gausianDensity(
+                        cfg.lambda * layer.getActivationSignalForVisibleUnit(hiddenUnitStates,i),
+                        cfg.mi,
+                        Math.pow(sigma, 2)
+            ));
         }
         return negdataProbs;
 
@@ -176,56 +173,7 @@ public class LearningAlgorithm {
         return a * Math.pow(Math.E, b);
     }
 
-    //TODO : Do wyjaśnienia. 
-    // Z opisu algorytmu dla linijki W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-    // wynikało by że macierz wag nalezy zmodyfikowac dodając do kazdej wagi tą samą wartość
-    // α(X * poshidprobsT – negdata * neghidprobsT)/batchSize. 
-    // Ma to sens? Czy żle czytam notację.
-    // Jeżeli (X * poshidprobsT) to iloczyn wektorowy to (X * poshidprobsT – negdata * neghidprobsT) jest wektorem
-    // wówczas do macierzy W dodajemy wektor
-    // w rzeciwnym wypadku do macierzy dodajemy liczbę (skalar)
-    // ----------------------------------------------------------
-    // W obecnej wersji zakładam że to iloczyn skalarny. (co jest troche bez sensu)
-
-    /**
-     * W:= W + α(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-     */
-    private static DoubleMatrix2D computeWCorrection(
-            W
-                    alpha, X, poshidprobs, negdata, neghidprobsT)/batchSize)
-
-            //W + alpha(X * poshidprobsT – negdata * neghidprobsT)/batchSize
-            return W.assign(new
-
-    DoubleFunction() {
-        @Override
-        public double apply ( double d){
-            return d + alpha * (sample.zDotProduct(poshidprobs) - negdata.zDotProduct(neghidprobs)) / batchSize;
-        }
-    });
-}
-
-    private static DoubleMatrix1D computeVbiasCorrection(
-            final DoubleMatrix1D vbias,
-            final DoubleMatrix1D sample,
-            final DoubleMatrix1D negdata,
-            final double alpha,
-            final int batchSize
-    ) {
-
-        // vbias + alpha(rowsum(X) – rowsum(negdata) )/batchSize 
-        return vbias.assign(new DoubleFunction() {
-            @Override
-            public double apply(double d) {
-                return d + alpha * (sample.zSum() - negdata.zSum()) / batchSize;
-            }
-        });
-
-    }
-
-    private static DoubleMatrix1D updateHbias(DoubleMatrix1D hbias, double learningRate, int numsamples, DoubleMatrix1D[] batchOffRandomlySamples) {
 
 
-    }
 
 }
