@@ -1,8 +1,6 @@
 package org.wit.snr.nn.srbm;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Created by kkoperkiewicz on 11.06.2017.
@@ -13,7 +11,11 @@ public class Matrix {
     final private int rows;
     final private int columns;
 
-
+    public static Matrix createMatrixInitializedByRandomValues(final int w, final int h) {
+        List<List<Double>> randomMatrix = SRBMUtils.getRandomMatrix(w, h);
+        Matrix m = new Matrix(randomMatrix);
+        return m;
+    }
 
     public Matrix(List<List<Double>> data) {
         this.data = data;

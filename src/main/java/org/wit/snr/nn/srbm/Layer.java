@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Layer {
 
-    public final List<List<Double>> Wij;
+    public final Matrix W;
     public final List<Double> vbias; // ci
     public final List<Double> hbias; // bj
 
@@ -14,9 +14,7 @@ public class Layer {
 
 
     public Layer(int numdims, int numhid) {
-
-        Wij = SRBMUtils.getRandomMatrix(numdims,numhid);
-
+        W = Matrix.createMatrixInitializedByRandomValues(numdims, numhid);
         vbias = Collections.nCopies(numdims,1.0);
         hbias = Collections.nCopies(numhid,1.0);
         inputSize = numdims;
@@ -35,7 +33,7 @@ public class Layer {
     public Double getWeightsSumForHiddenUnit(List<Boolean> visibleUnits, final int j){
         double sum = 0;
         for(int i = 0; i < inputSize; i++ ){
-            sum += Wij.get(i).get(j)*(visibleUnits.get(i) ? 1.0d : 0.0d);
+            sum += W.get(i, j) * (visibleUnits.get(i) ? 1.0d : 0.0d);
         }
         return sum;
     }
@@ -52,7 +50,7 @@ public class Layer {
     public Double getWeightsSumForVisibleUnit(List<Boolean> hiddenUnits, final int i){
         double sum = 0;
         for(int j = 0; j < outputSize; j++ ){
-            sum += Wij.get(i).get(j)*(hiddenUnits.get(j) ? 1.0d : 0.0d);
+            sum += W.get(i, j) * (hiddenUnits.get(j) ? 1.0d : 0.0d);
         }
         return sum;
     }
@@ -77,7 +75,6 @@ public class Layer {
      * Negative phase.
      *
      * @param visibleUnits
-     * @param j
      * @return
      */
     public Double getActivationSignalForVisibleUnit(List<Boolean> visibleUnits, final int i){

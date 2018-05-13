@@ -5,8 +5,9 @@
  */
 package org.wit.srbm;
 
-import org.wit.snr.nn.srbm.LearningAlgorithm;
-import static org.testng.Assert.*;
+import org.wit.snr.nn.srbm.RBM;
+
+import java.io.IOException;
 
 /**
  *
@@ -34,12 +35,12 @@ public class SrbmNetworkNGTest {
     }
 
     /**
-     * Test of main method, of class LearningAlgorithm.
+     * Test of main method, of class RBM.
      */
     @org.testng.annotations.Test
-    public void testLearning() {
-        
-        LearningAlgorithm algorithm = new LearningAlgorithm();
+    public void testLearning() throws IOException {
+
+        RBM algorithm = new RBM();
         algorithm.train();
         
         

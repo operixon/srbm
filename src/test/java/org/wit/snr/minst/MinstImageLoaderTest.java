@@ -5,17 +5,10 @@
  */
 package org.wit.snr.minst;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import static org.testng.Assert.*;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  *
@@ -49,7 +42,7 @@ public class MinstImageLoaderTest {
 
     @Test
     public void testGetImage() {
-        byte [][]image = mil.getImage(10);
+        byte[][] image = mil.getImage(11);
 
         for (byte[] bytes : image) {
             for (byte aByte : bytes) {
