@@ -7,9 +7,7 @@ package org.wit.snr.nn.srbm;
 
 import org.wit.snr.nn.srbm.math.ActivationFunction;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
-import org.wit.snr.nn.srbm.math.collection.Matrix1D;
-import org.wit.snr.nn.srbm.math.collection.ProbabilisticVector;
-import org.wit.snr.nn.srbm.math.collection.Vector;
+import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 import org.wit.snr.nn.srbm.math.function.GausianDensityFunction;
 import org.wit.snr.nn.srbm.math.function.SigmoidFunction;
 
@@ -17,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * @author koperix
@@ -39,132 +38,117 @@ public class RBM {
     }
 
     public void train() {
-        // while (not converged)
-        while (currentEpoch < cfg.numberOfEpochs) {
-            // for each training batch Xnumdims x batchSize
+        while (isConverged()) { // while (not converged)
+            // for each training batch X batchSize x numdims
             // (randomly sample batchSize patches from data w/o replacement)
             for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
                 Matrix X = trainingSet.getTrainingBatch(cfg.batchSize);
                 Matrix poshidprobs = getPosHidProbs(X);
-                // poshidstates := sample using poshidprobs
-                // negdata := reconstruction of visible values given poshidstates (use Equation 2)
-                // neghidprobs := hidden unit probabilities given negdata (use Equation 3)
-                List<Boolean> h = getHiddenValues(v);
-                List<Boolean> vv = getReconstructedVisualValues(h);
-                List<Boolean> hh = getReconstructedHiddenValues(vv);
-                // W := W + α(X*poshidprobsT – negdata*neghidprobsT)/batchSize
-                Matrix1D weightsDelta = getWeightsDelta(new Vector(v), new Vector(h), new Vector(vv), new Vector(hh));
-                layer.W.matrixAdd(weightsDelta);
+                Matrix poshidstates = getPosHidStates(poshidprobs);
+                Matrix negdata = getNegData(poshidstates);
+                Matrix neghidprobs = getNegHidProbs(negdata);
+                updateWeights(X, poshidprobs, negdata, neghidprobs);
                 //vbias := vbias + α(rowsum(X) – rowsum(negdata))/batchSize
-                updateVisibleUnitsBias(v, vv);
+                updateVBias(X, negdata);
                 //error := SquaredDiff(X,negdata)
+                getError(X, negdata);
             }
             //update hbias (use Equation 6)
+            updateHBias();
             // if (σ>0.05) σ := σ*0.99 end if
             currentEpoch++;
         }//#while end
     }//#train_rbm
 
-    private Matrix getPosHidProbs(Matrix x) {
+    private boolean isConverged() {
+        return currentEpoch < cfg.numberOfEpochs;
+    }
 
+    private void updateHBias() {
+        throw new UnsupportedOperationException();
+    }
+
+    private void getError(Matrix x, Matrix negdata) {
+        throw new UnsupportedOperationException();
+    }
+
+    private void updateVBias(Matrix x, Matrix negdata) {
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * vbias := vbias + α(rowsum(X) – rowsum(negdata))/batchSize
+     * // W := W + α(X*poshidprobsT – negdata*neghidprobsT)/batchSize
      *
-     * @param v
-     * @param vv
+     * @param x
+     * @param poshidprobs
+     * @param negdata
+     * @param neghidprobs
      */
-    private void updateVisibleUnitsBias(List<Boolean> v, List<Boolean> vv) {
-        double rowsum_X = v.stream().mapToDouble(x -> x ? 1 : 0).sum();
-        double rowsum_negdata = vv.stream().mapToDouble(x -> x ? 1 : 0).sum();
-        double deltaBias = cfg.alpha * (rowsum_X - rowsum_negdata) / cfg.batchSize;
-        for (int i = 0; i < layer.vbias.size(); i++) {
-            layer.vbias.set(i, layer.vbias.get(i) + deltaBias);
-        }
-
-    }
-
-    private void updateVisibleUnitsBias2(List<Boolean> v, List<Boolean> vv) {
-        List<Double> deltaV = new ArrayList<>(v.size());
-        for (int i = 0; i < cfg.numdims; i++) {
-            double vUnit = v.get(i) ? 1.0 : 0.0;
-            double vvUnit = vv.get(i) ? 1.0 : 0.0;
-            double currentBias = layer.vbias.get(i);
-            double newValue = currentBias + cfg.alpha * (vUnit - vvUnit) / cfg.batchSize;
-            deltaV.add(newValue);
-        }
+    private void updateWeights(Matrix X, Matrix poshidprobs, Matrix negdata, Matrix neghidprobs) {
+        Matrix X_poshidprobsT = X.multiplication(poshidprobs.transpose()); //X*poshidprobsT
+        Matrix negdata_neghidprobsT = negdata.multiplication(neghidprobs.transpose()); // negdata*neghidprobsT
+        Matrix delta = X_poshidprobsT.substract(negdata_neghidprobsT).scalarMultiply(cfg.alpha / cfg.batchSize);
+        layer.W.matrixAdd(delta);
     }
 
     /**
-     * <pre>
-     * Contrastive divergence weights correction based on positive phase and negative phase data.
-     * Given with equation :
-     * <code>delta W:=  α(X * poshidprobsT – negdata * neghidprobsT)/batchSize</code>
-     * <b>where</b>
-     *      X is v param
-     *      poshidprobsT is transposed h param
-     *      negdata is vv param
-     *      neghidprobsT is transposed param
-     *      X * poshidprobsT is Outer product of X and poshidprobsT vectors
-     * </pre>
-     *
-     * @param v  visible layer values vector
-     * @param h  hidden layer values vector
-     * @param vv reconstructed visible layer values vector
-     * @param hh reconstructed hidden layer values vector
-     * @return change of weights
-     */
-    private Matrix1D getWeightsDelta(Vector v, Vector h, Vector vv, Vector hh) {
-        Matrix vhOuterProduct = v.multiplyByTransposedVector(h);
-        Matrix1D vvhhOuterProduct = vv.multiplyByTransposedVector(hh);
-        Matrix1D delta = vhOuterProduct.substract(vvhhOuterProduct);
-        final double factor = cfg.alpha / cfg.batchSize;
-        delta.scalarMultiply(factor);
-        return delta;
-    }
-
-
-    /**
-     * Compute hidden layer values from reconstructed visible layer.
-     * This is negative phase operation.
-     * <pre>
-     * <code>
      * neghidprobs := hidden unit probabilities given negdata (use Equation 3)
-     * </code>
-     * </pre>
      *
-     * @param vv reconstructed visible layer units values
+     * @param negdata
      * @return
      */
-    private List<Boolean> getReconstructedHiddenValues(List<Boolean> vv) {
-        ProbabilisticVector hiddenLayerProbs = equation3(vv);
-        hiddenLayerProbs.sampling();
-        return hiddenLayerProbs.getSampledValues();
-    }
-
-    // negdata := reconstruction of visible values given poshidstates (use Equation 2)
-    private List<Boolean> getReconstructedVisualValues(List<Boolean> h) {
-        ProbabilisticVector visualLayerReconstructionProbability = equation2(h);
-        visualLayerReconstructionProbability.sampling();
-        return visualLayerReconstructionProbability.getSampledValues();
+    private Matrix getNegHidProbs(Matrix negdata) {
+        return getPosHidProbs(negdata);
     }
 
     /**
-     * Compute values for hidden layer units.
+     * negdata := reconstruction of visible values given poshidstates (use Equation 2)
      *
-     * <pre>
-     *
-     * poshidprobs := hidden unit probabilities given X (use Equation 3)
+     * @param poshidstates
+     * @return
+     */
+    private Matrix getNegData(Matrix poshidstates) {
+        List<List<Double>> visibleUnitsProbs = poshidstates
+                .getMatrixAsCollection()
+                .stream()
+                .map(sample -> equation2(sample))
+                .collect(Collectors.toList());
+        Matrix hp = new Matrix2D(visibleUnitsProbs);
+        if (hp.getRows() != cfg.batchSize || hp.getColumns() != cfg.numdims) {
+            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
+        }
+        return hp.gibsSampling();
+    }
+
+    /**
      * poshidstates := sample using poshidprobs
      *
-     * </pre>
+     * @param poshidprobs
+     * @return
      */
-    private List<Boolean> getHiddenValues(List<Boolean> v) {
-        ProbabilisticVector h_probs = equation3(v);
-        h_probs.sampling();
-        return h_probs.getSampledValues();
+    private Matrix getPosHidStates(Matrix poshidprobs) {
+        return poshidprobs.gibsSampling();
     }
+
+    /**
+     * hidden unit probabilities given X (use Equation 3)
+     *
+     * @param x
+     * @return
+     */
+    private Matrix getPosHidProbs(Matrix X) {
+        List<List<Double>> hiddenUnitsProbs = X
+                .getMatrixAsCollection()
+                .stream()
+                .map(sample -> equation3(sample))
+                .collect(Collectors.toList());
+        Matrix hp = new Matrix2D(hiddenUnitsProbs);
+        if (hp.getRows() != cfg.batchSize || hp.getColumns() != cfg.numhid) {
+            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
+        }
+        return hp;
+    }
+
 
     /**
      * P(hi|v) =g(lambda/sigma^2(bj+sum_i wij*vi)).
@@ -172,15 +156,15 @@ public class RBM {
      *     Hidden layer probabilities (h_probs) for given visual input v
      * </pre>
      *
-     * @param v visible layer data
+     * @param sample layer data
      * @return probabilities of hidden unit states
      */
-    private ProbabilisticVector equation3(List<Boolean> v) {
-        ProbabilisticVector h_probs = new ProbabilisticVector(cfg.numhid); // Wynik, czyli wektor prawdopodobieństw że dany neuron warstwy ukrytej ma wartość 1
+    private List<Double> equation3(List<Double> sample) {
+        List<Double> h_probs = new ArrayList<>(cfg.numhid); // Wynik, czyli wektor prawdopodobieństw że dany neuron warstwy ukrytej ma wartość 1
         final double cnst = (cfg.lambda / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
         for (int j = 0; j < cfg.numhid; j++) { // iterujemy po neuronach warstwy ukrytej
-            double z = cnst * (layer.getActivationSignalForHiddenUnit(v, j));
-            h_probs.getProbabilities().add(sigmoidFunction.evaluate(z));
+            double z = cnst * (layer.getActivationSignalForHiddenUnit(sample, j));
+            h_probs.set(j, sigmoidFunction.evaluate(z));
         }
         return h_probs;
     }
@@ -199,11 +183,11 @@ public class RBM {
      * @param hiddenUnitStates
      * @return Probabilities for visual units reconstruction
      */
-    private ProbabilisticVector equation2(List<Boolean> hiddenUnitStates) {
-        ProbabilisticVector negdataProbs = new ProbabilisticVector(cfg.numdims);
+    private List<Double> equation2(List<Double> hiddenUnitStates) {
+        List<Double> negdataProbs = new ArrayList(cfg.numdims);
         for (int i = 0; i < cfg.numdims; i++) { // iterate over all visible units
             double x = cfg.lambda * layer.getActivationSignalForVisibleUnit(hiddenUnitStates, i);
-            negdataProbs.getProbabilities().add(gausianDensityFunction.evaluate(x));
+            negdataProbs.set(i, gausianDensityFunction.evaluate(x));
         }
         return negdataProbs;
 

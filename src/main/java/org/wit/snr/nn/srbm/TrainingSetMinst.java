@@ -2,7 +2,7 @@ package org.wit.snr.nn.srbm;
 
 import org.wit.snr.minst.MinstImageLoader;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
-import org.wit.snr.nn.srbm.math.collection.Matrix1D;
+import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,18 +23,17 @@ public class TrainingSetMinst implements TrainingSet {
 
     @Override
     /**
-     *  training batch X numdims x batchSize
+     *  training batch X batchSize x numdims
      */
     public Matrix getTrainingBatch(int batchSize) {
-        List<Double> samples = new LinkedList<>();
+        List<List<Double>> samples = new ArrayList<>();
         for (int i = 0; i < batchSize; i++) {
             int randomIndexOfImage = rnd.nextInt(mil.getNumberOfImages()) - 1;
             List<Double> sample = getNormalizedImageData(mil.getImage(randomIndexOfImage));
-            samples.addAll(sample);
+            samples.add(sample);
         }
-        List<Double> samplesArray = new ArrayList<>(samples);
         int numdims = mil.getNumberOfRows() * mil.getNumberOfColumns();
-        Matrix trainingBath = new Matrix1D(samplesArray, numdims, batchSize);
+        Matrix trainingBath = new Matrix2D(samples);
         return trainingBath;
     }
 

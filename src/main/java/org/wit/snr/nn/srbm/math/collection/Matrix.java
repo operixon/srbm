@@ -93,4 +93,9 @@ public abstract class Matrix {
     abstract public int getColumns();
 
     abstract public int getRows();
+
+    abstract public Matrix gibsSampling();
+
+    abstract public List<List<Double>> getMatrixAsCollection();
+
 }

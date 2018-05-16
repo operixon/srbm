@@ -4,6 +4,9 @@ import org.wit.snr.nn.srbm.math.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by kkoperkiewicz on 11.06.2017.
@@ -42,6 +45,7 @@ public class Matrix2D extends Matrix {
     final private List<List<Double>> data;
     final int columns;
     final int rows;
+    final private static Random random = new Random();
 
 
     public Matrix2D(List<List<Double>> data) {
@@ -112,4 +116,21 @@ public class Matrix2D extends Matrix {
     public int getRows() {
         return rows;
     }
+
+    @Override
+    public Matrix gibsSampling() {
+        List<List<Double>> sampledMatrixData = data.stream().map(
+                row -> row
+                        .stream()
+                        .map(cel -> cel > random.nextDouble() ? 1.0 : 0.0)
+                        .collect(toList())
+        ).collect(toList());
+        return new Matrix2D(sampledMatrixData);
+    }
+
+    @Override
+    public List<List<Double>> getMatrixAsCollection() {
+        return data;
+    }
+
 }

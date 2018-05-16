@@ -106,4 +106,14 @@ public class Matrix1D extends Matrix {
     public int getRows() {
         return rows;
     }
+
+    @Override
+    public Matrix gibsSampling() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<List<Double>> getMatrixAsCollection() {
+        return null;
+    }
 }

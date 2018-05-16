@@ -1,6 +1,7 @@
 package org.wit.snr.nn.srbm;
 
 import org.wit.snr.nn.srbm.math.collection.Matrix;
+import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +17,7 @@ public class Layer {
 
 
     public Layer(int numdims, int numhid) {
-        W = Matrix.createMatrixWithRandomValues(numdims, numhid);
+        W = Matrix2D.createMatrixWithRandomValues(numdims, numhid);
         vbias = Collections.nCopies(numdims,1.0);
         hbias = Collections.nCopies(numhid,1.0);
         inputSize = numdims;
@@ -32,10 +33,14 @@ public class Layer {
      * @param j index of unit from hidden layer
      * @return activation signal value for #hiddenUnitIndex
      */
-    public Double getWeightsSumForHiddenUnit(List<Boolean> visibleUnits, final int j){
+    public Double getWeightsSumForHiddenUnit(List<Double> visibleUnits, final int j) {
         double sum = 0;
         for(int i = 0; i < inputSize; i++ ){
-            sum += W.get(j, i) * (visibleUnits.get(i) ? 1.0d : 0.0d);
+            final double unit = visibleUnits.get(i);
+            if (unit != 1.0 && unit != 0.0) {
+                throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", unit));
+            }
+            sum += W.get(j, i) * unit;
         }
         return sum;
     }
@@ -49,10 +54,14 @@ public class Layer {
      * @param i index of unit from visible layer
      * @return activation signal value for i neuron from visible layer
      */
-    public Double getWeightsSumForVisibleUnit(List<Boolean> hiddenUnits, final int i){
+    public Double getWeightsSumForVisibleUnit(List<Double> hiddenUnits, final int i) {
         double sum = 0;
         for(int j = 0; j < outputSize; j++ ){
-            sum += W.get(j, i) * (hiddenUnits.get(j) ? 1.0d : 0.0d);
+            final double unit = hiddenUnits.get(i);
+            if (unit != 1.0 && unit != 0.0) {
+                throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", unit));
+            }
+            sum += W.get(j, i) * unit;
         }
         return sum;
     }
@@ -66,7 +75,7 @@ public class Layer {
      * @param j
      * @return
      */
-    public Double getActivationSignalForHiddenUnit(List<Boolean> visibleUnits, final int j){
+    public Double getActivationSignalForHiddenUnit(List<Double> visibleUnits, final int j) {
         return hbias.get(j)  + getWeightsSumForHiddenUnit(visibleUnits, j);
 
     }
@@ -79,10 +88,9 @@ public class Layer {
      * @param visibleUnits
      * @return
      */
-    public Double getActivationSignalForVisibleUnit(List<Boolean> visibleUnits, final int i){
+    public Double getActivationSignalForVisibleUnit(List<Double> visibleUnits, final int i) {
         return vbias.get(i) + getWeightsSumForVisibleUnit(visibleUnits,i);
     }
 
-    public void updateVisualLayerBias() {
-    }
+
 }
