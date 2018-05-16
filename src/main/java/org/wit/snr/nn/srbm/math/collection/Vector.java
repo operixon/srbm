@@ -1,6 +1,5 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.math.collection;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,19 +13,20 @@ public class Vector<T> {
         this.data = data;
     }
 
-    public Matrix multiplyByTransposedVector(Vector transposedVector) {
-        int columns = data.size();
-        int rows = transposedVector.size();
-        List<List<Double>> result = new ArrayList<>(rows);
-        for (int rowIndex = 0; rowIndex < rows; rowIndex++) {
-            List<Double> row = new ArrayList<>(columns);
-            for (int columnIndex = 0; columnIndex < columns; columnIndex++) {
-                double cellValue = multiply(data.get(columnIndex), transposedVector.data.get(rowIndex));
-                row.add(columnIndex, cellValue);
-            }
-            result.add(rowIndex, row);
-        }
-        return new Matrix(result);
+    public Matrix1D multiplyByTransposedVector(Vector transposedVector) {
+        throw new UnsupportedOperationException();
+//        int columns = data.size();
+//        int rows = transposedVector.size();
+//        List<List<Double>> result = new ArrayList<>(rows);
+//        for (int rowIndex = 0; rowIndex < rows; rowIndex++) {
+//            List<Double> row = new ArrayList<>(columns);
+//            for (int columnIndex = 0; columnIndex < columns; columnIndex++) {
+//                double cellValue = multiply(data.get(columnIndex), transposedVector.data.get(rowIndex));
+//                row.add(columnIndex, cellValue);
+//            }
+//            result.add(rowIndex, row);
+//        }
+//        return new Matrix(result);
     }
 
     private double multiply(Object o1, Object o2) {

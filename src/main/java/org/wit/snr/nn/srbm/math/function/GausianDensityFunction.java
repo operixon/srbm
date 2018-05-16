@@ -1,4 +1,6 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.math.function;
+
+import org.wit.snr.nn.srbm.math.ActivationFunction;
 
 public class GausianDensityFunction implements ActivationFunction {
 

@@ -12,8 +12,8 @@ package org.wit.snr.nn.srbm;
 class Configuration {
     
     // Orginalne stałe z algorytmu
-    final int numdims = 20; //# of visible units
-    final int numhid = 5; //# of hidden units
+    final int numdims = 784; //# of visible units
+    final int numhid = 60; //# of hidden units
     final int numsamples = 100; //# of image patch samples
     final double alpha = 0.01;
     final double beta = 0.5;

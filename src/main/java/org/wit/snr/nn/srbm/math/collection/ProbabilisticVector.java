@@ -1,4 +1,4 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.math.collection;
 
 import java.util.ArrayList;
 import java.util.List;

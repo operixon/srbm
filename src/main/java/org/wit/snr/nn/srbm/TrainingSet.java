@@ -1,13 +1,12 @@
 package org.wit.snr.nn.srbm;
 
-import java.util.BitSet;
-import java.util.List;
+import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 /**
  * Created by akoperkiewicz on 14.01.2017.
  */
-public interface TrainingSet<V> {
+public interface TrainingSet {
 
-    List<V> getTrainingBatch(int batchSize);
+    Matrix getTrainingBatch(int batchSize);
 
 }

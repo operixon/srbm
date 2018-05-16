@@ -1,4 +1,4 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.math.collection;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
