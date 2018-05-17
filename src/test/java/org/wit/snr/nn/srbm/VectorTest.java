@@ -2,7 +2,6 @@ package org.wit.snr.nn.srbm;
 
 import org.testng.annotations.Test;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
-import org.wit.snr.nn.srbm.math.collection.Vector;
 
 import java.util.Arrays;
 

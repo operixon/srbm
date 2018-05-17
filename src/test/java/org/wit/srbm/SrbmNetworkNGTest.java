@@ -5,7 +5,7 @@
  */
 package org.wit.srbm;
 
-import org.wit.snr.nn.srbm.RBM;
+import org.wit.snr.nn.srbm.SRBM;
 
 import java.io.IOException;
 
@@ -35,12 +35,12 @@ public class SrbmNetworkNGTest {
     }
 
     /**
-     * Test of main method, of class RBM.
+     * Test of main method, of class SRBM.
      */
     @org.testng.annotations.Test
     public void testLearning() throws IOException {
 
-        RBM algorithm = new RBM();
+        SRBM algorithm = new SRBM();
         algorithm.train();
         
         

@@ -1,9 +1,9 @@
 package org.wit.snr.nn.srbm;
 
 import org.testng.annotations.Test;
-import org.wit.snr.nn.srbm.math.collection.SparseMatrix;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Created by kkoperkiewicz on 13.01.2017.

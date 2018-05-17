@@ -10,6 +10,7 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 import org.wit.snr.nn.srbm.math.function.GausianDensityFunction;
 import org.wit.snr.nn.srbm.math.function.SigmoidFunction;
+import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * @author koperix
  */
-public class RBM {
+public class SRBM {
 
     static final Random random = new Random();
     static final Configuration cfg = new Configuration();
@@ -31,16 +32,14 @@ public class RBM {
     final ActivationFunction sigmoidFunction;
     final TrainingSet trainingSet;
 
-    public RBM() throws IOException {
+    public SRBM() throws IOException {
         gausianDensityFunction = new GausianDensityFunction(sigma, cfg.mi);
         sigmoidFunction = new SigmoidFunction();
         trainingSet = new TrainingSetMinst();
     }
 
     public void train() {
-        while (isConverged()) { // while (not converged)
-            // for each training batch X batchSize x numdims
-            // (randomly sample batchSize patches from data w/o replacement)
+        while (isConverged()) {
             for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
                 Matrix X = trainingSet.getTrainingBatch(cfg.batchSize);
                 Matrix poshidprobs = getPosHidProbs(X);

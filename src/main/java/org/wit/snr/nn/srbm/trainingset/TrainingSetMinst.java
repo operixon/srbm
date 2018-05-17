@@ -1,6 +1,7 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.trainingset;
 
 import org.wit.snr.minst.MinstImageLoader;
+import org.wit.snr.nn.srbm.TrainingSet;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
