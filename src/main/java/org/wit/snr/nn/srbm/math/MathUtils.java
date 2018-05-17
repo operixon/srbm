@@ -28,14 +28,14 @@ public class MathUtils {
      * @return
      */
     public static List<List<Double>> getRandomMatrix(final int rowsNumber, final int columnsNumber) {
-        List<List<Double>> matrixCollection = new ArrayList<>();
-        for (int rowIndex = 0; rowIndex < rowsNumber; rowIndex++) {
-            List<Double> row = rand
-                    .doubles(columnsNumber, 0, 1)
+        List<List<Double>> columnsList = new ArrayList<>();
+        for (int columnIdx = 0; columnIdx < columnsNumber; columnIdx++) {
+            List<Double> column = rand
+                    .doubles(rowsNumber, 0, 1)
                     .boxed()
                     .collect(Collectors.toList());
-            matrixCollection.add(row);
+            columnsList.add(column);
         }
-        return matrixCollection;
+        return columnsList;
     }
 }

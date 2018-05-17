@@ -19,28 +19,17 @@ public class Matrix2D extends Matrix {
         return new Matrix2D(matrixData);
     }
 
-    public static Matrix createMatrixFromArray(double[][] m) {
-        final List<List<Double>> d = new ArrayList<>();
-        for (double[] mRow : m) {
-            List<Double> row = new ArrayList<>();
-            for (double cel : mRow) {
-                row.add(cel);
-            }
-            d.add(row);
-        }
-        return new Matrix2D(d);
-    }
 
     public static Matrix createFilledMatrix(int rows, int columns, double fillValue) {
-        List<List<Double>> table = new ArrayList<>(columns);
-        for (int i = 0; i < rows; i++) {
-            List<Double> row = new ArrayList<>(rows);
-            for (int j = 0; j < columns; j++) {
-                row.add(fillValue);
+        List<List<Double>> columnsList = new ArrayList<>(columns);
+        for (int i = 0; i < columns; i++) {
+            List<Double> column = new ArrayList<>(rows);
+            for (int j = 0; j < rows; j++) {
+                column.add(fillValue);
             }
-            table.add(row);
+            columnsList.add(column);
         }
-        return new Matrix2D(table);
+        return new Matrix2D(columnsList);
     }
 
     public static Matrix createColumnVector(List<Double> vectorData) {
@@ -99,9 +88,9 @@ public class Matrix2D extends Matrix {
     @Override
     public Matrix transpose() {
         Matrix result = instance(getColumnsNumber(), getRowsNumber());
-        for (int i = 0; i < getRowsNumber(); i++) {
-            for (int j = 0; j < getColumnsNumber(); j++) {
-                result.set(j, i, get(i, j));
+        for (int r = 0; r < result.getRowsNumber(); r++) {
+            for (int c = 0; c < result.getColumnsNumber(); c++) {
+                result.set(r, c, get(c, r));
             }
         }
         return result;

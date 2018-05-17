@@ -145,7 +145,7 @@ public class SRBM {
                 .map(sample -> equation2(sample))
                 .collect(Collectors.toList());
         Matrix hp = new Matrix2D(visibleUnitsProbs);
-        if (hp.getRowsNumber() != cfg.batchSize || hp.getColumnsNumber() != cfg.numdims) {
+        if (hp.getRowsNumber() != cfg.numdims || hp.getColumnsNumber() != cfg.batchSize) {
             throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
         }
         return hp.gibsSampling();
@@ -174,8 +174,8 @@ public class SRBM {
                 .map(sample -> equation3(sample))
                 .collect(Collectors.toList());
         Matrix hp = new Matrix2D(hiddenUnitsProbs);
-        if (hp.getRowsNumber() != cfg.batchSize || hp.getColumnsNumber() != cfg.numhid) {
-            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
+        if (hp.getRowsNumber() != cfg.numhid || hp.getColumnsNumber() != cfg.batchSize) {
+            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.numhid, cfg.batchSize, hp));
         }
         return hp;
     }
@@ -195,7 +195,7 @@ public class SRBM {
         final double cnst = (cfg.lambda / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
         for (int j = 0; j < cfg.numhid; j++) { // iterujemy po neuronach warstwy ukrytej
             double z = cnst * (layer.getActivationSignalForHiddenUnit(sample, j));
-            h_probs.set(j, sigmoidFunction.evaluate(z));
+            h_probs.add(sigmoidFunction.evaluate(z));
         }
         return h_probs;
     }
@@ -218,7 +218,7 @@ public class SRBM {
         List<Double> negdataProbs = new ArrayList(cfg.numdims);
         for (int i = 0; i < cfg.numdims; i++) { // iterate over all visible units
             double x = cfg.lambda * layer.getActivationSignalForVisibleUnit(hiddenUnitStates, i);
-            negdataProbs.set(i, gausianDensityFunction.evaluate(x));
+            negdataProbs.add(gausianDensityFunction.evaluate(x));
         }
         return negdataProbs;
 

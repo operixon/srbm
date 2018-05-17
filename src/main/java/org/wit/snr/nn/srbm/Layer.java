@@ -18,8 +18,8 @@ public class Layer {
 
     public Layer(int numdims, int numhid) {
         W = Matrix2D.createMatrixWithRandomValues(numdims, numhid);
-        vbias = Matrix2D.createFilledMatrix(1, numdims, 1.0);
-        hbias = Matrix2D.createFilledMatrix(1, numhid, 1.0);
+        vbias = Matrix2D.createFilledMatrix(numdims, 1, 1.0);
+        hbias = Matrix2D.createFilledMatrix(numhid, 1, 1.0);
         inputSize = numdims;
         outputSize = numhid;
     }
@@ -40,7 +40,7 @@ public class Layer {
             if (unit != 1.0 && unit != 0.0) {
                 throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", unit));
             }
-            sum += W.get(j, i) * unit;
+            sum += W.get(i, j) * unit;
         }
         return sum;
     }
@@ -57,11 +57,11 @@ public class Layer {
     public Double getWeightsSumForVisibleUnit(List<Double> hiddenUnits, final int i) {
         double sum = 0;
         for(int j = 0; j < outputSize; j++ ){
-            final double unit = hiddenUnits.get(i);
+            final double unit = hiddenUnits.get(j);
             if (unit != 1.0 && unit != 0.0) {
                 throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", unit));
             }
-            sum += W.get(j, i) * unit;
+            sum += W.get(i, j) * unit;
         }
         return sum;
     }
@@ -76,7 +76,7 @@ public class Layer {
      * @return
      */
     public Double getActivationSignalForHiddenUnit(List<Double> visibleUnits, final int j) {
-        return hbias.get(0, j) + getWeightsSumForHiddenUnit(visibleUnits, j);
+        return hbias.get(j, 0) + getWeightsSumForHiddenUnit(visibleUnits, j);
 
     }
 
@@ -89,7 +89,7 @@ public class Layer {
      * @return
      */
     public Double getActivationSignalForVisibleUnit(List<Double> visibleUnits, final int i) {
-        return vbias.get(0, i) + getWeightsSumForVisibleUnit(visibleUnits, i);
+        return vbias.get(i, 0) + getWeightsSumForVisibleUnit(visibleUnits, i);
     }
 
 
