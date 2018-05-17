@@ -72,23 +72,32 @@ public class RBM {
         throw new UnsupportedOperationException();
     }
 
-    private void updateVBias(Matrix x, Matrix negdata) {
-        throw new UnsupportedOperationException();
+    /**
+     * vbias := vbias + α(rowsum(X) – rowsum(negdata))/batchSize
+     *
+     * @param X
+     * @param negdata
+     */
+    private void updateVBias(Matrix X, Matrix negdata) {
+        Matrix rowsum_X = X.rowsum();
+        Matrix rowsum_negdata = negdata.rowsum();
+        Matrix biasDelta = rowsum_X.subtract(rowsum_negdata).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
+        layer.vbias.matrixAdd(biasDelta)
     }
 
     /**
      * // W := W + α(X*poshidprobsT – negdata*neghidprobsT)/batchSize
      *
-     * @param x
-     * @param poshidprobs
-     * @param negdata
-     * @param neghidprobs
+     * @param X visible layer samples batch
+     * @param poshidprobs positive phase hidden layer probabilities batch
+     * @param negdata visible layer batch data from negative phase
+     * @param neghidprobs  hidden layer probabilities for negative phase
      */
     private void updateWeights(Matrix X, Matrix poshidprobs, Matrix negdata, Matrix neghidprobs) {
         Matrix X_poshidprobsT = X.multiplication(poshidprobs.transpose()); //X*poshidprobsT
         Matrix negdata_neghidprobsT = negdata.multiplication(neghidprobs.transpose()); // negdata*neghidprobsT
-        Matrix delta = X_poshidprobsT.substract(negdata_neghidprobsT).scalarMultiply(cfg.alpha / cfg.batchSize);
-        layer.W.matrixAdd(delta);
+        Matrix delta = X_poshidprobsT.subtract(negdata_neghidprobsT).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
+        layer.W = layer.W.matrixAdd(delta);
     }
 
     /**

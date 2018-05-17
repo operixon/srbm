@@ -3,14 +3,13 @@ package org.wit.snr.nn.srbm;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Layer {
 
-    public final Matrix W;
-    public final List<Double> vbias; // ci
-    public final List<Double> hbias; // bj
+    public Matrix W;
+    public final Matrix vbias; // ci
+    public final Matrix hbias; // bj
 
     public final int inputSize;
     public final int outputSize;
@@ -18,8 +17,8 @@ public class Layer {
 
     public Layer(int numdims, int numhid) {
         W = Matrix2D.createMatrixWithRandomValues(numdims, numhid);
-        vbias = Collections.nCopies(numdims,1.0);
-        hbias = Collections.nCopies(numhid,1.0);
+        vbias = Matrix2D.createFilledMatrix(1, numdims, 1.0);
+        hbias = Matrix2D.createFilledMatrix(1, numhid, 1.0);
         inputSize = numdims;
         outputSize = numhid;
     }
@@ -76,7 +75,7 @@ public class Layer {
      * @return
      */
     public Double getActivationSignalForHiddenUnit(List<Double> visibleUnits, final int j) {
-        return hbias.get(j)  + getWeightsSumForHiddenUnit(visibleUnits, j);
+        return hbias.get(0, j) + getWeightsSumForHiddenUnit(visibleUnits, j);
 
     }
 
@@ -89,7 +88,7 @@ public class Layer {
      * @return
      */
     public Double getActivationSignalForVisibleUnit(List<Double> visibleUnits, final int i) {
-        return vbias.get(i) + getWeightsSumForVisibleUnit(visibleUnits,i);
+        return vbias.get(0, i) + getWeightsSumForVisibleUnit(visibleUnits, i);
     }
 
 

@@ -27,14 +27,15 @@ public abstract class Matrix {
 
     abstract public void set(int rowIndex, int columnIndex, double value);
 
-    public Matrix substract(Matrix m) {
+    public Matrix subtract(Matrix m) {
         assertEqualSize(m);
+        Matrix result = instance(getRows(), getColumns());
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getColumns(); j++) {
-                this.set(i, j, this.get(i, j) - m.get(i, j));
+                result.set(i, j, this.get(i, j) - m.get(i, j));
             }
         }
-        return this;
+        return result;
     }
 
     protected void assertEqualSize(Matrix m) {
@@ -50,12 +51,13 @@ public abstract class Matrix {
 
     public Matrix matrixAdd(Matrix m) {
         assertEqualSize(m);
+        Matrix result = instance(getRows(), getColumns());
         for (int i = 0; i < getRows(); i++) {
             for (int j = 0; j < getColumns(); j++) {
-                this.set(i, j, this.get(i, j) + m.get(i, j));
+                result.set(i, j, this.get(i, j) + m.get(i, j));
             }
         }
-        return this;
+        return result;
     }
 
     abstract public List<Double> getDataAsList();
@@ -98,4 +100,5 @@ public abstract class Matrix {
 
     abstract public List<List<Double>> getMatrixAsCollection();
 
+    public abstract Matrix rowsum();
 }

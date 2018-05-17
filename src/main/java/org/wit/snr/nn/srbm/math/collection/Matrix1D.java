@@ -116,4 +116,9 @@ public class Matrix1D extends Matrix {
     public List<List<Double>> getMatrixAsCollection() {
         return null;
     }
+
+    @Override
+    public Matrix rowsum() {
+        return null;
+    }
 }

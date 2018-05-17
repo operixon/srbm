@@ -81,16 +81,7 @@ public class Matrix2D extends Matrix {
         return this;
     }
 
-    @Override
-    public Matrix matrixAdd(Matrix m) {
-        assertEqualSize(m);
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                this.set(i, j, this.get(i, j) + m.get(i, j));
-            }
-        }
-        return this;
-    }
+
 
     @Override
     public List<Double> getDataAsList() {
@@ -99,7 +90,14 @@ public class Matrix2D extends Matrix {
 
     @Override
     public Matrix transpose() {
-        throw new UnsupportedOperationException();
+        this.getMatrixAsCollection();
+        Matrix result = instance(getColumns(), getRows());
+        for (int i = 0; i < getRows(); i++) {
+            for (int j = 0; j < getColumns(); j++) {
+                result.set(j, i, get(i, j));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -131,6 +129,11 @@ public class Matrix2D extends Matrix {
     @Override
     public List<List<Double>> getMatrixAsCollection() {
         return data;
+    }
+
+    @Override
+    public Matrix rowsum() {
+        return null;
     }
 
 }
