@@ -28,7 +28,7 @@ public class TrainingSetMinst implements TrainingSet {
     public Matrix getTrainingBatch(int batchSize) {
         List<List<Double>> samples = new ArrayList<>();
         for (int i = 0; i < batchSize; i++) {
-            int randomIndexOfImage = rnd.nextInt(mil.getNumberOfImages()) - 1;
+            int randomIndexOfImage = rnd.nextInt(mil.getNumberOfImages());
             List<Double> sample = getNormalizedImageData(mil.getImage(randomIndexOfImage));
             samples.add(sample);
         }
