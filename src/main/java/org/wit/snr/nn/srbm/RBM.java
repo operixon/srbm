@@ -49,8 +49,7 @@ public class RBM {
                 Matrix neghidprobs = getNegHidProbs(negdata);
                 updateWeights(X, poshidprobs, negdata, neghidprobs);
                 updateVBias(X, negdata);
-                //error := SquaredDiff(X,negdata)
-                getError(X, negdata);
+                updateError(X, negdata);
             }
             //update hbias (use Equation 6)
             updateHBias();
@@ -67,7 +66,14 @@ public class RBM {
         throw new UnsupportedOperationException();
     }
 
-    private void getError(Matrix X, Matrix negdata) {
+    /**
+     * error := SquaredDiff(X,negdata)
+     *
+     * @param X
+     * @param negdata
+     */
+    private void updateError(Matrix X, Matrix negdata) {
+
         List<List<Double>> dataBatch = X.getMatrixAsCollection();
         List<List<Double>> negDataBatch = negdata.getMatrixAsCollection();
         if (dataBatch.size() != negDataBatch.size() || dataBatch.get(0).size() != negDataBatch.get(0).size()) {
@@ -86,7 +92,7 @@ public class RBM {
                 error += (unit - negUnit) * (unit - negUnit);
             }
         }
-        layer.error = error;
+        layer.error = error / (cfg.batchSize * cfg.numdims);
     }
 
     /**
@@ -159,7 +165,7 @@ public class RBM {
     /**
      * hidden unit probabilities given X (use Equation 3)
      *
-     * @param x
+     * @param X
      * @return
      */
     private Matrix getPosHidProbs(Matrix X) {
