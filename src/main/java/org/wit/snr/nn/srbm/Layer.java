@@ -13,6 +13,7 @@ public class Layer {
 
     public final int inputSize;
     public final int outputSize;
+    public double error;
 
 
     public Layer(int numdims, int numhid) {

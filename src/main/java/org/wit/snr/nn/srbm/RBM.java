@@ -67,8 +67,26 @@ public class RBM {
         throw new UnsupportedOperationException();
     }
 
-    private void getError(Matrix x, Matrix negdata) {
-        throw new UnsupportedOperationException();
+    private void getError(Matrix X, Matrix negdata) {
+        List<List<Double>> dataBatch = X.getMatrixAsCollection();
+        List<List<Double>> negDataBatch = negdata.getMatrixAsCollection();
+        if (dataBatch.size() != negDataBatch.size() || dataBatch.get(0).size() != negDataBatch.get(0).size()) {
+            throw new IllegalStateException(String.format("x.size=%d; xx.size=%d; x.get(0).size=%d; xx.get(0).size=%d", dataBatch.size(), negDataBatch.size(), dataBatch.get(0).size(), negDataBatch.get(0).size()));
+        }
+        // mse = 1/n ( sum (n , i = 1, (Yi - Y'i)^2)
+        // Java stream not provides zip api to glue two collections
+        // so it must be done in for() fashion way
+        double error = 0;
+        for (int sampleIdx = 0; sampleIdx < dataBatch.size(); sampleIdx++) {
+            List<Double> data = dataBatch.get(sampleIdx);
+            List<Double> negData = negDataBatch.get(sampleIdx);
+            for (int unitIdx = 0; unitIdx < dataBatch.get(0).size(); unitIdx++) {
+                double unit = data.get(unitIdx);
+                double negUnit = negData.get(unitIdx);
+                error += (unit - negUnit) * (unit - negUnit);
+            }
+        }
+        layer.error = error;
     }
 
     /**

@@ -147,6 +147,11 @@ public class Matrix2D extends Matrix {
         return createColumnVector(rowsum);
     }
 
+    @Override
+    public List<Double> getColumn(int columnIndex) {
+        return columnsList.get(columnIndex);
+    }
+
     private List<List<Double>> getRowsList() {
         return this.transpose().getMatrixAsCollection();
     }

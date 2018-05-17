@@ -106,4 +106,6 @@ public abstract class Matrix {
      * @return column vector expresed by Matrix object
      */
     public abstract Matrix rowsum();
+
+    public abstract List<Double> getColumn(int columnIndex);
 }
