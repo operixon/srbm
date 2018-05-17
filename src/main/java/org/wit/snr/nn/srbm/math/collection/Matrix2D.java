@@ -35,7 +35,7 @@ public class Matrix2D extends Matrix {
         List<List<Double>> table = new ArrayList<>(columns);
         for (int i = 0; i < rows; i++) {
             List<Double> row = new ArrayList<>(rows);
-            for (int j = 0; i < columns; j++) {
+            for (int j = 0; j < columns; j++) {
                 row.add(fillValue);
             }
             table.add(row);
