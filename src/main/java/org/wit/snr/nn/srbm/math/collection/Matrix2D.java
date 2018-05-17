@@ -5,6 +5,7 @@ import org.wit.snr.nn.srbm.math.MathUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -42,58 +43,64 @@ public class Matrix2D extends Matrix {
         return new Matrix2D(table);
     }
 
-    final private List<List<Double>> data;
+    public static Matrix createColumnVector(List<Double> vectorData) {
+        List<List<Double>> reply = new ArrayList<>(1);
+        reply.add(vectorData);
+        return new Matrix2D(reply);
+    }
+
+    final private List<List<Double>> columnsList;
     final int columns;
     final int rows;
     final private static Random random = new Random();
 
 
-    public Matrix2D(List<List<Double>> data) {
-        if (data == null) {
+    public Matrix2D(List<List<Double>> columnsList) {
+        if (columnsList == null) {
             throw new NullPointerException();
         }
-        this.data = data;
-        this.rows = data.size();
-        this.columns = data.get(0).size();
+        this.columnsList = columnsList;
+        this.columns = columnsList.size();
+        this.rows = columnsList.get(0).size();
     }
 
     @Override
     public double get(int rowIndex, int columnIndex) {
-        return data.get(rowIndex).get(columnIndex);
+        return columnsList.get(columnIndex).get(rowIndex);
     }
 
 
     @Override
     public void set(int rowIndex, int columnIndex, double value) {
-        data.get(rowIndex).set(columnIndex, value);
+
+        columnsList.get(columnIndex).set(rowIndex, value);
     }
 
 
     @Override
     public Matrix scalarDivide(final double divVal) {
-        data.stream().forEach(row -> row.stream().forEach(cel -> cel = cel / divVal));
+        columnsList.stream().forEach(row -> row.stream().forEach(cel -> cel = cel / divVal));
         return this;
     }
 
     @Override
     public Matrix scalarMultiply(final double mulVal) {
-        data.stream().forEach(row -> row.stream().forEach(cel -> cel = cel * mulVal));
+        columnsList.stream().forEach(row -> row.stream().forEach(cel -> cel = cel * mulVal));
         return this;
     }
 
 
-
     @Override
     public List<Double> getDataAsList() {
+
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Matrix transpose() {
-        this.getMatrixAsCollection();
-        Matrix result = instance(getColumns(), getRows());
-        for (int i = 0; i < getRows(); i++) {
-            for (int j = 0; j < getColumns(); j++) {
+        Matrix result = instance(getColumnsNumber(), getRowsNumber());
+        for (int i = 0; i < getRowsNumber(); i++) {
+            for (int j = 0; j < getColumnsNumber(); j++) {
                 result.set(j, i, get(i, j));
             }
         }
@@ -106,18 +113,18 @@ public class Matrix2D extends Matrix {
     }
 
     @Override
-    public int getColumns() {
+    public int getColumnsNumber() {
         return columns;
     }
 
     @Override
-    public int getRows() {
+    public int getRowsNumber() {
         return rows;
     }
 
     @Override
     public Matrix gibsSampling() {
-        List<List<Double>> sampledMatrixData = data.stream().map(
+        List<List<Double>> sampledMatrixData = columnsList.stream().map(
                 row -> row
                         .stream()
                         .map(cel -> cel > random.nextDouble() ? 1.0 : 0.0)
@@ -128,12 +135,20 @@ public class Matrix2D extends Matrix {
 
     @Override
     public List<List<Double>> getMatrixAsCollection() {
-        return data;
+        return columnsList;
     }
 
     @Override
     public Matrix rowsum() {
-        return null;
+        List<List<Double>> rowsList = getRowsList();
+        List<Double> rowsum = rowsList.stream()
+                .map(row -> row.stream().collect(Collectors.summingDouble(Double::doubleValue)))
+                .collect(Collectors.toList());
+        return createColumnVector(rowsum);
+    }
+
+    private List<List<Double>> getRowsList() {
+        return this.transpose().getMatrixAsCollection();
     }
 
 }

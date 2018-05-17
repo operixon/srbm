@@ -48,7 +48,6 @@ public class RBM {
                 Matrix negdata = getNegData(poshidstates);
                 Matrix neghidprobs = getNegHidProbs(negdata);
                 updateWeights(X, poshidprobs, negdata, neghidprobs);
-                //vbias := vbias + α(rowsum(X) – rowsum(negdata))/batchSize
                 updateVBias(X, negdata);
                 //error := SquaredDiff(X,negdata)
                 getError(X, negdata);
@@ -82,7 +81,7 @@ public class RBM {
         Matrix rowsum_X = X.rowsum();
         Matrix rowsum_negdata = negdata.rowsum();
         Matrix biasDelta = rowsum_X.subtract(rowsum_negdata).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
-        layer.vbias.matrixAdd(biasDelta)
+        layer.vbias = layer.vbias.matrixAdd(biasDelta);
     }
 
     /**
@@ -123,7 +122,7 @@ public class RBM {
                 .map(sample -> equation2(sample))
                 .collect(Collectors.toList());
         Matrix hp = new Matrix2D(visibleUnitsProbs);
-        if (hp.getRows() != cfg.batchSize || hp.getColumns() != cfg.numdims) {
+        if (hp.getRowsNumber() != cfg.batchSize || hp.getColumnsNumber() != cfg.numdims) {
             throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
         }
         return hp.gibsSampling();
@@ -152,7 +151,7 @@ public class RBM {
                 .map(sample -> equation3(sample))
                 .collect(Collectors.toList());
         Matrix hp = new Matrix2D(hiddenUnitsProbs);
-        if (hp.getRows() != cfg.batchSize || hp.getColumns() != cfg.numhid) {
+        if (hp.getRowsNumber() != cfg.batchSize || hp.getColumnsNumber() != cfg.numhid) {
             throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
         }
         return hp;

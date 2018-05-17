@@ -6,10 +6,10 @@ import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 import java.util.List;
 
 public class Layer {
-
+    // W := randn(numdims, numhid)
     public Matrix W;
-    public final Matrix vbias; // ci
-    public final Matrix hbias; // bj
+    public Matrix vbias; // ci
+    public Matrix hbias; // bj
 
     public final int inputSize;
     public final int outputSize;

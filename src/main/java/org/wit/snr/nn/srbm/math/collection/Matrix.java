@@ -7,9 +7,9 @@ public abstract class Matrix {
 
     public String toFullString() {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < getRows(); i++) {
+        for (int i = 0; i < getRowsNumber(); i++) {
             sb.append("| ");
-            for (int j = 0; i < getColumns(); j++) {
+            for (int j = 0; i < getColumnsNumber(); j++) {
                 sb.append(String.format("%.2f", this.get(i, j)));
                 sb.append("|");
             }
@@ -20,7 +20,7 @@ public abstract class Matrix {
 
     @Override
     public String toString() {
-        return String.format("{Matrix rows=%d,columns=%d}", getRows(), getColumns());
+        return String.format("{Matrix rows=%d,columns=%d}", getRowsNumber(), getColumnsNumber());
     }
 
     abstract public double get(int rowIndex, int columnIndex);
@@ -29,9 +29,9 @@ public abstract class Matrix {
 
     public Matrix subtract(Matrix m) {
         assertEqualSize(m);
-        Matrix result = instance(getRows(), getColumns());
-        for (int i = 0; i < getRows(); i++) {
-            for (int j = 0; j < getColumns(); j++) {
+        Matrix result = instance(getRowsNumber(), getColumnsNumber());
+        for (int i = 0; i < getRowsNumber(); i++) {
+            for (int j = 0; j < getColumnsNumber(); j++) {
                 result.set(i, j, this.get(i, j) - m.get(i, j));
             }
         }
@@ -39,9 +39,9 @@ public abstract class Matrix {
     }
 
     protected void assertEqualSize(Matrix m) {
-        if (m.getRows() != getRows() && m.getColumns() != getColumns()) {
+        if (m.getRowsNumber() != getRowsNumber() && m.getColumnsNumber() != getColumnsNumber()) {
             throw new IllegalArgumentException("Substract is defined only for matrix's with the same size."
-                    + "(" + getRows() + "x" + getColumns() + ") != (" + m.getRows() + "x" + m.getColumns() + ")");
+                    + "(" + getRowsNumber() + "x" + getColumnsNumber() + ") != (" + m.getRowsNumber() + "x" + m.getColumnsNumber() + ")");
         }
     }
 
@@ -51,9 +51,9 @@ public abstract class Matrix {
 
     public Matrix matrixAdd(Matrix m) {
         assertEqualSize(m);
-        Matrix result = instance(getRows(), getColumns());
-        for (int i = 0; i < getRows(); i++) {
-            for (int j = 0; j < getColumns(); j++) {
+        Matrix result = instance(getRowsNumber(), getColumnsNumber());
+        for (int i = 0; i < getRowsNumber(); i++) {
+            for (int j = 0; j < getColumnsNumber(); j++) {
                 result.set(i, j, this.get(i, j) + m.get(i, j));
             }
         }
@@ -68,10 +68,10 @@ public abstract class Matrix {
 
     public Matrix multiplication(Matrix m) {
         assertSizeToMultiplication(this, m);
-        Matrix result = instance(getRows(), m.getColumns());
-        final int n = this.getColumns();
-        for (int i = 0; i < result.getRows(); i++) {
-            for (int j = 0; j < result.getColumns(); j++) {
+        Matrix result = instance(getRowsNumber(), m.getColumnsNumber());
+        final int n = this.getColumnsNumber();
+        for (int i = 0; i < result.getRowsNumber(); i++) {
+            for (int j = 0; j < result.getColumnsNumber(); j++) {
                 result.set(i, j, multiplyRowByColumn(n, i, j, this, m));
             }
         }
@@ -87,18 +87,23 @@ public abstract class Matrix {
     }
 
     void assertSizeToMultiplication(Matrix a, Matrix b) {
-        if (a.getColumns() != b.getRows()) {
+        if (a.getColumnsNumber() != b.getRowsNumber()) {
             throw new IllegalArgumentException(String.format("Matrix A columns not equals B rows. %s, %s", a, b));
         }
     }
 
-    abstract public int getColumns();
+    abstract public int getColumnsNumber();
 
-    abstract public int getRows();
+    abstract public int getRowsNumber();
 
     abstract public Matrix gibsSampling();
 
     abstract public List<List<Double>> getMatrixAsCollection();
 
+    /**
+     * Suoming all cel values in each row.
+     *
+     * @return column vector expresed by Matrix object
+     */
     public abstract Matrix rowsum();
 }

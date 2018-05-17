@@ -98,12 +98,12 @@ public class Matrix1D extends Matrix {
     }
 
     @Override
-    public int getColumns() {
+    public int getColumnsNumber() {
         return columns;
     }
 
     @Override
-    public int getRows() {
+    public int getRowsNumber() {
         return rows;
     }
 

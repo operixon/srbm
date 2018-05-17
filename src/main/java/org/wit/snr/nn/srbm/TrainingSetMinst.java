@@ -23,7 +23,7 @@ public class TrainingSetMinst implements TrainingSet {
 
     @Override
     /**
-     *  training batch X batchSize x numdims
+     *   training batch Xnumdims x batchSize (randomly sample batchSize patches from data w/o replacement)
      */
     public Matrix getTrainingBatch(int batchSize) {
         List<List<Double>> samples = new ArrayList<>();
@@ -32,7 +32,6 @@ public class TrainingSetMinst implements TrainingSet {
             List<Double> sample = getNormalizedImageData(mil.getImage(randomIndexOfImage));
             samples.add(sample);
         }
-        int numdims = mil.getNumberOfRows() * mil.getNumberOfColumns();
         Matrix trainingBath = new Matrix2D(samples);
         return trainingBath;
     }
