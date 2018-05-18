@@ -67,21 +67,23 @@ public abstract class Matrix {
     abstract protected Matrix instance(int rows, int columns);
 
     public Matrix multiplication(Matrix m) {
-        assertSizeToMultiplication(this, m);
-        Matrix result = instance(getRowsNumber(), m.getColumnsNumber());
-        final int columnsNumber = this.getColumnsNumber();
+        final Matrix A = this;
+        final Matrix B = m;
+        assertSizeToMultiplication(A, B);
+        final Matrix result = instance(A.getRowsNumber(), B.getColumnsNumber());
+        final int multiplVectorSize = A.getColumnsNumber();
         for (int i = 0; i < result.getRowsNumber(); i++) {
             for (int j = 0; j < result.getColumnsNumber(); j++) {
-                result.set(i, j, multiplyRowByColumn(columnsNumber, i, j, this, m));
+                result.set(i, j, multiplyRowByColumn(multiplVectorSize, i, j, this, m));
             }
         }
         return result;
     }
 
-    double multiplyRowByColumn(int columnsNumber, int i, int j, Matrix a, Matrix b) {
+    double multiplyRowByColumn(int multiplVectorSize, int i, int j, Matrix a, Matrix b) {
         double result = 0;
-        for (int x = 0; x < columnsNumber; x++) {
-            result += a.get(i, x) * b.get(x, i);
+        for (int x = 0; x < multiplVectorSize; x++) {
+            result += a.get(i, x) * b.get(x, j);
         }
         return result;
     }
