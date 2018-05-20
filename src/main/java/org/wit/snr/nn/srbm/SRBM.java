@@ -15,35 +15,37 @@ import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author koperix
  */
 public class SRBM {
 
-    static final Random random = new Random();
-    static final Configuration cfg = new Configuration();
-    final double sigma = 0.5;
-    int currentEpoch = 0;
-    final Layer layer = new Layer(cfg.numdims, cfg.numhid);
+    final Configuration cfg = new Configuration();
+    int currentEpoch;
+    final Layer layer;
     final ActivationFunction gausianDensityFunction;
-    final ActivationFunction sigmoidFunction;
     final TrainingSet trainingSet;
+    final HiddenLayerComputations hiddenLayerComputations;
+    final Equation3 equation3;
 
     public SRBM() throws IOException {
-        gausianDensityFunction = new GausianDensityFunction(sigma, cfg.mi);
-        sigmoidFunction = new SigmoidFunction();
+        this.layer = new Layer(cfg.numdims, cfg.numhid);
+        gausianDensityFunction = new GausianDensityFunction(cfg.sigma, cfg.mi);
         trainingSet = new TrainingSetMinst();
+        equation3 = new Equation3(cfg, layer, new SigmoidFunction());
+        hiddenLayerComputations = new HiddenLayerComputations(equation3, cfg);
     }
 
     public void train() {
+        currentEpoch = 0;
         while (isConverged()) {
             for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
                 Matrix X = trainingSet.getTrainingBatch(cfg.batchSize);
-                Matrix poshidprobs = getPosHidProbs(X);
-                Matrix poshidstates = getPosHidStates(poshidprobs);
+                Matrix poshidprobs = hiddenLayerComputations.getHidProbs(X);
+                Matrix poshidstates = hiddenLayerComputations.getHidStates(poshidprobs);
                 Matrix negdata = getNegData(poshidstates);
                 Matrix neghidprobs = getNegHidProbs(negdata);
                 updateWeights(X, poshidprobs, negdata, neghidprobs);
@@ -62,8 +64,9 @@ public class SRBM {
     }
 
     private void updateHBias() {
-        throw new UnsupportedOperationException();
+
     }
+
 
     /**
      * error := SquaredDiff(X,negdata)
@@ -110,10 +113,10 @@ public class SRBM {
     /**
      * // W := W + α(X*poshidprobsT – negdata*neghidprobsT)/batchSize
      *
-     * @param X visible layer samples batch
+     * @param X           visible layer samples batch
      * @param poshidprobs positive phase hidden layer probabilities batch
-     * @param negdata visible layer batch data from negative phase
-     * @param neghidprobs  hidden layer probabilities for negative phase
+     * @param negdata     visible layer batch data from negative phase
+     * @param neghidprobs hidden layer probabilities for negative phase
      */
     private void updateWeights(Matrix X, Matrix poshidprobs, Matrix negdata, Matrix neghidprobs) {
         Matrix X_poshidprobsT = X.multiplication(poshidprobs.transpose()); //X*poshidprobsT
@@ -129,7 +132,7 @@ public class SRBM {
      * @return
      */
     private Matrix getNegHidProbs(Matrix negdata) {
-        return getPosHidProbs(negdata);
+        return hiddenLayerComputations.getHidProbs(negdata);
     }
 
     /**
@@ -143,7 +146,7 @@ public class SRBM {
                 .getMatrixAsCollection()
                 .stream()
                 .map(sample -> equation2(sample))
-                .collect(Collectors.toList());
+                .collect(toList());
         Matrix hp = new Matrix2D(visibleUnitsProbs);
         if (hp.getRowsNumber() != cfg.numdims || hp.getColumnsNumber() != cfg.batchSize) {
             throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
@@ -151,54 +154,8 @@ public class SRBM {
         return hp.gibsSampling();
     }
 
-    /**
-     * poshidstates := sample using poshidprobs
-     *
-     * @param poshidprobs
-     * @return
-     */
-    private Matrix getPosHidStates(Matrix poshidprobs) {
-        return poshidprobs.gibsSampling();
-    }
-
-    /**
-     * hidden unit probabilities given X (use Equation 3)
-     *
-     * @param X
-     * @return
-     */
-    private Matrix getPosHidProbs(Matrix X) {
-        List<List<Double>> hiddenUnitsProbs = X
-                .getMatrixAsCollection()
-                .stream()
-                .map(sample -> equation3(sample))
-                .collect(Collectors.toList());
-        Matrix hp = new Matrix2D(hiddenUnitsProbs);
-        if (hp.getRowsNumber() != cfg.numhid || hp.getColumnsNumber() != cfg.batchSize) {
-            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.numhid, cfg.batchSize, hp));
-        }
-        return hp;
-    }
 
 
-    /**
-     * P(hi|v) =g(lambda/sigma^2(bj+sum_i wij*vi)).
-     * <pre>
-     *     Hidden layer probabilities (h_probs) for given visual input v
-     * </pre>
-     *
-     * @param sample layer data
-     * @return probabilities of hidden unit states
-     */
-    private List<Double> equation3(List<Double> sample) {
-        List<Double> h_probs = new ArrayList<>(cfg.numhid); // Wynik, czyli wektor prawdopodobieństw że dany neuron warstwy ukrytej ma wartość 1
-        final double cnst = (cfg.lambda / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
-        for (int j = 0; j < cfg.numhid; j++) { // iterujemy po neuronach warstwy ukrytej
-            double z = cnst * (layer.getActivationSignalForHiddenUnit(sample, j));
-            h_probs.add(sigmoidFunction.evaluate(z));
-        }
-        return h_probs;
-    }
 
 
     /**

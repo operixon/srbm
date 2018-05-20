@@ -25,4 +25,6 @@ class Configuration {
     final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
     final int numberOfEpochs = 1000;
     final double sparsneseFactor = 0.8; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+
+    final double sigma = 0.5;
 }
