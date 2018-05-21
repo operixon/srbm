@@ -42,7 +42,7 @@ public class TrainingSetMinst implements TrainingSet {
         List<Double> convertedSample = new LinkedList<>();
         for (byte[] bytes : image) {
             for (byte aByte : bytes) {
-                convertedSample.add(aByte < 0 ? 0.0 : 1.0);
+                convertedSample.add(aByte != 0 ? 0.0 : 1.0);
             }
         }
         return convertedSample;

@@ -13,6 +13,9 @@ import org.wit.snr.nn.srbm.math.function.SigmoidFunction;
 import org.wit.snr.nn.srbm.monitoring.Timer;
 import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferStrategy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +34,11 @@ public class SRBM {
     final TrainingSet trainingSet;
     final HiddenLayerComputations hiddenLayerComputations;
     final HiddenBiasAdaptation hiddenBiasAdaptation;
-    int currentEpoch;
     final Timer timer;
+    int currentEpoch;
+    JFrame frame;
+    Canvas canvas;
+    Graphics graphics;
 
     public SRBM() throws IOException {
         this.layer = new Layer(cfg.numdims, cfg.numhid);
@@ -42,7 +48,76 @@ public class SRBM {
         hiddenLayerComputations = new HiddenLayerComputations(equation3, cfg);
         hiddenBiasAdaptation = new HiddenBiasAdaptation(equation3);
         timer = new Timer();
+        initCanvas();
     }
+
+    private void initCanvas() {
+        frame = new JFrame("sRBM");
+
+        frame.setSize(700, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+        frame.setVisible(true);
+
+        //Creating the canvas.
+        canvas = new Canvas();
+
+        canvas.setSize(700, 500);
+        canvas.setBackground(Color.BLACK);
+        canvas.setVisible(true);
+        canvas.setFocusable(false);
+
+
+        //Putting it all together.
+        frame.add(canvas);
+
+        canvas.createBufferStrategy(3);
+
+
+    }
+
+    void draw(Matrix W, Matrix X) {
+
+        BufferStrategy bufferStrategy;
+        bufferStrategy = canvas.getBufferStrategy();
+        graphics = bufferStrategy.getDrawGraphics();
+        graphics.clearRect(0, 0, 700, 500);
+        int colidx = 0;
+
+        for (List<Double> column : W.getMatrixAsCollection()) {
+            for (int i = 0; i < 28; i++) {
+                for (int j = 0; j < 28; j++) {
+
+                    double color = column.get(i * 28 + j);
+                    int ic = (int) Math.round(color);
+                    graphics.setColor(new Color(ic));
+                    int offset_i = 28 * (colidx % 20) + 2;
+                    int offset_j = 28 * (Math.round(colidx / 20)) + 2;
+                    graphics.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
+                }
+            }
+            colidx++;
+        }
+
+        for (List<Double> column : X.getMatrixAsCollection()) {
+            for (int i = 0; i < 28; i++) {
+                for (int j = 0; j < 28; j++) {
+                    double color = column.get(i * 28 + j);
+                    graphics.setColor(Color.WHITE);
+                    int offset_i = 28 * (colidx % 20) + 2;
+                    int offset_j = 100 + 28 * (Math.round(colidx / 20)) + 2;
+                    if (color > 0) graphics.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
+                }
+            }
+            colidx++;
+        }
+
+
+        bufferStrategy.show();
+        graphics.dispose();
+    }
+
 
     public void train() {
         currentEpoch = 0;
@@ -50,7 +125,7 @@ public class SRBM {
 
             for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
                 timer.start();
-                Matrix X = trainingSet.getTrainingBatch(cfg.batchSize);
+                Matrix X = getTrainingBatch();
                 Matrix poshidprobs = getHidProbs(X);
                 Matrix poshidstates = getHidStates(poshidprobs);
                 Matrix negdata = getNegData(poshidstates);
@@ -61,6 +136,7 @@ public class SRBM {
                 updateHBias(X);
                 currentEpoch++;
                 System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
+                draw(layer.W, X);
                 timer.reset();
             }
             // Zgodnie z algorytmem
@@ -72,6 +148,13 @@ public class SRBM {
 
         }//#while end
     }//#train_rbm
+
+    private Matrix getTrainingBatch() {
+        Matrix trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
+        timer.mark("X");
+        //draw(trainingBatch);
+        return trainingBatch;
+    }
 
     private Matrix getHidStates(Matrix poshidprobs) {
         Matrix hidStates = hiddenLayerComputations.getHidStates(poshidprobs);
