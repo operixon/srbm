@@ -44,26 +44,49 @@ public class SRBM {
     public void train() {
         currentEpoch = 0;
         while (isConverged()) {
-            long a = System.currentTimeMillis();
+
             for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
+                final long a = System.currentTimeMillis();
+
                 Matrix X = trainingSet.getTrainingBatch(cfg.batchSize);
-                double trainBatchTime = (System.currentTimeMillis() - a) / 1000.0;
+                final double trainBatchTs = System.currentTimeMillis();
+
                 Matrix poshidprobs = hiddenLayerComputations.getHidProbs(X);
                 Matrix poshidstates = hiddenLayerComputations.getHidStates(poshidprobs);
-                double positiveTime = (System.currentTimeMillis() - trainBatchTime) / 1000.0;
+                double positiveTs = System.currentTimeMillis();
+
                 Matrix negdata = getNegData(poshidstates);
                 Matrix neghidprobs = getNegHidProbs(negdata);
-                double negTime = (System.currentTimeMillis() - positiveTime) / 1000.0;
+                double negTs = System.currentTimeMillis();
+
                 updateWeights(X, poshidprobs, negdata, neghidprobs);
-                double wUpdate = (System.currentTimeMillis() - negTime) / 1000.0;
+                double wUpdateTs = System.currentTimeMillis();
+
                 updateVBias(X, negdata);
-                double vbiasTime = (System.currentTimeMillis() - wUpdate) / 1000.0;
+                double vbiasTime = System.currentTimeMillis();
+
                 updateError(X, negdata);
-                double errorTime = (System.currentTimeMillis() - vbiasTime) / 1000.0;
+                double errorTime = System.currentTimeMillis();
+
                 updateHBias(X);
-                double hbiasTime = (System.currentTimeMillis() - errorTime) / 1000.0;
+                double hbiasTime = System.currentTimeMillis();
+
                 System.out.println("=<< time=" + ((System.currentTimeMillis() - a) / 1000.0) + "s, epoch=" + currentEpoch + " error=" + layer.error);
-                System.out.printf("batch gen %ss | positiv phase %ss | negative phase %ss | W update %ss | vbias update %ss | error update %ss | hidden bias %s%ns", trainBatchTime, positiveTime, negTime, wUpdate, vbiasTime, errorTime, hbiasTime);
+                System.out.printf(
+                        "| batch gen %.3fs " +
+                                "| positiv %.3fs " +
+                                "| negative %.3fs " +
+                                "| W  %.3fs " +
+                                "| vbias  %.3fs " +
+                                "| error %.3fs " +
+                                "| hbias %.3fs" + "%n",
+                        (trainBatchTs - a) / 1000.0,
+                        (positiveTs - trainBatchTs) / 1000.0,
+                        (negTs - positiveTs) / 1000.0,
+                        (wUpdateTs - negTs) / 1000.0,
+                        (vbiasTime - wUpdateTs) / 1000.0,
+                        (errorTime - vbiasTime) / 1000.0,
+                        (hbiasTime - errorTime) / 1000.0);
                 currentEpoch++;
             }
             // Zgodnie z algorytmem
