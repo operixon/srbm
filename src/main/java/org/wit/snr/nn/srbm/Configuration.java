@@ -26,5 +26,5 @@ class Configuration {
     final int numberOfEpochs = 1000;
     final double sparsneseFactor = 0.8; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
 
-    final double sigma = 0.5;
+    double sigma = 0.5;
 }

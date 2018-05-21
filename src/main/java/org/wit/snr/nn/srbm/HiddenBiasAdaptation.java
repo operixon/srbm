@@ -1,6 +1,10 @@
 package org.wit.snr.nn.srbm;
 
 
+import org.wit.snr.nn.srbm.math.collection.Matrix;
+
+import java.util.stream.Stream;
+
 /**
  * <h1>Sparse deep belief net models for visual area V2</h1>
  *
@@ -28,10 +32,31 @@ package org.wit.snr.nn.srbm;
 
 public class HiddenBiasAdaptation {
 
-    //hj := hj - ni (1/m * sum(from i=1, to m, E[hj(i)|v(i)])-p)
+    final Equation3 equation3;
 
-    public void updateBias() {
+    public HiddenBiasAdaptation(Equation3 equation3) {
+        this.equation3 = equation3;
+    }
 
+    /**
+     * Equation 6
+     * hj := hj - ni (1/m * sum(from i=1, to m, E[hj(i)|v(i)])-p)
+     *
+     * @param hj       current hidden bias unit value
+     * @param ni       learning rate
+     * @param m        number of samples
+     * @param j        index of hidden bias unit to update
+     * @param p        sparsneese factor
+     * @param vSamples sample data
+     * @return updated hidden bias unit value
+     **/
+    public Double getHiddenBiasUnit(final double hj, final double ni, final int m, final int j, final double p, final Matrix vSamples) {
+        final double sum_E_hj_v = Stream.iterate(0, i -> i++)
+                .limit(m)
+                .parallel()
+                .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i)))
+                .sum();
+        return hj - ni * (sum_E_hj_v / (double) m - p);
     }
 
 }

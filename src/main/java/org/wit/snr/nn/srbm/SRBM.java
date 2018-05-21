@@ -15,6 +15,7 @@ import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,38 +25,54 @@ import static java.util.stream.Collectors.toList;
 public class SRBM {
 
     final Configuration cfg = new Configuration();
-    int currentEpoch;
     final Layer layer;
     final ActivationFunction gausianDensityFunction;
     final TrainingSet trainingSet;
     final HiddenLayerComputations hiddenLayerComputations;
-    final Equation3 equation3;
+    final HiddenBiasAdaptation hiddenBiasAdaptation;
+    int currentEpoch;
 
     public SRBM() throws IOException {
         this.layer = new Layer(cfg.numdims, cfg.numhid);
         gausianDensityFunction = new GausianDensityFunction(cfg.sigma, cfg.mi);
         trainingSet = new TrainingSetMinst();
-        equation3 = new Equation3(cfg, layer, new SigmoidFunction());
+        Equation3 equation3 = new Equation3(cfg, layer, new SigmoidFunction());
         hiddenLayerComputations = new HiddenLayerComputations(equation3, cfg);
+        hiddenBiasAdaptation = new HiddenBiasAdaptation(equation3);
     }
 
     public void train() {
         currentEpoch = 0;
         while (isConverged()) {
+            long a = System.currentTimeMillis();
             for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
                 Matrix X = trainingSet.getTrainingBatch(cfg.batchSize);
+                double trainBatchTime = (System.currentTimeMillis() - a) / 1000.0;
                 Matrix poshidprobs = hiddenLayerComputations.getHidProbs(X);
                 Matrix poshidstates = hiddenLayerComputations.getHidStates(poshidprobs);
+                double positiveTime = (System.currentTimeMillis() - trainBatchTime) / 1000.0;
                 Matrix negdata = getNegData(poshidstates);
                 Matrix neghidprobs = getNegHidProbs(negdata);
+                double negTime = (System.currentTimeMillis() - positiveTime) / 1000.0;
                 updateWeights(X, poshidprobs, negdata, neghidprobs);
+                double wUpdate = (System.currentTimeMillis() - negTime) / 1000.0;
                 updateVBias(X, negdata);
+                double vbiasTime = (System.currentTimeMillis() - wUpdate) / 1000.0;
                 updateError(X, negdata);
+                double errorTime = (System.currentTimeMillis() - vbiasTime) / 1000.0;
+                updateHBias(X);
+                double hbiasTime = (System.currentTimeMillis() - errorTime) / 1000.0;
+                System.out.println("=<< time=" + ((System.currentTimeMillis() - a) / 1000.0) + "s, epoch=" + currentEpoch + " error=" + layer.error);
+                System.out.println("bath gen:" + trainBatchTime + "s, positiv phase" + positiveTime + "" + negTime + "" + wUpdate + "" + vbiasTime + "" + errorTime + "" + hbiasTime);
+                currentEpoch++;
             }
-            //update hbias (use Equation 6)
-            updateHBias();
-            // if (σ>0.05) σ := σ*0.99 end if
-            currentEpoch++;
+            // Zgodnie z algorytmem
+            // update hbias (use Equation 6)
+            // powinno być w tym miejscu ale wtedy nie mam dostępu do
+            // paczki trenującej
+
+            if (cfg.sigma > 0.05) cfg.sigma = cfg.sigma * 0.99;
+
         }//#while end
     }//#train_rbm
 
@@ -63,8 +80,21 @@ public class SRBM {
         return currentEpoch < cfg.numberOfEpochs;
     }
 
-    private void updateHBias() {
-
+    private void updateHBias(Matrix X) {
+        List<Double> updatedBiasData = Stream
+                .iterate(0, j -> j = j + 1)
+                .limit(cfg.numhid)
+                .parallel()
+                .map(j ->
+                        hiddenBiasAdaptation.getHiddenBiasUnit(
+                                layer.vbias.get(j, 0),
+                                cfg.learningRate,
+                                cfg.batchSize,
+                                j,
+                                cfg.sparsneseFactor,
+                                X))
+                .collect(toList());
+        layer.hbias = Matrix2D.createColumnVector(updatedBiasData);
     }
 
 
@@ -111,7 +141,7 @@ public class SRBM {
     }
 
     /**
-     * // W := W + α(X*poshidprobsT – negdata*neghidprobsT)/batchSize
+     * W := W + α(X*poshidprobsT – negdata*neghidprobsT)/batchSize
      *
      * @param X           visible layer samples batch
      * @param poshidprobs positive phase hidden layer probabilities batch
@@ -145,6 +175,7 @@ public class SRBM {
         List<List<Double>> visibleUnitsProbs = poshidstates
                 .getMatrixAsCollection()
                 .stream()
+                .parallel()
                 .map(sample -> equation2(sample))
                 .collect(toList());
         Matrix hp = new Matrix2D(visibleUnitsProbs);
@@ -153,9 +184,6 @@ public class SRBM {
         }
         return hp.gibsSampling();
     }
-
-
-
 
 
     /**
