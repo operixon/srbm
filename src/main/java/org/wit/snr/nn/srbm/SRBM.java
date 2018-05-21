@@ -63,7 +63,7 @@ public class SRBM {
                 updateHBias(X);
                 double hbiasTime = (System.currentTimeMillis() - errorTime) / 1000.0;
                 System.out.println("=<< time=" + ((System.currentTimeMillis() - a) / 1000.0) + "s, epoch=" + currentEpoch + " error=" + layer.error);
-                System.out.println("bath gen:" + trainBatchTime + "s, positiv phase" + positiveTime + "" + negTime + "" + wUpdate + "" + vbiasTime + "" + errorTime + "" + hbiasTime);
+                System.out.printf("batch gen %ss | positiv phase %ss | negative phase %ss | W update %ss | vbias update %ss | error update %ss | hidden bias %s%ns", trainBatchTime, positiveTime, negTime, wUpdate, vbiasTime, errorTime, hbiasTime);
                 currentEpoch++;
             }
             // Zgodnie z algorytmem
