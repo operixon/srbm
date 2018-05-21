@@ -1,5 +1,8 @@
 package org.wit.snr.nn.srbm.math.collection;
 
+import org.ojalgo.matrix.BasicMatrix;
+import org.ojalgo.matrix.PrimitiveMatrix;
+
 import java.util.List;
 
 public abstract class Matrix {
@@ -66,18 +69,32 @@ public abstract class Matrix {
 
     abstract protected Matrix instance(int rows, int columns);
 
+
+    private PrimitiveMatrix exportToAjo() {
+        BasicMatrix.Factory<PrimitiveMatrix> matrixFactory = PrimitiveMatrix.FACTORY;
+        BasicMatrix.Builder<PrimitiveMatrix> builder
+                = matrixFactory.getBuilder(this.getRowsNumber(), this.getColumnsNumber());
+
+        for (int r = 0; r < getRowsNumber(); r++) {
+            for (int c = 0; c < getColumnsNumber(); c++) {
+                builder.set(r, c, get(r, c));
+            }
+        }
+        return builder.build();
+    }
+
     public Matrix multiplication(Matrix m) {
-        final Matrix A = this;
-        final Matrix B = m;
-        assertSizeToMultiplication(A, B);
-        final Matrix result = instance(A.getRowsNumber(), B.getColumnsNumber());
-        final int multiplVectorSize = A.getColumnsNumber();
-        for (int i = 0; i < result.getRowsNumber(); i++) {
-            for (int j = 0; j < result.getColumnsNumber(); j++) {
-                result.set(i, j, multiplyRowByColumn(multiplVectorSize, i, j, this, m));
+        PrimitiveMatrix A = exportToAjo();
+        PrimitiveMatrix B = m.exportToAjo();
+        PrimitiveMatrix multiply = A.multiply(B);
+        Matrix result = instance((int) multiply.countRows(), (int) multiply.countColumns());
+        for (int r = 0; r < result.getRowsNumber(); r++) {
+            for (int c = 0; c < result.getColumnsNumber(); c++) {
+                result.set(r, c, multiply.get(r, c));
             }
         }
         return result;
+
     }
 
     double multiplyRowByColumn(int multiplVectorSize, int i, int j, Matrix a, Matrix b) {
