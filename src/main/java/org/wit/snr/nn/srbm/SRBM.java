@@ -10,6 +10,7 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 import org.wit.snr.nn.srbm.math.function.GausianDensityFunction;
 import org.wit.snr.nn.srbm.math.function.SigmoidFunction;
+import org.wit.snr.nn.srbm.monitoring.Timer;
 import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class SRBM {
     final HiddenLayerComputations hiddenLayerComputations;
     final HiddenBiasAdaptation hiddenBiasAdaptation;
     int currentEpoch;
+    final Timer timer;
 
     public SRBM() throws IOException {
         this.layer = new Layer(cfg.numdims, cfg.numhid);
@@ -39,6 +41,7 @@ public class SRBM {
         Equation3 equation3 = new Equation3(cfg, layer, new SigmoidFunction());
         hiddenLayerComputations = new HiddenLayerComputations(equation3, cfg);
         hiddenBiasAdaptation = new HiddenBiasAdaptation(equation3);
+        timer = new Timer();
     }
 
     public void train() {
@@ -46,48 +49,19 @@ public class SRBM {
         while (isConverged()) {
 
             for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
-                final long a = System.currentTimeMillis();
-
+                timer.start();
                 Matrix X = trainingSet.getTrainingBatch(cfg.batchSize);
-                final double trainBatchTs = System.currentTimeMillis();
-
-                Matrix poshidprobs = hiddenLayerComputations.getHidProbs(X);
-                Matrix poshidstates = hiddenLayerComputations.getHidStates(poshidprobs);
-                double positiveTs = System.currentTimeMillis();
-
+                Matrix poshidprobs = getHidProbs(X);
+                Matrix poshidstates = getHidStates(poshidprobs);
                 Matrix negdata = getNegData(poshidstates);
                 Matrix neghidprobs = getNegHidProbs(negdata);
-                double negTs = System.currentTimeMillis();
-
                 updateWeights(X, poshidprobs, negdata, neghidprobs);
-                double wUpdateTs = System.currentTimeMillis();
-
                 updateVBias(X, negdata);
-                double vbiasTime = System.currentTimeMillis();
-
                 updateError(X, negdata);
-                double errorTime = System.currentTimeMillis();
-
                 updateHBias(X);
-                double hbiasTime = System.currentTimeMillis();
-
-                System.out.println("=<< time=" + ((System.currentTimeMillis() - a) / 1000.0) + "s, epoch=" + currentEpoch + " error=" + layer.error);
-                System.out.printf(
-                        "| batch gen %.3fs " +
-                                "| positiv %.3fs " +
-                                "| negative %.3fs " +
-                                "| W  %.3fs " +
-                                "| vbias  %.3fs " +
-                                "| error %.3fs " +
-                                "| hbias %.3fs" + "%n",
-                        (trainBatchTs - a) / 1000.0,
-                        (positiveTs - trainBatchTs) / 1000.0,
-                        (negTs - positiveTs) / 1000.0,
-                        (wUpdateTs - negTs) / 1000.0,
-                        (vbiasTime - wUpdateTs) / 1000.0,
-                        (errorTime - vbiasTime) / 1000.0,
-                        (hbiasTime - errorTime) / 1000.0);
                 currentEpoch++;
+                System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
+                timer.reset();
             }
             // Zgodnie z algorytmem
             // update hbias (use Equation 6)
@@ -98,6 +72,18 @@ public class SRBM {
 
         }//#while end
     }//#train_rbm
+
+    private Matrix getHidStates(Matrix poshidprobs) {
+        Matrix hidStates = hiddenLayerComputations.getHidStates(poshidprobs);
+        timer.mark("hidstates");
+        return hidStates;
+    }
+
+    private Matrix getHidProbs(Matrix X) {
+        Matrix hidProbs = hiddenLayerComputations.getHidProbs(X);
+        timer.mark("hidprobs");
+        return hidProbs;
+    }
 
     private boolean isConverged() {
         return currentEpoch < cfg.numberOfEpochs;
@@ -118,6 +104,7 @@ public class SRBM {
                                 X))
                 .collect(toList());
         layer.hbias = Matrix2D.createColumnVector(updatedBiasData);
+        timer.mark("hbias");
     }
 
 
@@ -148,6 +135,7 @@ public class SRBM {
             }
         }
         layer.error = error / (cfg.batchSize * cfg.numdims);
+        timer.mark("error");
     }
 
     /**
@@ -161,6 +149,7 @@ public class SRBM {
         Matrix rowsum_negdata = negdata.rowsum();
         Matrix biasDelta = rowsum_X.subtract(rowsum_negdata).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
         layer.vbias = layer.vbias.matrixAdd(biasDelta);
+        timer.mark("vbias");
     }
 
     /**
@@ -172,10 +161,12 @@ public class SRBM {
      * @param neghidprobs hidden layer probabilities for negative phase
      */
     private void updateWeights(Matrix X, Matrix poshidprobs, Matrix negdata, Matrix neghidprobs) {
-        Matrix X_poshidprobsT = X.multiplication(poshidprobs.transpose()); //X*poshidprobsT
+        Matrix poshidprobsT = poshidprobs.transpose();
+        Matrix X_poshidprobsT = X.multiplication(poshidprobsT); //X*poshidprobsT
         Matrix negdata_neghidprobsT = negdata.multiplication(neghidprobs.transpose()); // negdata*neghidprobsT
         Matrix delta = X_poshidprobsT.subtract(negdata_neghidprobsT).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
         layer.W = layer.W.matrixAdd(delta);
+        timer.mark("W");
     }
 
     /**
@@ -185,7 +176,9 @@ public class SRBM {
      * @return
      */
     private Matrix getNegHidProbs(Matrix negdata) {
-        return hiddenLayerComputations.getHidProbs(negdata);
+        Matrix hidProbs = hiddenLayerComputations.getHidProbs(negdata);
+        timer.mark("neghidprobs");
+        return hidProbs;
     }
 
     /**
@@ -205,7 +198,9 @@ public class SRBM {
         if (hp.getRowsNumber() != cfg.numdims || hp.getColumnsNumber() != cfg.batchSize) {
             throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
         }
-        return hp.gibsSampling();
+        Matrix matrix = hp.gibsSampling();
+        timer.mark("negdata");
+        return matrix;
     }
 
 

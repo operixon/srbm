@@ -18,10 +18,11 @@
     </build>
     <packaging>jar</packaging>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.ojalgo/ojalgo -->
         <dependency>
-            <groupId>colt</groupId>
-            <artifactId>colt</artifactId>
-            <version>1.2.0</version>
+            <groupId>org.ojalgo</groupId>
+            <artifactId>ojalgo</artifactId>
+            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
