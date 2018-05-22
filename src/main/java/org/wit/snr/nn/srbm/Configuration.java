@@ -13,7 +13,7 @@ class Configuration {
     
     // Orginalne stałe z algorytmu
     final int numdims = 784; //# of visible units
-    final int numhid = 200; //# of hidden units
+    final int numhid = 5; //# of hidden units
     final double alpha = 0.01;
     final int batchSize = 200;
  

@@ -99,14 +99,14 @@ public class SRBM {
             }
             colidx++;
         }
-
+        colidx = 0;
         for (List<Double> column : X.getMatrixAsCollection()) {
             for (int i = 0; i < 28; i++) {
                 for (int j = 0; j < 28; j++) {
                     double color = column.get(i * 28 + j);
                     graphics.setColor(Color.WHITE);
                     int offset_i = 28 * (colidx % 20) + 2;
-                    int offset_j = 80 + 28 * (Math.round(colidx / 20)) + 2;
+                    int offset_j = 120 + 28 * (Math.round(colidx / 20)) + 2;
                     if (color > 0) graphics.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
                 }
             }
@@ -122,7 +122,6 @@ public class SRBM {
     public void train() {
         currentEpoch = 0;
         while (isConverged()) {
-
             for (int batchIdx = 0; batchIdx < 2; batchIdx++) {
                 timer.start();
                 Matrix X = getTrainingBatch();
@@ -136,7 +135,7 @@ public class SRBM {
                 updateHBias(X);
                 currentEpoch++;
                 System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
-                draw(layer.W, X);
+                draw(layer.W, negdata);
                 timer.reset();
             }
             // Zgodnie z algorytmem
@@ -181,7 +180,6 @@ public class SRBM {
         List<Double> updatedBiasData = Stream
                 .iterate(0, j -> j = j + 1)
                 .limit(cfg.numhid)
-                .parallel()
                 .map(j ->
                         hiddenBiasAdaptation.getHiddenBiasUnit(
                                 layer.vbias.get(j, 0),
@@ -279,7 +277,6 @@ public class SRBM {
         List<List<Double>> visibleUnitsProbs = poshidstates
                 .getMatrixAsCollection()
                 .stream()
-                .parallel()
                 .map(sample -> equation2(sample))
                 .collect(toList());
         Matrix hp = new Matrix2D(visibleUnitsProbs);

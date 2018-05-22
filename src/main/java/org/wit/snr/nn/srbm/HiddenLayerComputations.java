@@ -39,7 +39,6 @@ public class HiddenLayerComputations {
         List<List<Double>> hiddenUnitsProbs = X
                 .getMatrixAsCollection()
                 .stream()
-                .parallel()
                 .map(this::computeAllUnitsProbabilitiesFromHiddenLayer)
                 .collect(toList());
         Matrix hp = new Matrix2D(hiddenUnitsProbs);
@@ -53,7 +52,6 @@ public class HiddenLayerComputations {
     private List<Double> computeAllUnitsProbabilitiesFromHiddenLayer(List<Double> sample) {
         return Stream.iterate(0, i -> i++)
                 .limit(cfg.numhid)
-                .parallel()
                 .map(j -> equation3.evaluate(j, sample))
                 .collect(toList());
     }

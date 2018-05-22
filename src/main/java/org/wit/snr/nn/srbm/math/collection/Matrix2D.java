@@ -115,11 +115,9 @@ public class Matrix2D extends Matrix {
     public Matrix gibsSampling() {
         List<List<Double>> sampledMatrixData = columnsList
                 .stream()
-                .parallel()
                 .map(
                 row -> row
                         .stream()
-                        .parallel()
                         .map(cel -> cel > random.nextDouble() ? 1.0 : 0.0)
                         .collect(toList())
         ).collect(toList());
