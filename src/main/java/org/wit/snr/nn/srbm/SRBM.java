@@ -54,7 +54,7 @@ public class SRBM {
     private void initCanvas() {
         frame = new JFrame("sRBM");
 
-        frame.setSize(700, 500);
+        frame.setSize(700, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
@@ -106,7 +106,7 @@ public class SRBM {
                     double color = column.get(i * 28 + j);
                     graphics.setColor(Color.WHITE);
                     int offset_i = 28 * (colidx % 20) + 2;
-                    int offset_j = 100 + 28 * (Math.round(colidx / 20)) + 2;
+                    int offset_j = 80 + 28 * (Math.round(colidx / 20)) + 2;
                     if (color > 0) graphics.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
                 }
             }
@@ -123,7 +123,7 @@ public class SRBM {
         currentEpoch = 0;
         while (isConverged()) {
 
-            for (int batchIdx = 0; batchIdx < 10; batchIdx++) {
+            for (int batchIdx = 0; batchIdx < 2; batchIdx++) {
                 timer.start();
                 Matrix X = getTrainingBatch();
                 Matrix poshidprobs = getHidProbs(X);
@@ -147,6 +147,11 @@ public class SRBM {
             if (cfg.sigma > 0.05) cfg.sigma = cfg.sigma * 0.99;
 
         }//#while end
+        try {
+            Thread.sleep(1000 * 60 * 60 * 60 * 24);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }//#train_rbm
 
     private Matrix getTrainingBatch() {
