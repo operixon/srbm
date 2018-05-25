@@ -77,41 +77,20 @@ public class SRBM {
 
     }
 
-    void draw(Matrix W, Matrix X) {
+    void draw(Matrix W, Matrix X, Matrix negM) {
 
         BufferStrategy bufferStrategy;
         bufferStrategy = canvas.getBufferStrategy();
         graphics = bufferStrategy.getDrawGraphics();
         graphics.clearRect(0, 0, 700, 500);
-        int colidx = 0;
 
-        for (List<Double> column : W.getMatrixAsCollection()) {
-            for (int i = 0; i < 28; i++) {
-                for (int j = 0; j < 28; j++) {
 
-                    double color = column.get(i * 28 + j);
-                    int ic = (int) Math.round(color);
-                    graphics.setColor(new Color(ic));
-                    int offset_i = 28 * (colidx % 20) + 2;
-                    int offset_j = 28 * (Math.round(colidx / 20)) + 2;
-                    graphics.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
-                }
-            }
-            colidx++;
-        }
-        colidx = 0;
-        for (List<Double> column : X.getMatrixAsCollection()) {
-            for (int i = 0; i < 28; i++) {
-                for (int j = 0; j < 28; j++) {
-                    double color = column.get(i * 28 + j);
-                    graphics.setColor(Color.WHITE);
-                    int offset_i = 28 * (colidx % 20) + 2;
-                    int offset_j = 120 + 28 * (Math.round(colidx / 20)) + 2;
-                    if (color > 0) graphics.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
-                }
-            }
-            colidx++;
-        }
+        MatrixRenderer Wr = new MatrixRenderer(3, 10, W, graphics);
+        Wr.render();
+        MatrixRendererSample neg = new MatrixRendererSample(3, 200, negM, graphics);
+        neg.render();
+        MatrixRendererSample Xprint = new MatrixRendererSample(3, 300, X, graphics);
+        Xprint.render();
 
 
         bufferStrategy.show();
@@ -135,7 +114,7 @@ public class SRBM {
                 updateHBias(X);
                 currentEpoch++;
                 System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
-                draw(layer.W, negdata);
+                draw(layer.W.scalarMultiply(10000.0), X, negdata);
                 timer.reset();
             }
             // Zgodnie z algorytmem
@@ -247,10 +226,14 @@ public class SRBM {
      * @param neghidprobs hidden layer probabilities for negative phase
      */
     private void updateWeights(Matrix X, Matrix poshidprobs, Matrix negdata, Matrix neghidprobs) {
-        Matrix poshidprobsT = poshidprobs.transpose();
-        Matrix X_poshidprobsT = X.multiplication(poshidprobsT); //X*poshidprobsT
-        Matrix negdata_neghidprobsT = negdata.multiplication(neghidprobs.transpose()); // negdata*neghidprobsT
-        Matrix delta = X_poshidprobsT.subtract(negdata_neghidprobsT).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
+        // X*poshidprobsT
+        Matrix x_poshidprobsT = X.multiplication(poshidprobs.transpose());
+        // negdata*neghidprobsT
+        Matrix negdata_neghidprobsT = negdata.multiplication(neghidprobs.transpose());
+        // (X*poshidprobsT – negdata*neghidprobsT)
+        Matrix x_poshidprobsT_negdata_neghidprobsT = x_poshidprobsT.subtract(negdata_neghidprobsT);
+        // a*(X*poshidprobsT – negdata*neghidprobsT)/bathSize
+        Matrix delta = x_poshidprobsT_negdata_neghidprobsT.scalarDivide((double) cfg.batchSize).scalarMultiply(cfg.alpha);
         layer.W = layer.W.matrixAdd(delta);
         timer.mark("W");
     }
