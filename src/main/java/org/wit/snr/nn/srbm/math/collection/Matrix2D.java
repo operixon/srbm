@@ -68,14 +68,17 @@ public class Matrix2D extends Matrix {
 
     @Override
     public Matrix scalarDivide(final double divVal) {
-        columnsList.stream().forEach(row -> row.stream().forEach(cel -> cel = cel / divVal));
-        return this;
+        List<List<Double>> collect = columnsList.stream().map(column -> column.stream().map(cel -> cel = cel / divVal).collect(toList())).collect(toList());
+
+        return new Matrix2D(collect);
     }
 
     @Override
     public Matrix scalarMultiply(final double mulVal) {
-        columnsList.stream().forEach(row -> row.stream().forEach(cel -> cel = cel * mulVal));
-        return this;
+
+        List<List<Double>> collect = columnsList.stream().map(column -> column.stream().map(cel -> cel = cel * mulVal).collect(toList())).collect(toList());
+
+        return new Matrix2D(collect);
     }
 
 

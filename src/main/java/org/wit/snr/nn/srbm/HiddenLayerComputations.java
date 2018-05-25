@@ -48,9 +48,15 @@ public class HiddenLayerComputations {
         return hp;
     }
 
-
+    /**
+     * iterate on all hidden units and compute each hidden unit probability
+     * using equation3
+     *
+     * @param sample visual layer units
+     * @return list of probabilities hidden units to be in 1 state
+     */
     private List<Double> computeAllUnitsProbabilitiesFromHiddenLayer(List<Double> sample) {
-        return Stream.iterate(0, i -> i++)
+        return Stream.iterate(0, j -> j = j + 1)
                 .limit(cfg.numhid)
                 .map(j -> equation3.evaluate(j, sample))
                 .collect(toList());

@@ -50,8 +50,14 @@ public class HiddenBiasAdaptation {
      * @param vSamples sample data
      * @return updated hidden bias unit value
      **/
-    public Double getHiddenBiasUnit(final double hj, final double ni, final int m, final int j, final double p, final Matrix vSamples) {
-        final double sum_E_hj_v = Stream.iterate(0, i -> i++)
+    public Double getHiddenBiasUnit(
+            final double hj,
+            final double ni,
+            final int m,
+            final int j,
+            final double p,
+            final Matrix vSamples) {
+        final double sum_E_hj_v = Stream.iterate(0, i -> i = i + 1)
                 .limit(m)
                 .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i)))
                 .sum();
