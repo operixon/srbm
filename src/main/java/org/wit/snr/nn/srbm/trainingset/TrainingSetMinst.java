@@ -6,35 +6,44 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 
 public class TrainingSetMinst implements TrainingSet {
 
-    final MinstImageLoader mil;
     final static Random rnd = new Random();
+    final MinstImageLoader mil;
+    final List<List<Double>> images;
 
     public TrainingSetMinst() throws IOException {
         String f = getClass().getClassLoader().getResource("t10k-images-idx3-ubyte").getPath();
         mil = new MinstImageLoader(f);
+        images = Arrays.stream(mil.getImages())
+                .map(image -> getNormalizedImageData(image))
+                .collect(toList());
     }
 
     @Override
     /**
      *   training batch Xnumdims x batchSize (randomly sample batchSize patches from data w/o replacement)
+     *   1. get all samples from training batch
+     *   2. shufle order of images
+     *   3. slice all images list to chunks
+     *   4. convert single chunk to Matrix object
+     *   5. Return list of chunk where chunk contains list of images
      */
-    public Matrix getTrainingBatch(int batchSize) {
-        List<List<Double>> samples = new ArrayList<>();
-        for (int i = 0; i < batchSize; i++) {
-            int randomIndexOfImage = rnd.nextInt(mil.getNumberOfImages());
-            List<Double> sample = getNormalizedImageData(mil.getImage(randomIndexOfImage));
-            samples.add(sample);
-        }
-        Matrix trainingBath = new Matrix2D(samples);
-        return trainingBath;
+    public List<Matrix> getTrainingBatch(int miniBatchSize) {
+        final AtomicInteger counter = new AtomicInteger(0);
+        Collections.shuffle(images);
+        Collection<List<List<Double>>> minibatchesList = images.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / miniBatchSize))
+                .values();
+        List<Matrix> collect = minibatchesList.stream().map(mibibatch -> new Matrix2D(mibibatch)).collect(Collectors.toList());
+        return collect;
     }
 
 

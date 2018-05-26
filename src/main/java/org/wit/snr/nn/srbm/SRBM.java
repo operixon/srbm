@@ -101,9 +101,9 @@ public class SRBM {
     public void train() {
         currentEpoch = 0;
         while (isConverged()) {
-            for (int batchIdx = 0; batchIdx < 2; batchIdx++) {
+
+            for (Matrix X : getTrainingBatch()) {
                 timer.start();
-                Matrix X = getTrainingBatch();
                 Matrix poshidprobs = getHidProbs(X);
                 Matrix poshidstates = getHidStates(poshidprobs);
                 Matrix negdata = getNegData(poshidstates);
@@ -112,11 +112,11 @@ public class SRBM {
                 updateVBias(X, negdata);
                 updateError(X, negdata);
                 updateHBias(X);
-                currentEpoch++;
                 System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
                 draw(layer.W.scalarMultiply(10000.0), X, negdata);
                 timer.reset();
             }
+            currentEpoch++;
             // Zgodnie z algorytmem
             // update hbias (use Equation 6)
             // powinno być w tym miejscu ale wtedy nie mam dostępu do
@@ -125,6 +125,8 @@ public class SRBM {
             if (cfg.sigma > 0.05) cfg.sigma = cfg.sigma * 0.99;
 
         }//#while end
+
+        // Stiupid hack to prevent closing jframe after end of learning
         try {
             Thread.sleep(1000 * 60 * 60 * 60 * 24);
         } catch (InterruptedException e) {
@@ -132,10 +134,9 @@ public class SRBM {
         }
     }//#train_rbm
 
-    private Matrix getTrainingBatch() {
-        Matrix trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
+    private List<Matrix> getTrainingBatch() {
+        List<Matrix> trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
         timer.mark("X");
-        //draw(trainingBatch);
         return trainingBatch;
     }
 
