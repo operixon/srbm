@@ -146,6 +146,28 @@ public class Matrix2D extends Matrix {
         return columnsList.get(columnIndex);
     }
 
+    @Override
+    public Matrix normalize(int to) {
+        final double max = getMaxValue();
+        final double min = getMinValue();
+        final double range = max - min;
+        List<List<Double>> collect = this.columnsList.stream()
+                .map(
+                        column -> column.stream()
+                                .map(cel -> to * ((cel - min) / range))
+                                .collect(toList()))
+                .collect(toList());
+        return new Matrix2D(collect);
+    }
+
+    private double getMinValue() {
+        return 0;
+    }
+
+    private double getMaxValue() {
+        return 0;
+    }
+
     private List<List<Double>> getRowsList() {
         return this.transpose().getMatrixAsCollection();
     }

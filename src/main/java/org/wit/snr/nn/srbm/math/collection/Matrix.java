@@ -127,4 +127,6 @@ public abstract class Matrix {
     public abstract Matrix rowsum();
 
     public abstract List<Double> getColumn(int columnIndex);
+
+    public abstract Matrix normalize(int to);
 }
