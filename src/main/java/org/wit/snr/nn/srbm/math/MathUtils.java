@@ -13,16 +13,6 @@ public class MathUtils {
 
     public static Random rand = new Random();
 
-    public static List<Double> getRandomList(final int length) {
-        List<Double> collect =
-                Stream
-                        .iterate(0, i -> i++)
-                        .limit(length)
-                        .map(x -> (rand.nextGaussian() / 10) - 0.005)
-                        .collect(Collectors.toList());
-        return new ArrayList<Double>(collect);
-    }
-
     /**
      * Produce matrix collection witch random double values.
      *
@@ -36,7 +26,7 @@ public class MathUtils {
             columnsList.add(
                     Stream.iterate(0, i -> i = i + 1)
                             .limit(rowsNumber)
-                            .map(x -> rand.nextGaussian())
+                            .map(x -> rand.nextGaussian() * 0.01)
                             .collect(Collectors.toList())
             );
         }
