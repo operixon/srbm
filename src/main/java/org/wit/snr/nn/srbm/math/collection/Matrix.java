@@ -128,5 +128,5 @@ public abstract class Matrix {
 
     public abstract List<Double> getColumn(int columnIndex);
 
-    public abstract Matrix normalize(int to);
+    public abstract Matrix normalize(int from, int to);
 }

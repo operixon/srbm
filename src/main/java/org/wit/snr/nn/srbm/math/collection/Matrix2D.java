@@ -85,7 +85,9 @@ public class Matrix2D extends Matrix {
     @Override
     public List<Double> getDataAsList() {
 
-        throw new UnsupportedOperationException();
+        return columnsList.stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -146,26 +148,39 @@ public class Matrix2D extends Matrix {
         return columnsList.get(columnIndex);
     }
 
+    /**
+     * (X - Xmin)(b-a)
+     * X' = a + -------------------
+     * Xmax - Xmin
+     *
+     * @return matrix witch values in range [a,b]
+     */
     @Override
-    public Matrix normalize(int to) {
+    public Matrix normalize(int a, int b) {
+
         final double max = getMaxValue();
         final double min = getMinValue();
-        final double range = max - min;
+        final double b_a = b - a;
+        final double Xmax_Xmin = max - min;
+        if (Xmax_Xmin == 0) throw new IllegalStateException();
+
         List<List<Double>> collect = this.columnsList.stream()
                 .map(
                         column -> column.stream()
-                                .map(cel -> to * ((cel - min) / range))
+                                .map(X -> a + ((X - min) * b_a) / (Xmax_Xmin))
                                 .collect(toList()))
                 .collect(toList());
         return new Matrix2D(collect);
     }
 
+
+
     private double getMinValue() {
-        return 0;
+        return getDataAsList().stream().mapToDouble(d -> d).min().getAsDouble();
     }
 
     private double getMaxValue() {
-        return 0;
+        return getDataAsList().stream().mapToDouble(d -> d).max().getAsDouble();
     }
 
     private List<List<Double>> getRowsList() {
