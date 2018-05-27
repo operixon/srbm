@@ -54,7 +54,7 @@ public class SRBM {
     private void initCanvas() {
         frame = new JFrame("sRBM");
 
-        frame.setSize(700, 800);
+        frame.setSize(1500, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
@@ -82,15 +82,15 @@ public class SRBM {
         BufferStrategy bufferStrategy;
         bufferStrategy = canvas.getBufferStrategy();
         graphics = bufferStrategy.getDrawGraphics();
-        graphics.clearRect(0, 0, 700, 500);
+        graphics.clearRect(0, 0, 1700, 1200);
 
 
-        MatrixRenderer Wr = new MatrixRenderer(3, 10, W, graphics);
+        MatrixRenderer Wr = new MatrixRenderer(0, 10, W, graphics);
+        MatrixRendererSample neg = new MatrixRendererSample(680, 10, negM, graphics, Color.RED);
+        MatrixRendererSample Xprint = new MatrixRendererSample(680, 10, X, graphics, Color.GREEN);
         Wr.render();
-        MatrixRendererSample neg = new MatrixRendererSample(3, 200, negM, graphics);
-        neg.render();
-        MatrixRendererSample Xprint = new MatrixRendererSample(3, 300, X, graphics);
         Xprint.render();
+        neg.render();
 
 
         bufferStrategy.show();

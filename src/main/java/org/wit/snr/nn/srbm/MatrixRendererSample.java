@@ -11,12 +11,14 @@ public class MatrixRendererSample {
     final private int y;
     final private Matrix m;
     final private Graphics g;
+    final Color color;
 
-    public MatrixRendererSample(int x, int y, Matrix m, Graphics g) {
+    public MatrixRendererSample(int x, int y, Matrix m, Graphics g, Color color) {
         this.x = x;
         this.y = y;
         this.m = m;
         this.g = g;
+        this.color = color;
     }
 
     public void render() {
@@ -25,11 +27,11 @@ public class MatrixRendererSample {
         for (List<Double> column : m.getMatrixAsCollection()) {
             for (int i = 0; i < 28; i++) {
                 for (int j = 0; j < 28; j++) {
-                    double color = column.get(i * 28 + j);
-                    g.setColor(Color.WHITE);
+                    double matrixVals = column.get(i * 28 + j);
+                    g.setColor(color);
                     int offset_i = x + 28 * (colidx % 20) + 2;
                     int offset_j = y + 28 * (Math.round(colidx / 20)) + 2;
-                    if (color > 0) g.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
+                    if (matrixVals > 0) g.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
                 }
             }
             colidx++;
