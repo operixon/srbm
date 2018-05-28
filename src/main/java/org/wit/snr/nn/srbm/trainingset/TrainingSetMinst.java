@@ -49,9 +49,9 @@ public class TrainingSetMinst implements TrainingSet {
 
     private List<Double> getNormalizedImageData(byte[][] image) {
         List<Double> convertedSample = new LinkedList<>();
-        for (byte[] bytes : image) {
-            for (byte aByte : bytes) {
-                convertedSample.add(aByte == 0 ? 0.0 : 1.0);
+        for (int i = 0; i < mil.getNumberOfRows(); i++) {
+            for (int j = 0; j < mil.getNumberOfColumns(); j++) {
+                convertedSample.add(image[j][i] == 0 ? 0.0 : 1.0);
             }
         }
         return convertedSample;
