@@ -61,7 +61,7 @@ public class HiddenBiasAdaptation {
                 .limit(m)
                 .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i)))
                 .sum();
-        return hj - ni * (sum_E_hj_v / (double) m - p);
+        return hj - ni * ((sum_E_hj_v / (double) m) - p);
     }
 
 }
