@@ -15,14 +15,14 @@ class Configuration {
     final int numdims = 784; //# of visible units
     final int numhid = 20; //# of hidden units
     final double alpha = 0.01;
-    final int batchSize = 20;
+    final int batchSize = 5;
  
     // Dodaane zmienne
     final double mi = 0.5;
-    final double learningRate = 0.3;
+    final double learningRate = 0.2;
     final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
-    final int numberOfEpochs = 300;
-    final double sparsneseFactor = 0.8; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+    final int numberOfEpochs = 60;
+    final double sparsneseFactor = 0.7; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
 
     double sigma = 0.5;
 }
