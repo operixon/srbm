@@ -26,10 +26,12 @@ public class MathUtils {
             columnsList.add(
                     Stream.iterate(0, i -> i = i + 1)
                             .limit(rowsNumber)
-                            .map(x -> rand.nextGaussian() * 0.01)
+                            .map(x -> rand.nextGaussian() * 0.1)
                             .collect(Collectors.toList())
             );
+            rand.setSeed(System.nanoTime() + System.currentTimeMillis());
         }
+
         return columnsList;
     }
 }
