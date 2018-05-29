@@ -32,4 +32,12 @@ public class Matrix2DTest {
         normalized.getDataAsList().stream().forEach(cel -> Assert.assertTrue(cel <= 255));
 
     }
+
+    @Test
+    void r() {
+        Matrix sourceArray = Matrix2D.createFilledMatrix(10, 10, 1);
+        Matrix dd = sourceArray.rowsum();
+        System.out.println(sourceArray.rowsum());
+
+    }
 }

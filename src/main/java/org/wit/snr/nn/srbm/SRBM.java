@@ -17,8 +17,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -42,7 +42,7 @@ public class SRBM {
 
     public SRBM() throws IOException {
         this.layer = new Layer(cfg.numdims, cfg.numhid);
-        gausianDensityFunction = new GausianDensityFunction(cfg.sigma, cfg.mi);
+        gausianDensityFunction = new GausianDensityFunction(cfg.mi);
         trainingSet = new TrainingSetMinst();
         Equation3 equation3 = new Equation3(cfg, layer, new SigmoidFunction());
         hiddenLayerComputations = new HiddenLayerComputations(equation3, cfg);
@@ -86,8 +86,8 @@ public class SRBM {
 
 
         MatrixRenderer Wr = new MatrixRenderer(0, 10, W, graphics);
-        MatrixRendererSample neg = new MatrixRendererSample(680, 10, negM, graphics, Color.RED);
-        MatrixRendererSample Xprint = new MatrixRendererSample(680, 10, X, graphics, Color.GREEN);
+        MatrixRenderer neg = new MatrixRenderer(680, 10, negM, graphics);
+        MatrixRendererSample Xprint = new MatrixRendererSample(680, 100, X, graphics, Color.GREEN);
         Wr.render();
         Xprint.render();
         neg.render();
@@ -113,7 +113,7 @@ public class SRBM {
                 updateError(X, negdata);
                 updateHBias(X);
                 System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
-                draw(layer.W.scalarMultiply(10000.0), X, negdata);
+                draw(layer.W, X, negdata);
                 timer.reset();
             }
             currentEpoch++;
@@ -252,24 +252,37 @@ public class SRBM {
     }
 
     /**
-     * negdata := reconstruction of visible values given poshidstates (use Equation 2)
+     * <pre>
      *
-     * @param poshidstates
-     * @return
+     * negdata := reconstruction of visible values given poshidstates (use Equation 2)
+     * Iterate by N hissen samples
+     *      For N hidden sample
+     *              Iterate by all visible layer units
+     *                  for i visible unit execute equation 2
+     *
+     * </pre>
+     *
+     * @param poshidstates matrix of hidden units states from positive phase
+     * @return matrix of visible layers of reconstructed data without gibs sampling ( it is beater to use probabilities than boolean samples)
      */
     private Matrix getNegData(Matrix poshidstates) {
         List<List<Double>> visibleUnitsProbs = poshidstates
                 .getMatrixAsCollection()
                 .stream()
-                .map(sample -> equation2(sample))
+                .map(
+                        hiddenLayerStates -> IntStream
+                                .range(0, cfg.numdims)
+                                .mapToDouble(visibleUnitIndex -> equation2(visibleUnitIndex, hiddenLayerStates))
+                                .boxed()
+                                .collect(toList())
+                )
                 .collect(toList());
         Matrix hp = new Matrix2D(visibleUnitsProbs);
         if (hp.getRowsNumber() != cfg.numdims || hp.getColumnsNumber() != cfg.batchSize) {
             throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.batchSize, cfg.numhid, hp));
         }
-        Matrix matrix = hp.gibsSampling();
         timer.mark("negdata");
-        return matrix;
+        return hp;
     }
 
 
@@ -286,13 +299,9 @@ public class SRBM {
      * @param hiddenUnitStates
      * @return Probabilities for visual units reconstruction
      */
-    private List<Double> equation2(List<Double> hiddenUnitStates) {
-        List<Double> negdataProbs = new ArrayList(cfg.numdims);
-        for (int i = 0; i < cfg.numdims; i++) { // iterate over all visible units
-            double x = cfg.lambda * layer.getActivationSignalForVisibleUnit(hiddenUnitStates, i);
-            negdataProbs.add(gausianDensityFunction.evaluate(x));
-        }
-        return negdataProbs;
+    private Double equation2(final int i, List<Double> hiddenUnitStates) {
+        double x = cfg.lambda * layer.getActivationSignalForVisibleUnit(hiddenUnitStates, i);
+        return gausianDensityFunction.evaluate(x, cfg.sigma);
 
     }
 

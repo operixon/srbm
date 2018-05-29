@@ -18,8 +18,8 @@ public class Layer {
 
     public Layer(int numdims, int numhid) {
         W = Matrix2D.createMatrixWithRandomValues(numdims, numhid);
-        vbias = Matrix2D.createMatrixWithRandomValues(numdims, 1);
-        hbias = Matrix2D.createMatrixWithRandomValues(numhid, 1);
+        vbias = Matrix2D.createFilledMatrix(numdims, 1, 0);
+        hbias = Matrix2D.createFilledMatrix(numhid, 1, 0);
         inputSize = numdims;
         outputSize = numhid;
     }
@@ -37,9 +37,9 @@ public class Layer {
         double sum = 0;
         for(int i = 0; i < inputSize; i++ ){
             final double unit = visibleUnits.get(i);
-            if (unit != 1.0 && unit != 0.0) {
-                throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", unit));
-            }
+            //   if (unit != 1.0 && unit != 0.0) {
+            //       throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", unit));
+            //  }
             sum += W.get(i, j) * unit;
         }
         return sum;
@@ -89,7 +89,9 @@ public class Layer {
      * @return
      */
     public Double getActivationSignalForVisibleUnit(List<Double> visibleUnits, final int i) {
-        return vbias.get(i, 0) + getWeightsSumForVisibleUnit(visibleUnits, i);
+        Double weightsSumForVisibleUnit = getWeightsSumForVisibleUnit(visibleUnits, i);
+        double v = vbias.get(i, 0);
+        return v + weightsSumForVisibleUnit;
     }
 
 
