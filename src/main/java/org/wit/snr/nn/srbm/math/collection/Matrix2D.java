@@ -162,7 +162,9 @@ public class Matrix2D extends Matrix {
         final double min = getMinValue();
         final double b_a = b - a;
         final double Xmax_Xmin = max - min;
-        if (Xmax_Xmin == 0) throw new IllegalStateException();
+        if (Xmax_Xmin == 0) {
+            return Matrix2D.createFilledMatrix(getRowsNumber(), getColumnsNumber(), a);
+        }
 
         List<List<Double>> collect = this.columnsList.stream()
                 .map(
