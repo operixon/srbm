@@ -19,7 +19,7 @@ public class Layer {
     public Layer(int numdims, int numhid) {
         W = Matrix2D.createMatrixWithRandomValues(numdims, numhid);
         vbias = Matrix2D.createFilledMatrix(numdims, 1, 0);
-        hbias = Matrix2D.createFilledMatrix(numhid, 1, 0);
+        hbias = Matrix2D.createMatrixWithRandomValues(numhid, 1);
         inputSize = numdims;
         outputSize = numhid;
     }

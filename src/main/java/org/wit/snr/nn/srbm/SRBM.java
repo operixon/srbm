@@ -107,7 +107,7 @@ public class SRBM {
                 Matrix poshidprobs = getHidProbs(X);
                 Matrix poshidstates = getHidStates(poshidprobs);
                 Matrix negdata = getNegData(poshidstates);
-                Matrix neghidprobs = getNegHidProbs(negdata);
+                Matrix neghidprobs = getNegHidProbs(negdata.gibsSampling());
                 updateWeights(X, poshidprobs, negdata, neghidprobs);
                 updateVBias(X, negdata);
                 updateError(X, negdata);

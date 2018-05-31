@@ -31,6 +31,7 @@ public class GausianDensityFunction implements ActivationFunction {
      */
     public double evaluate(double... Xn) {
         final double x = Xn[0];
+        //   System.out.println("x-->"+x);
         final double sigma = Xn[1];
         final double a = 1.0 / (sigma * SQRT_2_PI);
         final double b = (-1.0 * Math.pow(x - mi, 2)) / (2 * sigma * sigma);

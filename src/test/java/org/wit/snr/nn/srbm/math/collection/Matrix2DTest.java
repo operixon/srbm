@@ -40,4 +40,24 @@ public class Matrix2DTest {
         System.out.println(sourceArray.rowsum());
 
     }
+
+    @Test
+    void rowSumTest() {
+        // Given
+        Matrix m = Matrix2D.createFilledMatrix(5, 3, 0);
+        // When set first row to 1 values in each cell
+        m.set(0, 0, 1);
+        m.set(0, 1, 1);
+        m.set(0, 2, 1);
+        Matrix rowsum = m.rowsum();
+        // Then
+        Assert.assertEquals(rowsum.getColumnsNumber(), 1);
+        Assert.assertEquals(rowsum.get(0, 0), 3.0);
+        Assert.assertEquals(rowsum.get(1, 0), 0.0);
+        Assert.assertEquals(rowsum.get(2, 0), 0.0);
+        Assert.assertEquals(rowsum.get(3, 0), 0.0);
+        Assert.assertEquals(rowsum.get(4, 0), 0.0);
+
+
+    }
 }
