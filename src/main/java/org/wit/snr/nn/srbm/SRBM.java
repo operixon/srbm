@@ -87,7 +87,7 @@ public class SRBM {
 
         MatrixRenderer Wr = new MatrixRenderer(0, 10, W, graphics);
         MatrixRenderer neg = new MatrixRenderer(680, 10, negM, graphics);
-        MatrixRendererSample Xprint = new MatrixRendererSample(680, 100, X, graphics, Color.GREEN);
+        MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, X, graphics, Color.WHITE);
         Wr.render();
         Xprint.render();
         neg.render();
@@ -163,7 +163,7 @@ public class SRBM {
                 .map(j ->
                         hiddenBiasAdaptation.getHiddenBiasUnit(
                                 layer.vbias.get(j, 0),
-                                cfg.learningRate,
+                                cfg.alpha,
                                 cfg.batchSize,
                                 j,
                                 cfg.sparsneseFactor,
