@@ -5,6 +5,7 @@ import org.wit.snr.nn.srbm.math.MathUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -175,6 +176,17 @@ public class Matrix2D extends Matrix {
         return new Matrix2D(collect);
     }
 
+    @Override
+    public Matrix reshape(final int columnLength) {
+        final List<Double> columns = new ArrayList<>();
+        List<Double> dataAsList = this.getDataAsList();
+        final AtomicInteger counter = new AtomicInteger(0);
+        List<List<Double>> values = dataAsList
+                .stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / columnLength))
+                .values().stream().collect(Collectors.toList());
+        return new Matrix2D(values);
+    }
 
 
     private double getMinValue() {

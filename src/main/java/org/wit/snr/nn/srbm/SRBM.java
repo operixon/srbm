@@ -77,7 +77,7 @@ public class SRBM {
 
     }
 
-    void draw(Matrix W, Matrix X, Matrix negM) {
+    void draw(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
 
         BufferStrategy bufferStrategy;
         bufferStrategy = canvas.getBufferStrategy();
@@ -87,10 +87,14 @@ public class SRBM {
 
         MatrixRenderer Wr = new MatrixRenderer(0, 10, W, graphics);
         MatrixRenderer neg = new MatrixRenderer(680, 10, negM, graphics);
+        MatrixRendererHiddenUnits neghidprobsDraw = new MatrixRendererHiddenUnits(600, 5, neghidprobs, graphics);
         MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, X, graphics, Color.WHITE);
+        MatrixRenderer vbiasDraw = new MatrixRenderer(650, 200, vbias, graphics);
         Wr.render();
         Xprint.render();
         neg.render();
+        neghidprobsDraw.render();
+        vbiasDraw.render();
 
 
         bufferStrategy.show();
@@ -108,12 +112,12 @@ public class SRBM {
                 Matrix poshidstates = getHidStates(poshidprobs);
                 Matrix negdata = getNegData(poshidstates);
                 Matrix neghidprobs = getNegHidProbs(negdata.gibsSampling());
-                updateWeights(X, poshidprobs, negdata, neghidprobs);
+                updateWeights(X, poshidprobs, negdata.gibsSampling(), neghidprobs);
                 updateVBias(X, negdata);
                 updateError(X, negdata);
                 updateHBias(X);
                 System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
-                draw(layer.W, X, negdata);
+                draw(layer.W, X, negdata, layer.hbias.reshape(80), layer.vbias);
                 timer.reset();
             }
             currentEpoch++;
@@ -255,8 +259,8 @@ public class SRBM {
      * <pre>
      *
      * negdata := reconstruction of visible values given poshidstates (use Equation 2)
-     * Iterate by N hissen samples
-     *      For N hidden sample
+     * Iterate by N hidden samples
+     *      For N-th hidden sample
      *              Iterate by all visible layer units
      *                  for i visible unit execute equation 2
      *
@@ -269,7 +273,7 @@ public class SRBM {
         List<List<Double>> visibleUnitsProbs = poshidstates
                 .getMatrixAsCollection()
                 .stream()
-                .map(
+                .map( // For each hidden layer reproduce visual layer unit by unit using equation nr 2
                         hiddenLayerStates -> IntStream
                                 .range(0, cfg.numdims)
                                 .mapToDouble(visibleUnitIndex -> equation2(visibleUnitIndex, hiddenLayerStates))
