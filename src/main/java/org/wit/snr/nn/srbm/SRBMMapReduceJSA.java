@@ -24,7 +24,7 @@ public class SRBMMapReduceJSA extends SRBM {
         while (isConverged()) {
             MiniBatchTrainingResult epochTrainnigResult = getTrainingBatch()
                     .parallelStream()
-                    .map(this::trainMiniBatch)
+                    .map(x -> trainMiniBatch(x))
                     .reduce(new MiniBatchTrainingResult(layer.W, layer.vbias, layer.hbias),
                             SRBMMapReduceJSA::applyDeltas);
             updateLayerData(epochTrainnigResult);
@@ -51,6 +51,7 @@ public class SRBMMapReduceJSA extends SRBM {
 
 
     private MiniBatchTrainingResult trainMiniBatch(Matrix X) {
+
         timer.set(new Timer());
         timer.get().start();
         Matrix poshidprobs = getHidProbs(X);

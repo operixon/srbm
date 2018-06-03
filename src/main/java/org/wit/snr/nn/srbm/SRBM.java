@@ -16,9 +16,12 @@ import org.wit.snr.nn.srbm.visualization.MatrixRenderer;
 import org.wit.snr.nn.srbm.visualization.MatrixRendererHiddenUnits;
 import org.wit.snr.nn.srbm.visualization.MatrixRendererSample;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,6 +48,8 @@ public abstract class SRBM {
     JFrame frame; // TODO : refactor
     Canvas canvas; // TODO : refacotr
 
+    final String sessionId = "srbm-" + System.currentTimeMillis();
+
     public abstract void train();
 
     public SRBM() throws IOException, InterruptedException {
@@ -65,7 +70,7 @@ public abstract class SRBM {
         frame.setSize(1500, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
+        frame.setResizable(true);
         frame.setVisible(true);
         //Creating the canvas.
         canvas = new Canvas();
@@ -79,26 +84,52 @@ public abstract class SRBM {
     }
 
     void draw(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
+        displayVisualizationOnScreen(W, X, negM, neghidprobs, vbias);
+        saveVisualizationToFile(W, X, negM, neghidprobs, vbias);
+    }
+
+    private void displayVisualizationOnScreen(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
         synchronized (canvas) {
-            BufferStrategy bufferStrategy;
-            bufferStrategy = canvas.getBufferStrategy();
+            BufferStrategy bufferStrategy = canvas.getBufferStrategy();
             Graphics graphics = bufferStrategy.getDrawGraphics();
-            graphics.clearRect(0, 0, 1700, 1200);
-            MatrixRenderer Wr = new MatrixRenderer(0, 10, W, graphics);
-            MatrixRenderer neg = new MatrixRenderer(680, 10, negM, graphics);
-            MatrixRendererHiddenUnits neghidprobsDraw = new MatrixRendererHiddenUnits(600, 5, neghidprobs, graphics);
-            MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, X, graphics, Color.WHITE);
-            MatrixRenderer vbiasDraw = new MatrixRenderer(630, 200, vbias, graphics);
-            Wr.render();
-            Xprint.render();
-            neg.render();
-            neghidprobsDraw.render();
-            vbiasDraw.render();
+            renderVisualizationOnGraphicsComponent(W, X, negM, neghidprobs, vbias, graphics);
             bufferStrategy.show();
             graphics.dispose();
         }
     }
 
+    private void renderVisualizationOnGraphicsComponent(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias, Graphics graphics) {
+        graphics.clearRect(0, 0, 1700, 1200);
+        MatrixRenderer Wr = new MatrixRenderer(0, 10, W, graphics);
+        MatrixRenderer neg = new MatrixRenderer(680, 10, negM, graphics);
+        MatrixRendererHiddenUnits neghidprobsDraw = new MatrixRendererHiddenUnits(600, 5, neghidprobs, graphics);
+        MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, X, graphics, Color.WHITE);
+        MatrixRenderer vbiasDraw = new MatrixRenderer(630, 200, vbias, graphics);
+        Wr.render();
+        Xprint.render();
+        neg.render();
+        neghidprobsDraw.render();
+        vbiasDraw.render();
+    }
+
+    public void saveVisualizationToFile(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
+        try {
+            BufferedImage image = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = image.createGraphics();
+            renderVisualizationOnGraphicsComponent(W, X, negM, neghidprobs, vbias, graphics);
+            graphics.dispose();
+            String pathname = cfg.visualizationOutDirectory
+                    + File.separatorChar
+                    + sessionId
+                    + "-" + currentEpoch.get()
+                    + "-" + miniBatchIndex.get()
+                    + ".jpg";
+            ImageIO.write(image, "JPEG", new File(pathname));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     protected Matrix getNegData(Matrix poshidstates) {
         Matrix negData = negativePhaseComputations.getNegData(poshidstates);

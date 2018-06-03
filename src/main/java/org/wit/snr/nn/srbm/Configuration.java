@@ -21,7 +21,8 @@ public class Configuration {
     public final double mi = 0;
     public final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
     public final int numberOfEpochs = 60;
-    public final double sparsneseFactor = 0.04; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+    public final double sparsneseFactor = 0.03; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
 
     public double sigma = 0.5;
+    public final String visualizationOutDirectory = "C:\\srbm";
 }
