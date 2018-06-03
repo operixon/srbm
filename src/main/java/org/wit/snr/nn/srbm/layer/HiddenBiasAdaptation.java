@@ -1,4 +1,4 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.layer;
 
 
 import org.wit.snr.nn.srbm.math.collection.Matrix;
@@ -48,9 +48,9 @@ public class HiddenBiasAdaptation {
      * @param j        index of hidden bias unit to update
      * @param p        sparsneese factor
      * @param vSamples sample data
-     * @return updated hidden bias unit value
+     * @return - ni (1/m * sum(from i=1, to m, E[hj(i)|v(i)])-p)
      **/
-    public Double getHiddenBiasUnit(
+    public Double getHiddenBiasUnitDelta(
             final double hj,
             final double ni,
             final int m,
@@ -61,7 +61,7 @@ public class HiddenBiasAdaptation {
                 .limit(m)
                 .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i)))
                 .sum();
-        return hj - ni * ((sum_E_hj_v / (double) m) - p);
+        return -ni * ((sum_E_hj_v / (double) m) - p);
     }
 
 }

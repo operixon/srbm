@@ -131,4 +131,6 @@ public abstract class Matrix {
     public abstract Matrix normalize(int from, int to);
 
     public abstract Matrix reshape(int columnLength);
+
+
 }

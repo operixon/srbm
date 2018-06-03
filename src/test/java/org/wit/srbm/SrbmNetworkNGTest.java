@@ -6,6 +6,7 @@
 package org.wit.srbm;
 
 import org.wit.snr.nn.srbm.SRBM;
+import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
 
 import java.io.IOException;
 
@@ -38,9 +39,9 @@ public class SrbmNetworkNGTest {
      * Test of main method, of class SRBM.
      */
     @org.testng.annotations.Test
-    public void testLearning() throws IOException {
+    public void testLearning() throws IOException, InterruptedException {
 
-        SRBM algorithm = new SRBM();
+        SRBM algorithm = new SRBMMapReduceJSA();
         algorithm.train();
         
         

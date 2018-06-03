@@ -9,19 +9,19 @@ package org.wit.snr.nn.srbm;
  *
  * @author koperix
  */
-class Configuration {
+public class Configuration {
     
     // Orginalne stałe z algorytmu
-    final int numdims = 784; //# of visible units
-    final int numhid = 200; //# of hidden units
-    final double alpha = 0.01; // Learning rate, recomended value is 0.01
-    final int batchSize = 10;
+    public final int numdims = 784; //# of visible units
+    public final int numhid = 20; //# of hidden units
+    public final double alpha = 0.01; // Learning rate, recomended value is 0.01
+    public final int batchSize = 20;
  
     // Dodaane zmienne
-    final double mi = 0;
-    final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
-    final int numberOfEpochs = 60;
-    final double sparsneseFactor = 0.8; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+    public final double mi = 0;
+    public final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
+    public final int numberOfEpochs = 60;
+    public final double sparsneseFactor = 0.04; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
 
-    double sigma = 0.05;
+    public double sigma = 0.5;
 }

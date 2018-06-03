@@ -1,5 +1,6 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.layer;
 
+import org.wit.snr.nn.srbm.Configuration;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
@@ -8,12 +9,12 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class HiddenLayerComputations {
+public class PositivePhaseComputations {
 
     private final Equation3 equation3;
     private final Configuration cfg;
 
-    public HiddenLayerComputations(Equation3 equation3, Configuration cfg) {
+    public PositivePhaseComputations(Equation3 equation3, Configuration cfg) {
         this.equation3 = equation3;
         this.cfg = cfg;
     }

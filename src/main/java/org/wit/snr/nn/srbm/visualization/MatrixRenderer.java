@@ -1,4 +1,4 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.visualization;
 
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 
@@ -21,7 +21,7 @@ public class MatrixRenderer {
 
     public void render() {
         int colidx = 0;
-        for (List<Double> column : m.normalize(100, 200).getMatrixAsCollection()) {
+        for (List<Double> column : m.normalize(0, 255).getMatrixAsCollection()) {
             for (int i = 0; i < 28; i++) {
                 for (int j = 0; j < 28; j++) {
                     int c = (int) Math.round(column.get(i * 28 + j));

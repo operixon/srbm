@@ -1,4 +1,4 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.layer;
 
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
@@ -18,7 +18,7 @@ public class Layer {
 
     public Layer(int numdims, int numhid) {
         W = Matrix2D.createMatrixWithRandomValues(numdims, numhid);
-        vbias = Matrix2D.createFilledMatrix(numdims, 1, 0);
+        vbias = Matrix2D.createMatrixWithRandomValues(numdims, 1);
         hbias = Matrix2D.createMatrixWithRandomValues(numhid, 1);
         inputSize = numdims;
         outputSize = numhid;
@@ -57,11 +57,11 @@ public class Layer {
     public Double getWeightsSumForVisibleUnit(List<Double> hiddenUnits, final int i) {
         double sum = 0;
         for(int j = 0; j < outputSize; j++ ){
-            final double unit = hiddenUnits.get(j);
-            if (unit != 1.0 && unit != 0.0) {
-                throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", unit));
+            final double hj = hiddenUnits.get(j);
+            if (hj != 1.0 && hj != 0.0) {
+                throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", hj));
             }
-            sum += W.get(i, j) * unit;
+            sum += W.get(i, j) * hj;
         }
         return sum;
     }
@@ -82,14 +82,14 @@ public class Layer {
 
     /**
      * Compute summary plus bias.
-     * Z = C_i + SUM_j (W_ij * H_j)
+     * Zi = C_i + SUM_j (W_ij * H_j)
      * Negative phase.
      *
-     * @param visibleUnits
+     * @param hiddenUnits
      * @return
      */
-    public Double getActivationSignalForVisibleUnit(List<Double> visibleUnits, final int i) {
-        Double weightsSumForVisibleUnit = getWeightsSumForVisibleUnit(visibleUnits, i);
+    public Double getActivationSignalForVisibleUnit(List<Double> hiddenUnits, final int i) {
+        Double weightsSumForVisibleUnit = getWeightsSumForVisibleUnit(hiddenUnits, i);
         double v = vbias.get(i, 0);
         return v + weightsSumForVisibleUnit;
     }

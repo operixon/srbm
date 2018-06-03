@@ -1,5 +1,6 @@
-package org.wit.snr.nn.srbm;
+package org.wit.snr.nn.srbm.layer;
 
+import org.wit.snr.nn.srbm.Configuration;
 import org.wit.snr.nn.srbm.math.ActivationFunction;
 
 import java.util.List;
