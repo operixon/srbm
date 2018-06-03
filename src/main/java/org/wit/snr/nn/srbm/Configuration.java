@@ -13,9 +13,9 @@ public class Configuration {
     
     // Orginalne stałe z algorytmu
     public final int numdims = 784; //# of visible units
-    public final int numhid = 20; //# of hidden units
+    public final int numhid = 200; //# of hidden units
     public final double alpha = 0.01; // Learning rate, recomended value is 0.01
-    public final int batchSize = 20;
+    public final int batchSize = 200;
  
     // Dodaane zmienne
     public final double mi = 0;

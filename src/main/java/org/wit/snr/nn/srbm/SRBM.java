@@ -123,9 +123,6 @@ public abstract class SRBM {
         return hidProbs;
     }
 
-    protected boolean isConverged() {
-        return currentEpoch.get() < cfg.numberOfEpochs;
-    }
 
     protected Matrix updateHBias(Matrix X) {
         List<Double> delta = Stream

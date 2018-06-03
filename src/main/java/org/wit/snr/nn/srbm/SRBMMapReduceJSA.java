@@ -22,28 +22,32 @@ public class SRBMMapReduceJSA extends SRBM {
 
     public void train() {
         while (isConverged()) {
-            MiniBatchTrainingResult reduce = getTrainingBatch()
+            MiniBatchTrainingResult epochTrainnigResult = getTrainingBatch()
                     .parallelStream()
                     .map(this::trainMiniBatch)
                     .reduce(new MiniBatchTrainingResult(layer.W, layer.vbias, layer.hbias),
                             SRBMMapReduceJSA::applyDeltas);
-            layer.W = reduce.getW();
-            layer.hbias = reduce.getHbias();
-            layer.vbias = reduce.getVbias();
-            currentEpoch.incrementAndGet();
+            updateLayerData(epochTrainnigResult);
             miniBatchIndex.set(0);
             if (cfg.sigma > 0.05)
                 cfg.sigma = cfg.sigma * 0.99;
 
         }//#while end
 
-        // Stiupid hack to prevent closing jframe after end of learning
+        // embarrassing quality solution to prevent closing jframe after end of learning
         try {
             Thread.sleep(1000 * 60 * 60 * 60 * 24);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }//#train_rbm
+
+    private void updateLayerData(MiniBatchTrainingResult reduce) {
+        layer.W = reduce.getW();
+        layer.hbias = reduce.getHbias();
+        layer.vbias = reduce.getVbias();
+        currentEpoch.incrementAndGet();
+    }
 
 
     private MiniBatchTrainingResult trainMiniBatch(Matrix X) {
@@ -62,5 +66,9 @@ public class SRBMMapReduceJSA extends SRBM {
         // timer.get().reset();
         timer.remove();
         return new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta);
+    }
+
+    protected boolean isConverged() {
+        return currentEpoch.get() < cfg.numberOfEpochs;
     }
 }
