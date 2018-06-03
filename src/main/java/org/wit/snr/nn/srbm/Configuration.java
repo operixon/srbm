@@ -13,7 +13,7 @@ class Configuration {
     
     // Orginalne stałe z algorytmu
     final int numdims = 784; //# of visible units
-    final int numhid = 200; //# of hidden units
+    final int numhid = 10; //# of hidden units
     final double alpha = 0.01; // Learning rate, recomended value is 0.01
     final int batchSize = 10;
  
@@ -21,7 +21,7 @@ class Configuration {
     final double mi = 0;
     final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
     final int numberOfEpochs = 60;
-    final double sparsneseFactor = 0.8; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+    final double sparsneseFactor = 0.04; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
 
-    double sigma = 0.05;
+    double sigma = 0.5;
 }

@@ -18,6 +18,8 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -35,12 +37,12 @@ public class SRBM {
     final HiddenLayerComputations hiddenLayerComputations;
     final HiddenBiasAdaptation hiddenBiasAdaptation;
     final Timer timer;
-    int currentEpoch;
+    AtomicInteger currentEpoch = new AtomicInteger(0);
     JFrame frame;
     Canvas canvas;
     Graphics graphics;
 
-    public SRBM() throws IOException {
+    public SRBM() throws IOException, InterruptedException {
         this.layer = new Layer(cfg.numdims, cfg.numhid);
         gausianDensityFunction = new GausianDensityFunction(cfg.mi);
         trainingSet = new TrainingSetMinst();
@@ -89,7 +91,7 @@ public class SRBM {
         MatrixRenderer neg = new MatrixRenderer(680, 10, negM, graphics);
         MatrixRendererHiddenUnits neghidprobsDraw = new MatrixRendererHiddenUnits(600, 5, neghidprobs, graphics);
         MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, X, graphics, Color.WHITE);
-        MatrixRenderer vbiasDraw = new MatrixRenderer(650, 200, vbias, graphics);
+        MatrixRenderer vbiasDraw = new MatrixRenderer(630, 200, vbias, graphics);
         Wr.render();
         Xprint.render();
         neg.render();
@@ -103,30 +105,38 @@ public class SRBM {
 
 
     public void train() {
-        currentEpoch = 0;
         while (isConverged()) {
 
-            for (Matrix X : getTrainingBatch()) {
-                timer.start();
-                Matrix poshidprobs = getHidProbs(X);
-                Matrix poshidstates = getHidStates(poshidprobs);
-                Matrix negdata = getNegData(poshidstates);
-                Matrix neghidprobs = getNegHidProbs(negdata.gibsSampling());
-                updateWeights(X, poshidprobs, negdata.gibsSampling(), neghidprobs);
-                updateVBias(X, negdata);
-                updateError(X, negdata);
-                updateHBias(X);
-                System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
-                draw(layer.W, X, negdata, layer.hbias.reshape(80), layer.vbias);
-                timer.reset();
-            }
-            currentEpoch++;
-            // Zgodnie z algorytmem
-            // update hbias (use Equation 6)
-            // powinno być w tym miejscu ale wtedy nie mam dostępu do
-            // paczki trenującej
-
-            if (cfg.sigma > 0.05) cfg.sigma = cfg.sigma * 0.99;
+            Optional<MiniBatchTrainingResult> cumulatedDeltas = getTrainingBatch()
+                    .stream()
+                    .map(X -> {
+                        timer.start();
+                        Matrix poshidprobs = getHidProbs(X);
+                        Matrix poshidstates = getHidStates(poshidprobs);
+                        Matrix negdata = getNegData(poshidstates);
+                        Matrix neghidprobs = getNegHidProbs(negdata);
+                        Matrix Wdelta = updateWeights(X, poshidprobs, negdata, neghidprobs);
+                        Matrix vBiasDelta = updateVBias(X, negdata);
+                        updateError(X, negdata);
+                        Matrix hBiasDelta = updateHBias(X);
+                        System.out.printf("E %s | %s | %s %n", currentEpoch, layer.error, timer.toString());
+                        draw(layer.W, X, negdata, layer.hbias.reshape(80), layer.vbias);
+                        timer.reset();
+                        return new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta);
+                    })
+                    .reduce((p1, p2) ->
+                            new MiniBatchTrainingResult(
+                                    p1.getW().matrixAdd(p2.getW()),
+                                    p1.getVbias().matrixAdd(p2.getVbias()),
+                                    p1.getHbias().matrixAdd(p2.getHbias())
+                            )
+                    );
+            layer.W = layer.W.matrixAdd(cumulatedDeltas.get().getW());
+            layer.hbias = layer.hbias.matrixAdd(cumulatedDeltas.get().getHbias());
+            layer.vbias = layer.vbias.matrixAdd(cumulatedDeltas.get().getVbias());
+            currentEpoch.incrementAndGet();
+            if (cfg.sigma > 0.05)
+                cfg.sigma = cfg.sigma * 0.99;
 
         }//#while end
 
@@ -157,11 +167,11 @@ public class SRBM {
     }
 
     private boolean isConverged() {
-        return currentEpoch < cfg.numberOfEpochs;
+        return currentEpoch.get() < cfg.numberOfEpochs;
     }
 
-    private void updateHBias(Matrix X) {
-        List<Double> updatedBiasData = Stream
+    private Matrix updateHBias(Matrix X) {
+        List<Double> biasData = Stream
                 .iterate(0, j -> j = j + 1)
                 .limit(cfg.numhid)
                 .map(j ->
@@ -173,8 +183,8 @@ public class SRBM {
                                 cfg.sparsneseFactor,
                                 X))
                 .collect(toList());
-        layer.hbias = Matrix2D.createColumnVector(updatedBiasData);
         timer.mark("hbias");
+        return Matrix2D.createColumnVector(biasData);
     }
 
 
@@ -214,12 +224,13 @@ public class SRBM {
      * @param X
      * @param negdata
      */
-    private void updateVBias(Matrix X, Matrix negdata) {
+    private Matrix updateVBias(Matrix X, Matrix negdata) {
         Matrix rowsum_X = X.rowsum();
         Matrix rowsum_negdata = negdata.rowsum();
         Matrix biasDelta = rowsum_X.subtract(rowsum_negdata).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
-        layer.vbias = layer.vbias.matrixAdd(biasDelta);
+        //layer.vbias = layer.vbias.matrixAdd(biasDelta);
         timer.mark("vbias");
+        return biasDelta;
     }
 
     /**
@@ -230,7 +241,7 @@ public class SRBM {
      * @param negdata     visible layer batch data from negative phase
      * @param neghidprobs hidden layer probabilities for negative phase
      */
-    private void updateWeights(Matrix X, Matrix poshidprobs, Matrix negdata, Matrix neghidprobs) {
+    private Matrix updateWeights(Matrix X, Matrix poshidprobs, Matrix negdata, Matrix neghidprobs) {
         // X*poshidprobsT
         Matrix x_poshidprobsT = X.multiplication(poshidprobs.transpose());
         // negdata*neghidprobsT
@@ -238,9 +249,9 @@ public class SRBM {
         // (X*poshidprobsT – negdata*neghidprobsT)
         Matrix x_poshidprobsT_negdata_neghidprobsT = x_poshidprobsT.subtract(negdata_neghidprobsT);
         // a*(X*poshidprobsT – negdata*neghidprobsT)/bathSize
-        Matrix delta = x_poshidprobsT_negdata_neghidprobsT.scalarDivide((double) cfg.batchSize).scalarMultiply(cfg.alpha);
-        layer.W = layer.W.matrixAdd(delta);
-        timer.mark("W");
+        return x_poshidprobsT_negdata_neghidprobsT.scalarDivide((double) cfg.batchSize).scalarMultiply(cfg.alpha);
+        // layer.W = layer.W.matrixAdd(delta);
+        //timer.mark("W");
     }
 
     /**

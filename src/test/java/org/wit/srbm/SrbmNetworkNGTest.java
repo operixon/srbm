@@ -38,7 +38,7 @@ public class SrbmNetworkNGTest {
      * Test of main method, of class SRBM.
      */
     @org.testng.annotations.Test
-    public void testLearning() throws IOException {
+    public void testLearning() throws IOException, InterruptedException {
 
         SRBM algorithm = new SRBM();
         algorithm.train();
