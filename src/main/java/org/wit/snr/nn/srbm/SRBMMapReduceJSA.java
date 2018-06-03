@@ -51,7 +51,7 @@ public class SRBMMapReduceJSA extends SRBM {
 
 
     private MiniBatchTrainingResult trainMiniBatch(Matrix X) {
-
+        final int batchIndex = miniBatchIndex.getAndIncrement();
         timer.set(new Timer());
         timer.get().start();
         Matrix poshidprobs = getHidProbs(X);
@@ -62,8 +62,9 @@ public class SRBMMapReduceJSA extends SRBM {
         Matrix vBiasDelta = updateVBias(X, negdata);
         updateError(X, negdata);
         Matrix hBiasDelta = updateHBias(X);
-        System.out.printf("E %s/%s | %s | %s %n", miniBatchIndex.getAndIncrement() * cfg.batchSize, currentEpoch, layer.error, timer.get().toString());
-        draw(layer.W, X, negdata, layer.hbias.reshape(50), layer.vbias);
+
+        System.out.printf("E %s/%s | %s | %s %n", batchIndex * cfg.batchSize, currentEpoch, layer.error, timer.get().toString());
+        draw(batchIndex, layer.W, X, negdata, layer.hbias.reshape(50), layer.vbias);
         // timer.get().reset();
         timer.remove();
         return new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta);

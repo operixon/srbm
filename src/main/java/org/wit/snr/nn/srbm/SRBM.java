@@ -83,9 +83,9 @@ public abstract class SRBM {
         canvas.createBufferStrategy(3);
     }
 
-    void draw(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
+    void draw(int batchIndex, Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
         displayVisualizationOnScreen(W, X, negM, neghidprobs, vbias);
-        saveVisualizationToFile(W, X, negM, neghidprobs, vbias);
+        saveVisualizationToFile(batchIndex, W, X, negM, neghidprobs, vbias);
     }
 
     private void displayVisualizationOnScreen(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
@@ -112,7 +112,7 @@ public abstract class SRBM {
         vbiasDraw.render();
     }
 
-    public void saveVisualizationToFile(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
+    public void saveVisualizationToFile(int batchIndex, Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
         try {
             BufferedImage image = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics = image.createGraphics();
@@ -122,7 +122,7 @@ public abstract class SRBM {
                     + File.separatorChar
                     + sessionId
                     + "-" + currentEpoch.get()
-                    + "-" + miniBatchIndex.get()
+                    + "-" + batchIndex
                     + ".jpg";
             ImageIO.write(image, "JPEG", new File(pathname));
         } catch (Exception e) {
