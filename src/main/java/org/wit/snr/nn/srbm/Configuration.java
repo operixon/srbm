@@ -24,6 +24,6 @@ public class Configuration {
     public final double sparsneseFactor = 0.03; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
 
     public double sigma = 0.5;
-    public final String visualizationOutDirectory = "C:\\srbm";
+    public final String visualizationOutDirectory = "/srbm";
     public final boolean saveVisualization = true;
 }
