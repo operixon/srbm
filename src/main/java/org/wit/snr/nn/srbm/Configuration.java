@@ -25,4 +25,5 @@ public class Configuration {
 
     public double sigma = 0.5;
     public final String visualizationOutDirectory = "C:\\srbm";
+    public final boolean saveVisualization = true;
 }

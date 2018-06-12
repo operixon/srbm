@@ -85,7 +85,7 @@ public abstract class SRBM {
 
     void draw(int batchIndex, Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
         displayVisualizationOnScreen(W, X, negM, neghidprobs, vbias);
-        saveVisualizationToFile(batchIndex, W, X, negM, neghidprobs, vbias);
+        if(cfg.saveVisualization) saveVisualizationToFile(batchIndex, W, X, negM, neghidprobs, vbias);
     }
 
     private void displayVisualizationOnScreen(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
