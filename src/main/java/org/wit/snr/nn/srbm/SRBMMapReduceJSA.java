@@ -12,14 +12,6 @@ public class SRBMMapReduceJSA extends SRBM {
         super();
     }
 
-    private static MiniBatchTrainingResult applyDeltas(MiniBatchTrainingResult p1, MiniBatchTrainingResult p2) {
-        return new MiniBatchTrainingResult(
-                p1.getW().matrixAdd(p2.getW()),
-                p1.getVbias().matrixAdd(p2.getVbias()),
-                p1.getHbias().matrixAdd(p2.getHbias())
-        );
-    }
-
     public void train() {
         while (isConverged()) {
             MiniBatchTrainingResult epochTrainnigResult = getTrainingBatch()
@@ -33,13 +25,6 @@ public class SRBMMapReduceJSA extends SRBM {
                 cfg.sigma = cfg.sigma * 0.99;
 
         }//#while end
-
-        // embarrassing quality solution to prevent closing jframe after end of learning
-        try {
-            Thread.sleep(1000 * 60 * 60 * 60 * 24);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }//#train_rbm
 
     private void updateLayerData(MiniBatchTrainingResult reduce) {
@@ -72,5 +57,13 @@ public class SRBMMapReduceJSA extends SRBM {
 
     protected boolean isConverged() {
         return currentEpoch.get() < cfg.numberOfEpochs;
+    }
+
+    private static MiniBatchTrainingResult applyDeltas(MiniBatchTrainingResult p1, MiniBatchTrainingResult p2) {
+        return new MiniBatchTrainingResult(
+                p1.getW().matrixAdd(p2.getW()),
+                p1.getVbias().matrixAdd(p2.getVbias()),
+                p1.getHbias().matrixAdd(p2.getHbias())
+        );
     }
 }
