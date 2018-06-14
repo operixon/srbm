@@ -4,35 +4,44 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.monitoring.Timer;
 
 import java.io.IOException;
+import java.util.Optional;
 
-public class SRBMMapReduceJSA extends SRBM {
+public class SRBMMapReduceJSA extends SRBM
+{
 
 
-    public SRBMMapReduceJSA() throws IOException, InterruptedException {
+    public SRBMMapReduceJSA() throws IOException, InterruptedException
+    {
         super();
     }
 
-    public void train() {
-        while (isConverged()) {
+    public void train()
+    {
+        while (isConverged())
+        {
             epoch();
         }
     }
 
     private void epoch()
     {
-        MiniBatchTrainingResult epochTrainnigResult = mapReduce();
-        updateLayerData(epochTrainnigResult);
+        getMapReduceResult().ifPresent(cumulatedDelta ->
+                                               updateLayerData(cumulatedDelta));
         updateSigma();
         miniBatchIndex.set(0);
+        currentEpoch.incrementAndGet();
     }
 
-    private MiniBatchTrainingResult mapReduce()
+    private Optional<MiniBatchTrainingResult> getMapReduceResult()
     {
         return getTrainingBatch()
                 .parallelStream()
-                .map(x -> trainMiniBatch(x))
-                .reduce(new MiniBatchTrainingResult(layer.W, layer.vbias, layer.hbias),
-                        SRBMMapReduceJSA::applyDeltas);
+                .map( samples -> trainMiniBatch(samples))
+                .reduce(
+                        Optional.empty(),
+                        (sum, nextValue) -> sum.map(s -> s.apply(nextValue))
+                                               .orElse(nextValue)
+                       );
     }
 
     private void updateSigma()
@@ -41,15 +50,16 @@ public class SRBMMapReduceJSA extends SRBM {
             cfg.sigma = cfg.sigma * 0.99;
     }
 
-    private void updateLayerData(MiniBatchTrainingResult reduce) {
-        layer.W = reduce.getW();
-        layer.hbias = reduce.getHbias();
-        layer.vbias = reduce.getVbias();
-        currentEpoch.incrementAndGet();
+    private void updateLayerData(MiniBatchTrainingResult delta)
+    {
+        layer.W = layer.W.matrixAdd(delta.getW());
+        layer.hbias = layer.hbias.matrixAdd(delta.getHbias());
+        layer.vbias = layer.vbias.matrixAdd(delta.getVbias());
     }
 
 
-    private MiniBatchTrainingResult trainMiniBatch(Matrix X) {
+    private Optional<MiniBatchTrainingResult> trainMiniBatch(Matrix X)
+    {
         final int batchIndex = miniBatchIndex.getAndIncrement();
         timer.set(new Timer());
         timer.get().start();
@@ -64,20 +74,13 @@ public class SRBMMapReduceJSA extends SRBM {
 
         System.out.printf("E %s/%s | %s | %s %n", batchIndex * cfg.batchSize, currentEpoch, layer.error, timer.get().toString());
         draw(batchIndex, layer.W, X, negdata, layer.hbias.reshape(50), layer.vbias);
-        // timer.get().reset();
         timer.remove();
-        return new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta);
+        return Optional.of(new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta));
     }
 
-    protected boolean isConverged() {
+    protected boolean isConverged()
+    {
         return currentEpoch.get() < cfg.numberOfEpochs;
     }
 
-    private static MiniBatchTrainingResult applyDeltas(MiniBatchTrainingResult p1, MiniBatchTrainingResult p2) {
-        return new MiniBatchTrainingResult(
-                p1.getW().matrixAdd(p2.getW()),
-                p1.getVbias().matrixAdd(p2.getVbias()),
-                p1.getHbias().matrixAdd(p2.getHbias())
-        );
-    }
 }
