@@ -14,18 +14,32 @@ public class SRBMMapReduceJSA extends SRBM {
 
     public void train() {
         while (isConverged()) {
-            MiniBatchTrainingResult epochTrainnigResult = getTrainingBatch()
-                    .parallelStream()
-                    .map(x -> trainMiniBatch(x))
-                    .reduce(new MiniBatchTrainingResult(layer.W, layer.vbias, layer.hbias),
-                            SRBMMapReduceJSA::applyDeltas);
-            updateLayerData(epochTrainnigResult);
-            miniBatchIndex.set(0);
-            if (cfg.sigma > 0.05)
-                cfg.sigma = cfg.sigma * 0.99;
+            epoch();
+        }
+    }
 
-        }//#while end
-    }//#train_rbm
+    private void epoch()
+    {
+        MiniBatchTrainingResult epochTrainnigResult = mapReduce();
+        updateLayerData(epochTrainnigResult);
+        updateSigma();
+        miniBatchIndex.set(0);
+    }
+
+    private MiniBatchTrainingResult mapReduce()
+    {
+        return getTrainingBatch()
+                .parallelStream()
+                .map(x -> trainMiniBatch(x))
+                .reduce(new MiniBatchTrainingResult(layer.W, layer.vbias, layer.hbias),
+                        SRBMMapReduceJSA::applyDeltas);
+    }
+
+    private void updateSigma()
+    {
+        if (cfg.sigma > 0.05)
+            cfg.sigma = cfg.sigma * 0.99;
+    }
 
     private void updateLayerData(MiniBatchTrainingResult reduce) {
         layer.W = reduce.getW();
