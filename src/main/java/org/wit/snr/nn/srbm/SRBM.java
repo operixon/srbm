@@ -105,7 +105,7 @@ public abstract class SRBM {
         graphics.clearRect(0, 0, 1700, 1200);
         MatrixRendererIF[] rlist = {
                 // Wagi
-                new MatrixRenderer(0, 10, d.layer.W, graphics),
+                new MatrixRenderer(0, 10, d.Wdelta, graphics),
                 // biasy
                 new MatrixRendererHiddenUnits(0, 1100, d.vBiasDelta.reshape(28).transpose(), graphics),
                 new MatrixRendererHiddenUnits(100, 1100, d.layer.vbias.reshape(28).transpose(), graphics),
@@ -175,7 +175,7 @@ public abstract class SRBM {
                 .limit(cfg.numhid())
                 .map(j ->
                         hiddenBiasAdaptation.getHiddenBiasUnitDelta(
-                                layer.vbias.get(j, 0),
+                                layer.hbias.get(j, 0),
                                 cfg.alpha(),
                                 cfg.batchSize(),
                                 j,

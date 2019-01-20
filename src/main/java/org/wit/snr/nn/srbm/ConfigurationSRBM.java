@@ -15,7 +15,7 @@ public class ConfigurationSRBM extends Configuration {
     public final int numdims = 784; //# of visible units
     public final int numhid = 784; //# of hidden units
     public final double alpha = 0.01; // Learning rate, recomended value is 0.01
-    public final int batchSize = 200;
+    public final int batchSize = 1;
 
     // Dodaane zmienne
     public final double mi = 0;

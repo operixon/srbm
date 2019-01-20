@@ -58,6 +58,7 @@ public class HiddenBiasAdaptation {
             final double p,
             final Matrix vSamples,
             final double sigma) {
+
         final double sum_E_hj_v = Stream.iterate(0, i -> i = i + 1)
                 .limit(m)
                 .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i),sigma))
