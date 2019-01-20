@@ -40,8 +40,8 @@ public class Equation2 {
      * @param hiddenUnitStates hidden layer states
      * @return negdata for single unit in visual layer
      */
-    public Double evaluate(final int i, List<Double> hiddenUnitStates) {
-        double x = cfg.lambda * layer.getActivationSignalForVisibleUnit(hiddenUnitStates, i);
-        return activationFunction.evaluate(x, cfg.sigma);
+    public Double evaluate(final int i, final List<Double> hiddenUnitStates, final double sigma) {
+        double x = cfg.lambda() * layer.getActivationSignalForVisibleUnit(hiddenUnitStates, i);
+        return activationFunction.evaluate(x, sigma);
     }
 }

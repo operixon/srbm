@@ -47,8 +47,8 @@ public class SRBMMapReduceJSA extends SRBM
 
     private void updateSigma()
     {
-        if (cfg.sigma > 0.05)
-            cfg.sigma = cfg.sigma * 0.99;
+        if (sigma > 0.05)
+            sigma = sigma * cfg.sigmaDecay();
     }
 
     private void updateLayerData(MiniBatchTrainingResult delta)
@@ -73,7 +73,7 @@ public class SRBMMapReduceJSA extends SRBM
         updateError(X, negdata);
         Matrix hBiasDelta = updateHBias(X);
 
-        System.out.printf("E %s/%s | %s | %s %n", batchIndex * cfg.batchSize, currentEpoch, layer.error, timer.get().toString());
+        System.out.printf("E %s/%s | %s | %s %n", batchIndex * cfg.batchSize(), currentEpoch, layer.error, timer.get().toString());
         datavis datavis = new datavis(
                 X,
                 batchIndex,
@@ -93,7 +93,7 @@ public class SRBMMapReduceJSA extends SRBM
 
     protected boolean isConverged()
     {
-        return currentEpoch.get() < cfg.numberOfEpochs;
+        return currentEpoch.get() < cfg.numberOfEpochs();
     }
 
 }

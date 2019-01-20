@@ -6,24 +6,31 @@
 package org.wit.snr.nn.srbm;
 
 /**
- *
  * @author koperix
  */
-public class Configuration {
-    
-    // Orginalne stałe z algorytmu
-    public final int numdims = 784; //# of visible units
-    public final int numhid = 784; //# of hidden units
-    public final double alpha = 0.01; // Learning rate, recomended value is 0.01
-    public final int batchSize = 200;
- 
-    // Dodaane zmienne
-    public final double mi = 0;
-    public final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
-    public final int numberOfEpochs = 600000000;
-    public final double sparsneseFactor = 0.05; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+public abstract class Configuration {
 
-    public double sigma = 0.5;
-    public final String visualizationOutDirectory = "/home/artur/srbm";
-    public final boolean saveVisualization = true;
+    abstract public int numdims();
+
+    abstract public int numhid();
+
+    abstract public double alpha();
+
+    abstract public int batchSize();
+
+    abstract public double mi();
+
+    abstract public double lambda();
+
+    abstract public int numberOfEpochs();
+
+    abstract public double sparsneseFactor();
+
+    abstract public double sigmaInit();
+
+    abstract public double sigmaDecay();
+
+    abstract public String visualizationOutDirectory();
+
+    abstract public boolean saveVisualization();
 }

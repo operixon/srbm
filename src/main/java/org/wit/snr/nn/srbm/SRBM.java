@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class SRBM {
 
-    final Configuration cfg = new Configuration();
+    final Configuration cfg = new ConfigurationSRBM();
     final Layer layer;
     final TrainingSet trainingSet;
     final PositivePhaseComputations positivePhaseComputations;
@@ -51,10 +51,12 @@ public abstract class SRBM {
 
     final String sessionId = "srbm-" + System.currentTimeMillis();
 
+    protected double  sigma = cfg.sigmaInit();
+
     public abstract void train();
 
     public SRBM() throws IOException, InterruptedException {
-        this.layer = new Layer(cfg.numdims, cfg.numhid);
+        this.layer = new Layer(cfg.numdims(), cfg.numhid());
         trainingSet = new TrainingSetMinst();
         Equation3 equation3 = new Equation3(cfg, layer, new SigmoidFunction());
         positivePhaseComputations = new PositivePhaseComputations(equation3, cfg);
@@ -86,7 +88,7 @@ public abstract class SRBM {
 
     void draw(datavis datavis) {
         displayVisualizationOnScreen(datavis);
-        if (cfg.saveVisualization) saveVisualizationToFile(datavis);
+        if (cfg.saveVisualization()) saveVisualizationToFile(datavis);
     }
 
     private void displayVisualizationOnScreen(datavis d) {
@@ -130,7 +132,7 @@ public abstract class SRBM {
             Graphics2D graphics = image.createGraphics();
             renderVisualizationOnGraphicsComponent(d, graphics);
             graphics.dispose();
-            String pathname = cfg.visualizationOutDirectory
+            String pathname = cfg.visualizationOutDirectory()
                     + File.separatorChar
                     + sessionId
                     + "-" + currentEpoch.get()
@@ -144,13 +146,13 @@ public abstract class SRBM {
     }
 
     protected Matrix getNegData(Matrix poshidstates) {
-        Matrix negData = negativePhaseComputations.getNegData(poshidstates);
+        Matrix negData = negativePhaseComputations.getNegData(poshidstates,sigma);
         timer.get().mark("negdata");
         return negData;
     }
 
     protected List<Matrix> getTrainingBatch() {
-        List<Matrix> trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize);
+        List<Matrix> trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize());
         return trainingBatch;
     }
 
@@ -161,7 +163,7 @@ public abstract class SRBM {
     }
 
     protected Matrix getHidProbs(Matrix X) {
-        Matrix hidProbs = positivePhaseComputations.getHidProbs(X);
+        Matrix hidProbs = positivePhaseComputations.getHidProbs(X,sigma);
         timer.get().mark("hidprobs");
         return hidProbs;
     }
@@ -170,15 +172,17 @@ public abstract class SRBM {
     protected Matrix updateHBias(Matrix X) {
         List<Double> delta = Stream
                 .iterate(0, j -> j = j + 1)
-                .limit(cfg.numhid)
+                .limit(cfg.numhid())
                 .map(j ->
                         hiddenBiasAdaptation.getHiddenBiasUnitDelta(
                                 layer.vbias.get(j, 0),
-                                cfg.alpha,
-                                cfg.batchSize,
+                                cfg.alpha(),
+                                cfg.batchSize(),
                                 j,
-                                cfg.sparsneseFactor,
-                                X))
+                                cfg.sparsneseFactor(),
+                                X,
+                                sigma
+                        ))
                 .collect(toList());
         timer.get().mark("hbias");
         return Matrix2D.createColumnVector(delta);
@@ -211,7 +215,7 @@ public abstract class SRBM {
                 error += (unit - negUnit) * (unit - negUnit);
             }
         }
-        layer.error = error / (cfg.batchSize * cfg.numdims);
+        layer.error = error / (cfg.batchSize() * cfg.numdims());
         timer.get().mark("error");
     }
 
@@ -224,7 +228,7 @@ public abstract class SRBM {
     protected Matrix updateVBias(Matrix X, Matrix negdata) {
         Matrix rowsum_X = X.rowsum();
         Matrix rowsum_negdata = negdata.rowsum();
-        Matrix biasDelta = rowsum_X.subtract(rowsum_negdata).scalarMultiply(cfg.alpha / (double) cfg.batchSize);
+        Matrix biasDelta = rowsum_X.subtract(rowsum_negdata).scalarMultiply(cfg.alpha() / (double) cfg.batchSize());
         timer.get().mark("vbias");
         return biasDelta;
     }
@@ -246,7 +250,7 @@ public abstract class SRBM {
         Matrix x_poshidprobsT = X.multiplication(poshidprobs.transpose()); // X*poshidprobsT
         Matrix negdata_neghidprobsT = negdata.multiplication(neghidprobs.transpose());// negdata*neghidprobsT
         Matrix x_poshidprobsT_negdata_neghidprobsT = x_poshidprobsT.subtract(negdata_neghidprobsT);// (X*poshidprobsT – negdata*neghidprobsT)
-        Matrix delta = x_poshidprobsT_negdata_neghidprobsT.scalarDivide((double) cfg.batchSize).scalarMultiply(cfg.alpha);// a*(X*poshidprobsT – negdata*neghidprobsT)/bathSize
+        Matrix delta = x_poshidprobsT_negdata_neghidprobsT.scalarDivide((double) cfg.batchSize()).scalarMultiply(cfg.alpha());// a*(X*poshidprobsT – negdata*neghidprobsT)/bathSize
         timer.get().mark("W");
         return delta;
     }
@@ -258,7 +262,7 @@ public abstract class SRBM {
      * @return
      */
     protected Matrix getNegHidProbs(Matrix negdata) {
-        Matrix hidProbs = positivePhaseComputations.getHidProbs(negdata);
+        Matrix hidProbs = positivePhaseComputations.getHidProbs(negdata,sigma);
         timer.get().mark("neghidprobs");
         return hidProbs;
     }

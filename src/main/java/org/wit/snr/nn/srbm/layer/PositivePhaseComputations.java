@@ -36,15 +36,15 @@ public class PositivePhaseComputations {
      * @param X batch of samples
      * @return
      */
-    public Matrix getHidProbs(Matrix X) {
+    public Matrix getHidProbs(Matrix X,final double sigma) {
         List<List<Double>> hiddenUnitsProbs = X
                 .getMatrixAsCollection()
                 .stream()
-                .map(this::computeAllUnitsProbabilitiesFromHiddenLayer)
+                .map((List<Double> sample) -> computeAllUnitsProbabilitiesFromHiddenLayer(sample,sigma))
                 .collect(toList());
         Matrix hp = new Matrix2D(hiddenUnitsProbs);
-        if (hp.getRowsNumber() != cfg.numhid || hp.getColumnsNumber() != cfg.batchSize) {
-            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.numhid, cfg.batchSize, hp));
+        if (hp.getRowsNumber() != cfg.numhid() || hp.getColumnsNumber() != cfg.batchSize()) {
+            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.numhid(), cfg.batchSize(), hp));
         }
         return hp;
     }
@@ -56,10 +56,10 @@ public class PositivePhaseComputations {
      * @param sample visual layer units
      * @return list of probabilities hidden units to be in 1 state
      */
-    private List<Double> computeAllUnitsProbabilitiesFromHiddenLayer(List<Double> sample) {
+    private List<Double> computeAllUnitsProbabilitiesFromHiddenLayer(List<Double> sample, double sigma) {
         return Stream.iterate(0, j -> j = j + 1)
-                .limit(cfg.numhid)
-                .map(j -> equation3.evaluate(j, sample))
+                .limit(cfg.numhid())
+                .map(j -> equation3.evaluate(j, sample,sigma))
                 .collect(toList());
     }
 

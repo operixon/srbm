@@ -31,8 +31,8 @@ public class Equation3 {
      * @param j      hidden unit index
      * @return probability activation of single hidden unit with index j
      */
-    public Double evaluate(int j, List<Double> sample) {
-        final double cnst = (cfg.lambda / (cfg.sigma * cfg.sigma)); // Obliczamy stałą część wyrarzenia
+    public Double evaluate(int j, List<Double> sample, double sigma) {
+        final double cnst = (cfg.lambda() / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
         final double z = cnst * (layer.getActivationSignalForHiddenUnit(sample, j));
         return activationFunction.evaluate(z);
     }
