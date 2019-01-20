@@ -86,14 +86,14 @@ public abstract class SRBM {
 
     void draw(datavis datavis) {
         displayVisualizationOnScreen(datavis);
-        if(cfg.saveVisualization) saveVisualizationToFile(datavis);
+        if (cfg.saveVisualization) saveVisualizationToFile(datavis);
     }
 
     private void displayVisualizationOnScreen(datavis d) {
         synchronized (canvas) {
             BufferStrategy bufferStrategy = canvas.getBufferStrategy();
             Graphics graphics = bufferStrategy.getDrawGraphics();
-            renderVisualizationOnGraphicsComponent(d,graphics);
+            renderVisualizationOnGraphicsComponent(d, graphics);
             bufferStrategy.show();
             graphics.dispose();
         }
@@ -101,20 +101,21 @@ public abstract class SRBM {
 
     private void renderVisualizationOnGraphicsComponent(datavis d, Graphics graphics) {
         graphics.clearRect(0, 0, 1700, 1200);
-        MatrixRendererIF [] rlist = {
-         new MatrixRenderer(0, 10, d.layer.W, graphics),
-         new MatrixRenderer(680, 10, d.negdata, graphics),
-         //BIG ONE LEFT TOP
+        MatrixRendererIF[] rlist = {
+                new MatrixRenderer(0, 10, d.layer.W, graphics),
+                new MatrixRenderer(680, 10, d.negdata, graphics),
+                //BIG ONE LEFT TOP
                 new MatrixRendererHiddenUnits(0, 1100, d.vBiasDelta.reshape(28).transpose(), graphics),
-         // BIG ONE LEFT BOTTOM
-                new MatrixRendererHiddenUnits(400, 1100, d.negdata.reshape(28).transpose(), graphics),
-         new MatrixRendererSample(680, 350, d.X, graphics, Color.WHITE),
+                // BIG ONE LEFT BOTTOM
+                new MatrixRendererHiddenUnits(400, 600, d.poshidstates.reshape(28).transpose(), graphics),
 
-         new MatrixRenderer(630, 200, d.layer.vbias, graphics),
-         new MatrixRenderer(660, 200, d.vBiasDelta, graphics),
+                new MatrixRendererSample(680, 350, d.X, graphics, Color.WHITE),
 
-         new MatrixRenderer(630, 230, d.layer.hbias, graphics),
-         new MatrixRenderer(660, 230, d.hBiasDelta, graphics)
+                new MatrixRenderer(630, 200, d.layer.vbias, graphics),
+                new MatrixRenderer(660, 200, d.vBiasDelta, graphics),
+
+                new MatrixRenderer(630, 230, d.layer.hbias, graphics),
+                new MatrixRenderer(660, 230, d.hBiasDelta, graphics)
         };
 
         for (MatrixRendererIF matrixRendererIF : rlist) {
@@ -261,10 +262,6 @@ public abstract class SRBM {
         timer.get().mark("neghidprobs");
         return hidProbs;
     }
-
-
-
-
 
 
 }

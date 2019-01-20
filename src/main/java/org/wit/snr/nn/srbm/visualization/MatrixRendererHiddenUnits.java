@@ -20,7 +20,7 @@ public class MatrixRendererHiddenUnits implements MatrixRendererIF{
     }
 
     public void render() {
-        final int cellSize = 8;
+        final int cellSize = 2;
         final List<List<Double>> data = m.normalize(0, 255).getMatrixAsCollection();
         final int cols = data.size();
         final int rows = data.get(0).size();
