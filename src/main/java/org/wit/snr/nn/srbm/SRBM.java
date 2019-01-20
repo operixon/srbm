@@ -59,7 +59,7 @@ public abstract class SRBM {
         positivePhaseComputations = new PositivePhaseComputations(equation3, cfg);
         hiddenBiasAdaptation = new HiddenBiasAdaptation(equation3);
         negativePhaseComputations = new NegativePhaseComputations(
-                new Equation2(cfg, layer, new GausianDensityFunction(cfg.mi)),
+                new Equation2(cfg, layer, new SigmoidFunction()),
                 cfg
         );
         initCanvas();
@@ -83,28 +83,28 @@ public abstract class SRBM {
         canvas.createBufferStrategy(3);
     }
 
-    void draw(int batchIndex, Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
-        displayVisualizationOnScreen(W, X, negM, neghidprobs, vbias);
-        if(cfg.saveVisualization) saveVisualizationToFile(batchIndex, W, X, negM, neghidprobs, vbias);
+    void draw(datavis datavis) {
+        displayVisualizationOnScreen(datavis);
+        if(cfg.saveVisualization) saveVisualizationToFile(datavis);
     }
 
-    private void displayVisualizationOnScreen(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
+    private void displayVisualizationOnScreen(datavis d) {
         synchronized (canvas) {
             BufferStrategy bufferStrategy = canvas.getBufferStrategy();
             Graphics graphics = bufferStrategy.getDrawGraphics();
-            renderVisualizationOnGraphicsComponent(W, X, negM, neghidprobs, vbias, graphics);
+            renderVisualizationOnGraphicsComponent(d,graphics);
             bufferStrategy.show();
             graphics.dispose();
         }
     }
 
-    private void renderVisualizationOnGraphicsComponent(Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias, Graphics graphics) {
+    private void renderVisualizationOnGraphicsComponent(datavis d, Graphics graphics) {
         graphics.clearRect(0, 0, 1700, 1200);
-        MatrixRenderer Wr = new MatrixRenderer(0, 10, W, graphics);
-        MatrixRenderer neg = new MatrixRenderer(680, 10, negM, graphics);
-        MatrixRendererHiddenUnits neghidprobsDraw = new MatrixRendererHiddenUnits(600, 5, neghidprobs, graphics);
-        MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, X, graphics, Color.WHITE);
-        MatrixRenderer vbiasDraw = new MatrixRenderer(630, 200, vbias, graphics);
+        MatrixRenderer Wr = new MatrixRenderer(0, 10, d.layer.W, graphics);
+        MatrixRenderer neg = new MatrixRenderer(680, 10, d.negdata, graphics);
+        MatrixRendererHiddenUnits neghidprobsDraw = new MatrixRendererHiddenUnits(600, 5, d.neghidprobs, graphics);
+        MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, d.X, graphics, Color.WHITE);
+        MatrixRenderer vbiasDraw = new MatrixRenderer(630, 200, d.layer.vbias, graphics);
         Wr.render();
         Xprint.render();
         neg.render();
@@ -112,17 +112,17 @@ public abstract class SRBM {
         vbiasDraw.render();
     }
 
-    public void saveVisualizationToFile(int batchIndex, Matrix W, Matrix X, Matrix negM, Matrix neghidprobs, Matrix vbias) {
+    public void saveVisualizationToFile(datavis d) {
         try {
             BufferedImage image = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics = image.createGraphics();
-            renderVisualizationOnGraphicsComponent(W, X, negM, neghidprobs, vbias, graphics);
+            renderVisualizationOnGraphicsComponent(d, graphics);
             graphics.dispose();
             String pathname = cfg.visualizationOutDirectory
                     + File.separatorChar
                     + sessionId
                     + "-" + currentEpoch.get()
-                    + "-" + batchIndex
+                    + "-" + d.bathIdx
                     + ".jpg";
             ImageIO.write(image, "JPEG", new File(pathname));
         } catch (Exception e) {

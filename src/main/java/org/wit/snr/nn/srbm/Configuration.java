@@ -13,9 +13,9 @@ public class Configuration {
     
     // Orginalne stałe z algorytmu
     public final int numdims = 784; //# of visible units
-    public final int numhid = 200; //# of hidden units
+    public final int numhid = 784; //# of hidden units
     public final double alpha = 0.01; // Learning rate, recomended value is 0.01
-    public final int batchSize = 200;
+    public final int batchSize = 4;
  
     // Dodaane zmienne
     public final double mi = 0;
@@ -24,6 +24,6 @@ public class Configuration {
     public final double sparsneseFactor = 0.03; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
 
     public double sigma = 0.5;
-    public final String visualizationOutDirectory = "/srbm";
+    public final String visualizationOutDirectory = "/home/artur/srbm";
     public final boolean saveVisualization = true;
 }
