@@ -36,6 +36,7 @@ public class SRBMMapReduceJSA extends SRBM
     {
         return getTrainingBatch()
                 .parallelStream()
+                .limit(10)
                 .map( samples -> trainMiniBatch(samples))
                 .reduce(
                         Optional.empty(),

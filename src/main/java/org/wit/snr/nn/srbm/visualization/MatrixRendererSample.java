@@ -5,7 +5,7 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import java.awt.*;
 import java.util.List;
 
-public class MatrixRendererSample {
+public class MatrixRendererSample implements MatrixRendererIF {
 
     final private int x;
     final private int y;
@@ -21,6 +21,7 @@ public class MatrixRendererSample {
         this.color = color;
     }
 
+    @Override
     public void render() {
 
         int colidx = 0;

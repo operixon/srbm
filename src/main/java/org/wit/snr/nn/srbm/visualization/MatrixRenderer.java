@@ -5,7 +5,7 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import java.awt.*;
 import java.util.List;
 
-public class MatrixRenderer {
+public class MatrixRenderer implements MatrixRendererIF{
 
     final private int x;
     final private int y;

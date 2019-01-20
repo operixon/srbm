@@ -14,6 +14,7 @@ import org.wit.snr.nn.srbm.monitoring.Timer;
 import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 import org.wit.snr.nn.srbm.visualization.MatrixRenderer;
 import org.wit.snr.nn.srbm.visualization.MatrixRendererHiddenUnits;
+import org.wit.snr.nn.srbm.visualization.MatrixRendererIF;
 import org.wit.snr.nn.srbm.visualization.MatrixRendererSample;
 
 import javax.imageio.ImageIO;
@@ -100,16 +101,26 @@ public abstract class SRBM {
 
     private void renderVisualizationOnGraphicsComponent(datavis d, Graphics graphics) {
         graphics.clearRect(0, 0, 1700, 1200);
-        MatrixRenderer Wr = new MatrixRenderer(0, 10, d.layer.W, graphics);
-        MatrixRenderer neg = new MatrixRenderer(680, 10, d.negdata, graphics);
-        MatrixRendererHiddenUnits neghidprobsDraw = new MatrixRendererHiddenUnits(600, 5, d.neghidprobs, graphics);
-        MatrixRendererSample Xprint = new MatrixRendererSample(680, 350, d.X, graphics, Color.WHITE);
-        MatrixRenderer vbiasDraw = new MatrixRenderer(630, 200, d.layer.vbias, graphics);
-        Wr.render();
-        Xprint.render();
-        neg.render();
-        neghidprobsDraw.render();
-        vbiasDraw.render();
+        MatrixRendererIF [] rlist = {
+         new MatrixRenderer(0, 10, d.layer.W, graphics),
+         new MatrixRenderer(680, 10, d.negdata, graphics),
+         //BIG ONE LEFT TOP
+                new MatrixRendererHiddenUnits(0, 1100, d.vBiasDelta.reshape(28).transpose(), graphics),
+         // BIG ONE LEFT BOTTOM
+                new MatrixRendererHiddenUnits(400, 1100, d.negdata.reshape(28).transpose(), graphics),
+         new MatrixRendererSample(680, 350, d.X, graphics, Color.WHITE),
+
+         new MatrixRenderer(630, 200, d.layer.vbias, graphics),
+         new MatrixRenderer(660, 200, d.vBiasDelta, graphics),
+
+         new MatrixRenderer(630, 230, d.layer.hbias, graphics),
+         new MatrixRenderer(660, 230, d.hBiasDelta, graphics)
+        };
+
+        for (MatrixRendererIF matrixRendererIF : rlist) {
+            matrixRendererIF.render();
+        }
+
     }
 
     public void saveVisualizationToFile(datavis d) {
