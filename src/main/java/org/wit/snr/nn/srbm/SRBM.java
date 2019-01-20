@@ -115,7 +115,7 @@ public abstract class SRBM {
                 new MatrixRendererHiddenUnits(400, 610, d.poshidstates.reshape(28).transpose(), graphics),
                 new MatrixRendererHiddenUnits(500, 610, d.negdata.reshape(28).transpose(), graphics),
                 new MatrixRendererHiddenUnits(600, 610, d.neghidprobs.reshape(28).transpose(), graphics),
-                
+
         };
 
         for (MatrixRendererIF matrixRendererIF : rlist) {

@@ -60,4 +60,19 @@ public class Matrix2DTest {
 
 
     }
+
+    @Test
+    void addMatrix() {
+        // Given
+        Matrix m1 = Matrix2D.createFilledMatrix(10, 2, -1);
+        Matrix m2 = Matrix2D.createFilledMatrix(10, 2, 1);
+
+        // When
+        Matrix m3 = m1.matrixAdd(m2);
+
+        //
+        Assert.assertEquals(m3.rowsum().transpose().rowsum().getMatrixAsCollection().get(0).get(0), 0.0);
+
+
+    }
 }
