@@ -41,8 +41,11 @@ public class HiddenBiasAdaptation {
     /**
      * Equation 6
      * hj := hj - ni (1/m * sum(from i=1, to m, E[hj(i)|v(i)])-p)
+     * =>
+     * hj := hj + hiddenBiasUnitDelta
+     * =>
+     * hiddenBiasUnitDelta = - ni (1/m * sum(from i=1, to m, E[hj(i)|v(i)])-p)
      *
-     * @param hj       current hidden bias unit value
      * @param ni       learning rate
      * @param m        number of samples
      * @param j        index of hidden bias unit to update
@@ -51,7 +54,6 @@ public class HiddenBiasAdaptation {
      * @return - ni (1/m * sum(from i=1, to m, E[hj(i)|v(i)])-p)
      **/
     public Double getHiddenBiasUnitDelta(
-            final double hj,
             final double ni,
             final int m,
             final int j,
@@ -59,11 +61,12 @@ public class HiddenBiasAdaptation {
             final Matrix vSamples,
             final double sigma) {
 
-        final double sum_E_hj_v = Stream.iterate(0, i -> i = i + 1)
-                .limit(m)
-                .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i),sigma))
-                .sum();
-        return hj-ni * ((sum_E_hj_v / (double) m) - p);
+        final double sum_E_hj_v =
+                Stream.iterate(0, i -> i = i + 1)
+                        .limit(m)
+                        .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i), sigma))
+                        .sum();
+        return -ni * ((sum_E_hj_v / (double) m) - p);
     }
 
 }

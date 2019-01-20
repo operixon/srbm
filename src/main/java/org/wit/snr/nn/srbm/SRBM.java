@@ -24,6 +24,7 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -168,24 +169,25 @@ public abstract class SRBM {
         return hidProbs;
     }
 
-
-    protected Matrix updateHBias(Matrix X) {
-        List<Double> delta = Stream
-                .iterate(0, j -> j = j + 1)
-                .limit(cfg.numhid())
-                .map(j ->
-                        hiddenBiasAdaptation.getHiddenBiasUnitDelta(
-                                layer.hbias.get(j, 0),
-                                cfg.alpha(),
-                                cfg.batchSize(),
-                                j,
-                                cfg.sparsneseFactor(),
-                                X,
-                                sigma
-                        ))
-                .collect(toList());
+    /**
+    * Oblicza wektor bias ukryty poprzez wywołanie równania nr 3 dla każdej jednostki wektora
+    */
+    protected Matrix getHBiasDelta(Matrix X) {
+        List<Double> hBiasDelta = new LinkedList<>();
+        for(int j = 0; j < cfg.numhid(); j++)
+        {
+            Double hiddenBiasUnitDelta = hiddenBiasAdaptation.getHiddenBiasUnitDelta(
+                    cfg.alpha(),
+                    cfg.batchSize(),
+                    j,
+                    cfg.sparsneseFactor(),
+                    X,
+                    sigma
+            );
+            hBiasDelta.add(hiddenBiasUnitDelta);
+        }
         timer.get().mark("hbias");
-        return Matrix2D.createColumnVector(delta);
+        return Matrix2D.createColumnVector(hBiasDelta);
     }
 
 

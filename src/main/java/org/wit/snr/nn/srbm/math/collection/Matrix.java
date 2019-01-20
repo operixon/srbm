@@ -83,6 +83,8 @@ public abstract class Matrix {
         return builder.build();
     }
 
+
+
     public Matrix multiplication(Matrix m) {
         PrimitiveMatrix A = exportToAjo();
         PrimitiveMatrix B = m.exportToAjo();

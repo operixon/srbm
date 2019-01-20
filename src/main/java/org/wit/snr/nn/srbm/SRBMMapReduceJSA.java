@@ -71,7 +71,7 @@ public class SRBMMapReduceJSA extends SRBM
         Matrix Wdelta = updateWeights(X, poshidprobs, negdata, neghidprobs);
         Matrix vBiasDelta = updateVBias(X, negdata);
         updateError(X, negdata);
-        Matrix hBiasDelta = updateHBias(X);
+        Matrix hBiasDelta = getHBiasDelta(X);
 
         System.out.printf("E %s/%s | %s | %s %n", batchIndex * cfg.batchSize(), currentEpoch, layer.error, timer.get().toString());
         datavis datavis = new datavis(

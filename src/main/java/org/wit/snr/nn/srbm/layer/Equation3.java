@@ -20,20 +20,21 @@ public class Equation3 {
     /**
      * P(hj|v) =g( λ /sigma^2(bj+sum_i wij*vi)).
      * if
-     * z = λ /sigma^2(bj+sum_i wij*vi)
+     * z = (λ /sigma^2) * (bj+sum_i wij*vi)
      * then
      * P(hj|v) =g( z)
      * <pre>
-     *     Hidden layer probabilities (h_probs) for given visual input v
+     *     Hidden layer j-th unit probability for given visual input v
      * </pre>
      *
-     * @param sample visible layer data
+     * @param v visible layer data
      * @param j      hidden unit index
      * @return probability activation of single hidden unit with index j
      */
-    public Double evaluate(int j, List<Double> sample, double sigma) {
+    public Double evaluate(int j, List<Double> v, double sigma) {
         final double cnst = (cfg.lambda() / (sigma * sigma)); // Obliczamy stałą część wyrarzenia
-        final double z = cnst * (layer.getActivationSignalForHiddenUnit(sample, j));
+
+        final double z = cnst * (layer.getActivationSignalForHiddenUnit(v, j));
         return activationFunction.evaluate(z);
     }
 }

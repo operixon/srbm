@@ -5,6 +5,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class Matrix2DTest {
 
     @BeforeMethod
@@ -93,6 +96,25 @@ public class Matrix2DTest {
         Assert.assertEquals(mt.get(1, 0), 2.0);
         Assert.assertEquals(mt.get(2, 0), 3.0);
 
+
+    }
+
+    @Test
+    void createColumnVector()
+    {
+        // Given
+        List<Double> l = new LinkedList<Double>();
+        l.add(1.0);
+        l.add(2.0);
+        l.add(3.0);
+        // When
+        Matrix v = Matrix2D.createColumnVector(l);
+        //Then
+        Assert.assertEquals(v.getRowsNumber(),3);
+        Assert.assertEquals(v.getColumnsNumber(),1);
+        Assert.assertEquals(v.get(0,0),1.0);
+        Assert.assertEquals(v.get(1,0),2.0);
+        Assert.assertEquals(v.get(2,0),3.0);
 
     }
 }
