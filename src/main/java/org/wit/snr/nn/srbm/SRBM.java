@@ -106,18 +106,18 @@ public abstract class SRBM {
         graphics.clearRect(0, 0, 1700, 1200);
         MatrixRendererIF[] rlist = {
                 // Wagi
-                new MatrixRenderer(0, 10, d.Wdelta, graphics),
+                new MatrixRenderer(0, 10, d.layer.W, graphics),
                 // biasy
                 new MatrixRendererHiddenUnits(0, 1100, d.vBiasDelta.reshape(28).transpose(), graphics),
                 new MatrixRendererHiddenUnits(100, 1100, d.layer.vbias.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(0, 1000, d.hBiasDelta.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(100, 1000, d.layer.hbias.reshape(28).transpose(), graphics),
+                new MatrixRendererHiddenUnits(0, 1000, d.hBiasDelta.reshape(7).transpose(), graphics),
+                new MatrixRendererHiddenUnits(100, 1000, d.layer.hbias.reshape(7).transpose(), graphics),
                 // data flow
                 new MatrixRendererHiddenUnits(200, 610, d.X.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(300, 610, d.poshidprobs.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(400, 610, d.poshidstates.reshape(28).transpose(), graphics),
+                new MatrixRendererHiddenUnits(300, 610, d.poshidprobs.reshape(7).transpose(), graphics),
+                new MatrixRendererHiddenUnits(400, 610, d.poshidstates.reshape(7).transpose(), graphics),
                 new MatrixRendererHiddenUnits(500, 610, d.negdata.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(600, 610, d.neghidprobs.reshape(28).transpose(), graphics),
+                new MatrixRendererHiddenUnits(600, 610, d.neghidprobs.reshape(7).transpose(), graphics),
 
         };
 
