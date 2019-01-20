@@ -75,4 +75,24 @@ public class Matrix2DTest {
 
 
     }
+
+    @Test
+    void transpose() {
+        // Given
+        Matrix m = Matrix2D.createFilledMatrix(5, 3, 0);
+        // When set first row to 1 values in each cell
+        m.set(0, 0, 1);
+        m.set(0, 1, 2);
+        m.set(0, 2, 3);
+        Matrix mt = m.transpose();
+        // Then
+        Assert.assertEquals(mt.getColumnsNumber(), 5);
+        Assert.assertEquals(mt.getRowsNumber(), 3);
+
+        Assert.assertEquals(mt.get(0, 0), 1.0);
+        Assert.assertEquals(mt.get(1, 0), 2.0);
+        Assert.assertEquals(mt.get(2, 0), 3.0);
+
+
+    }
 }
