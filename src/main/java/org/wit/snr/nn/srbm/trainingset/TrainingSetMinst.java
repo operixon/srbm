@@ -6,6 +6,7 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -39,7 +40,8 @@ public class TrainingSetMinst implements TrainingSet {
     public List<Matrix> getTrainingBatch(int miniBatchSize) {
         final AtomicInteger counter = new AtomicInteger(0);
         Collections.shuffle(images);
-        Collection<List<List<Double>>> minibatchesList = images.stream()
+        Collection<List<List<Double>>> minibatchesList = images
+                .stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / miniBatchSize))
                 .values();
         List<Matrix> collect = minibatchesList.stream().map(mibibatch -> new Matrix2D(mibibatch)).collect(Collectors.toList());
@@ -51,9 +53,11 @@ public class TrainingSetMinst implements TrainingSet {
         List<Double> convertedSample = new LinkedList<>();
         for (int i = 0; i < mil.getNumberOfRows(); i++) {
             for (int j = 0; j < mil.getNumberOfColumns(); j++) {
-                convertedSample.add(image[j][i] == 0 ? 0.0 : 1.0);
+                int intVal = Byte.toUnsignedInt(image[j][i]);
+                convertedSample.add(new Integer(intVal).doubleValue());
             }
         }
-        return convertedSample;
+
+        return Matrix2D.createColumnVector(convertedSample).normalize(0,1).getDataAsList();
     }
 }
