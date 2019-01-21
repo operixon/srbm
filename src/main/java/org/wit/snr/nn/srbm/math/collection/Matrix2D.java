@@ -3,6 +3,7 @@ package org.wit.snr.nn.srbm.math.collection;
 import org.wit.snr.nn.srbm.math.MathUtils;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -86,9 +87,14 @@ public class Matrix2D extends Matrix {
     @Override
     public List<Double> getDataAsList() {
 
-        return columnsList.stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+        List<Double> l = new LinkedList<>();
+        for (List<Double> column : columnsList) {
+            l.addAll(column);
+        }
+        return l;
+        //return columnsList.stream()
+          //      .flatMap(List::stream)
+            //    .collect(Collectors.toList());
     }
 
     @Override
