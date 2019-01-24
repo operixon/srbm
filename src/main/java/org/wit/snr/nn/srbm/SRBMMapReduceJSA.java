@@ -10,9 +10,9 @@ public class SRBMMapReduceJSA extends SRBM
 {
 
 
-    public SRBMMapReduceJSA() throws IOException, InterruptedException
+    public SRBMMapReduceJSA(Configuration cfg) throws IOException, InterruptedException
     {
-        super();
+        super(cfg);
     }
 
     public void train()

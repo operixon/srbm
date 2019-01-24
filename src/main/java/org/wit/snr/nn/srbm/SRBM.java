@@ -36,7 +36,7 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class SRBM {
 
-    final Configuration cfg = new ConfigurationSRBM();
+    final Configuration cfg;
     final Layer layer;
     final TrainingSet trainingSet;
     final PositivePhaseComputations positivePhaseComputations;
@@ -52,11 +52,12 @@ public abstract class SRBM {
 
     final String sessionId = "srbm-" + System.currentTimeMillis();
 
-    protected double  sigma = cfg.sigmaInit();
+     protected double  sigma;
 
     public abstract void train();
 
-    public SRBM() throws IOException, InterruptedException {
+    public SRBM(Configuration cfg) throws IOException, InterruptedException {
+        this.cfg = cfg;
         this.layer = new Layer(cfg.numdims(), cfg.numhid());
         trainingSet = new TrainingSetMinst();
         Equation3 equation3 = new Equation3(cfg, layer, new SigmoidFunction());
@@ -67,6 +68,7 @@ public abstract class SRBM {
                 cfg
         );
         initCanvas();
+        sigma = cfg.sigmaInit();
     }
 
     private void initCanvas() {
