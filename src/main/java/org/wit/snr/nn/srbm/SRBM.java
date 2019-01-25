@@ -37,6 +37,8 @@ import static java.util.stream.Collectors.toList;
 public abstract class SRBM {
 
     final Configuration cfg;
+
+
     final Layer layer;
     final TrainingSet trainingSet;
     final PositivePhaseComputations positivePhaseComputations;
@@ -52,7 +54,8 @@ public abstract class SRBM {
 
     final String sessionId = "srbm-" + System.currentTimeMillis();
 
-     protected double  sigma;
+    protected double  sigma;
+    protected SRBM previousLayer;
 
     public abstract void train();
 
@@ -106,20 +109,22 @@ public abstract class SRBM {
 
     private void renderVisualizationOnGraphicsComponent(datavis d, Graphics graphics) {
         graphics.clearRect(0, 0, 1700, 1200);
+        int visSize = (int) Math.sqrt(cfg.numdims());
+        int hidSize = (int) Math.sqrt(cfg.numhid());
         MatrixRendererIF[] rlist = {
                 // Wagi
-                new MatrixRenderer(0, 10, d.layer.W, graphics),
+                new MatrixRenderer(0, 10, visSize, d.layer.W, graphics),
                 // biasy
-                new MatrixRendererHiddenUnits(0, 1100, d.vBiasDelta.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(100, 1100, d.layer.vbias.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(0, 1000, d.hBiasDelta.reshape(7).transpose(), graphics),
-                new MatrixRendererHiddenUnits(100, 1000, d.layer.hbias.reshape(7).transpose(), graphics),
+                new MatrixRendererHiddenUnits(0, 1100, d.vBiasDelta.reshape(visSize).transpose(), graphics),
+                new MatrixRendererHiddenUnits(100, 1100, d.layer.vbias.reshape(visSize).transpose(), graphics),
+                new MatrixRendererHiddenUnits(0, 1000, d.hBiasDelta.reshape(hidSize).transpose(), graphics),
+                new MatrixRendererHiddenUnits(100, 1000, d.layer.hbias.reshape(hidSize).transpose(), graphics),
                 // data flow
-                new MatrixRendererHiddenUnits(200, 610, d.X.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(300, 610, d.poshidprobs.reshape(7).transpose(), graphics),
-                new MatrixRendererHiddenUnits(400, 610, d.poshidstates.reshape(7).transpose(), graphics),
-                new MatrixRendererHiddenUnits(500, 610, d.negdata.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(600, 610, d.neghidprobs.reshape(7).transpose(), graphics),
+                new MatrixRendererHiddenUnits(200, 610, d.X.reshape(visSize).transpose(), graphics),
+                new MatrixRendererHiddenUnits(300, 610, d.poshidprobs.reshape(hidSize).transpose(), graphics),
+                new MatrixRendererHiddenUnits(400, 610, d.poshidstates.reshape(hidSize).transpose(), graphics),
+                new MatrixRendererHiddenUnits(500, 610, d.negdata.reshape(visSize).transpose(), graphics),
+                new MatrixRendererHiddenUnits(600, 610, d.neghidprobs.reshape(hidSize).transpose(), graphics),
 
         };
 
@@ -307,5 +312,16 @@ public abstract class SRBM {
         return hidProbs;
     }
 
+    public Layer getLayer() {
+        return layer;
+    }
 
+    public  void connectPreviousLayer(SRBM prevLayer){
+      this.previousLayer = prevLayer;
+    }
+
+    protected Matrix compute(Matrix x)
+    {
+        return positivePhaseComputations.getHidProbs(x,sigma);
+    }
 }

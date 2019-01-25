@@ -2,18 +2,16 @@ package org.wit.snr.nn.srbm.autoencoder;
 
 public class CfgB extends CfgAutoencoder {
 
-    public final int numdims = 196;
-    public final int numhid =  784;
-    public final int numberOfEpochs = 14;
+    public final int numberOfEpochs = 60;
 
     @Override
     public int numdims() {
-        return numdims;
+        return autoEncoderHiddenLayerSize;
     }
 
     @Override
     public int numhid() {
-        return numhid;
+        return autoEncoderVisibleLayerSize;
     }
 
     @Override
