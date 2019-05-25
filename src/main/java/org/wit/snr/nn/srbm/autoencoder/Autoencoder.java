@@ -29,5 +29,6 @@ public class Autoencoder {
         Matrix W1 = netA.getLayer().W.transpose();
         netB.getLayer().W = W1;
         netB.train();
+
     }
 }

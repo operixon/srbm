@@ -1,0 +1,11 @@
+1. wyklikac nowa prace
+2. napisac nowy plan pracy (zaproponować) 
+3. wyslac plan na maila do jp
+4. jak przejdzie to wrzucic do ubika
+5. 502 081 407
+6. Dac jp instrukcje do kodow zrodlowych
+ktory pakiet co robi itp
+
+docelowo jedna warstwa
+
+

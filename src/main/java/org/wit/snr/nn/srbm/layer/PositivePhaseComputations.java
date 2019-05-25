@@ -41,7 +41,7 @@ public class PositivePhaseComputations {
         List<List<Double>> hiddenUnitsProbs = X
                 .getMatrixAsCollection()
                 .stream()
-                .map((List<Double> sample) -> computeAllUnitsProbabilitiesFromHiddenLayer2(sample,sigma))
+                .map((List<Double> sample) -> computeAllUnitsProbabilitiesFromHiddenLayer(sample,sigma))
                 .collect(toList());
         Matrix hp = new Matrix2D(hiddenUnitsProbs);
         if (hp.getRowsNumber() != cfg.numhid() || hp.getColumnsNumber() != cfg.batchSize()) {
@@ -68,7 +68,7 @@ public class PositivePhaseComputations {
     }
 
     /**
-     * iterate on all hidden units and compute each hidden unit probability
+     * iterate on all hidden units and propagate each hidden unit probability
      * using equation3
      *
      * @param sample visual layer units

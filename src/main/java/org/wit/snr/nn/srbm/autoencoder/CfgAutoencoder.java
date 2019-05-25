@@ -6,7 +6,7 @@ public abstract class CfgAutoencoder extends Configuration {
 
 
     public final double alpha = 0.01; // Learning rate, recomended value is 0.01
-    public final int batchSize = 200;
+    public final int batchSize = 196;
     public final double mi = 0;
     public final double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
     public final double sparsneseFactor = 0.02; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
@@ -16,7 +16,7 @@ public abstract class CfgAutoencoder extends Configuration {
     public final boolean saveVisualization = true;
 
     protected final int autoEncoderVisibleLayerSize = 28*28;
-    protected final int autoEncoderHiddenLayerSize = (28*28)/4;
+    protected final int autoEncoderHiddenLayerSize = (28/2)*(28/2);
 
     @Override
     public double alpha() {

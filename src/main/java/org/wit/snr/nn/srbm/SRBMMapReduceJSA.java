@@ -36,7 +36,7 @@ public class SRBMMapReduceJSA extends SRBM
     {
         return getTrainingBatch()
                 .parallelStream()
-               // .limit(10)
+                .limit(10)
                 .map( samples -> trainMiniBatch(samples))
                 .reduce(
                         Optional.empty(),
@@ -63,7 +63,7 @@ public class SRBMMapReduceJSA extends SRBM
     {
         if(previousLayer!=null)
         {
-            X = previousLayer.compute(X);
+            X = previousLayer.propagate(X);
         }
         final int batchIndex = miniBatchIndex.getAndIncrement();
         timer.set(new Timer());
@@ -91,7 +91,9 @@ public class SRBMMapReduceJSA extends SRBM
                 hBiasDelta
         );
         draw(datavis);
-
+       // if (previousLayer != null ){
+         //   previousLayer.backPropagate(negdata);
+       // }
         timer.remove();
         return Optional.of(new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta));
     }

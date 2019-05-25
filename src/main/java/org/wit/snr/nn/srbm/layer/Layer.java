@@ -25,7 +25,7 @@ public class Layer {
     }
 
     /**
-     * This method compute activation signal for one neuron
+     * This method propagate activation signal for one neuron
      * from hidden layer. This value is defined as a
      * SUM_i( W_ij * V_i ).
      * This computation is related with positive phase.
@@ -46,7 +46,7 @@ public class Layer {
     }
 
     /**
-     * This method compute activation signal for one neuron
+     * This method propagate activation signal for one neuron
      * from visible layer. This value is defined as a
      * SUM_j( W_ij * H_j )
      * This computation is related with negative phase.

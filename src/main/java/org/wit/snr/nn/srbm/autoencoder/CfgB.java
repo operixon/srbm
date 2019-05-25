@@ -2,7 +2,7 @@ package org.wit.snr.nn.srbm.autoencoder;
 
 public class CfgB extends CfgAutoencoder {
 
-    public final int numberOfEpochs = 60;
+    public final int numberOfEpochs = 10;
 
     @Override
     public int numdims() {
