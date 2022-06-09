@@ -13,7 +13,7 @@ public class Layer {
 
     public final int inputSize;
     public final int outputSize;
-    public double error;
+    public double error= 1;
 
 
     public Layer(int numdims, int numhid) {
@@ -58,9 +58,9 @@ public class Layer {
         double sum = 0;
         for(int j = 0; j < outputSize; j++ ){
             final double hj = hiddenUnits.get(j);
-            if (hj != 1.0 && hj != 0.0) {
-                throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", hj));
-            }
+          //  if (hj != 1.0 && hj != 0.0) {
+          //      throw new IllegalStateException(String.format("Unit value schould be 1 or 0. But found %s", hj));
+          //  }
             sum += W.get(i, j) * hj;
         }
         return sum;

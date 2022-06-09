@@ -5,6 +5,8 @@ import org.ojalgo.matrix.PrimitiveMatrix;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 public abstract class Matrix {
 
 
@@ -118,6 +120,9 @@ public abstract class Matrix {
     abstract public int getRowsNumber();
 
     abstract public Matrix gibsSampling();
+
+    abstract public Matrix treshold(double t);
+    abstract public Matrix clone();
 
     abstract public List<List<Double>> getMatrixAsCollection();
 

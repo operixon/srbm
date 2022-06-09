@@ -93,8 +93,8 @@ public class Matrix2D extends Matrix {
         }
         return l;
         //return columnsList.stream()
-          //      .flatMap(List::stream)
-            //    .collect(Collectors.toList());
+        //      .flatMap(List::stream)
+        //    .collect(Collectors.toList());
     }
 
     @Override
@@ -128,11 +128,24 @@ public class Matrix2D extends Matrix {
         List<List<Double>> sampledMatrixData = columnsList
                 .stream()
                 .map(
-                row -> row
-                        .stream()
-                        .map(cel -> cel > random.nextDouble() ? 1.0 : 0.0)
-                        .collect(toList())
-        ).collect(toList());
+                        row -> row
+                                .stream()
+                                .map(cel -> cel > random.nextDouble() ? 1.0 : 0.0)
+                                .collect(toList())
+                ).collect(toList());
+        return new Matrix2D(sampledMatrixData);
+    }
+
+    @Override
+    public Matrix treshold(double t) {
+        List<List<Double>> sampledMatrixData = columnsList
+                .stream()
+                .map(
+                        row -> row
+                                .stream()
+                                .map(cel -> cel > t ? 1.0 : 0.0)
+                                .collect(toList())
+                ).collect(toList());
         return new Matrix2D(sampledMatrixData);
     }
 
@@ -207,4 +220,14 @@ public class Matrix2D extends Matrix {
         return this.transpose().getMatrixAsCollection();
     }
 
+    public Matrix clone() {
+        List<List<Double>> sampledMatrixData = columnsList
+                .stream()
+                .map(row -> row
+                        .stream()
+                        .map(Double::new)
+                        .collect(toList())
+                ).collect(toList());
+        return new Matrix2D(sampledMatrixData);
+    }
 }

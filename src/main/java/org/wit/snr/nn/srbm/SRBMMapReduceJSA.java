@@ -4,96 +4,143 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.monitoring.Timer;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class SRBMMapReduceJSA extends SRBM
-{
+public class SRBMMapReduceJSA extends SRBM {
 
 
-    public SRBMMapReduceJSA() throws IOException, InterruptedException
-    {
+    private List<Matrix> batch;
+    private SRBM prev;
+    private SRBM next;
+
+    public SRBMMapReduceJSA() throws IOException, InterruptedException {
         super();
+        batch = getTrainingBatch();
     }
 
-    public void train()
-    {
-        while (isConverged())
-        {
-            epoch();
+    @Override
+    public Matrix eval(Matrix matrix) {
+        if (prev != null) {
+            return getHidStates(getHidProbs(prev.eval(matrix)));
+        } else {
+            return getHidStates(getHidProbs(matrix));
         }
     }
 
-    private void epoch()
-    {
-        getMapReduceResult().ifPresent(cumulatedDelta ->
-                                               updateLayerData(cumulatedDelta));
+    public SRBMMapReduceJSA(SRBM v1) throws IOException, InterruptedException {
+        super();
+        batch = getTrainingBatch();
+        this.prev = v1;
+        v1.setNext(this);
+
+    }
+
+
+    public void setPrev(SRBM prev) {
+        this.prev = prev;
+    }
+
+    public void setNext(SRBM next) {
+        this.next = next;
+    }
+
+    public void train() {
+        while (!isConverged()) {
+            epoch();
+        }
+        if (next != null) {
+            next.train();
+        }
+    }
+
+    private void epoch() {
+        getMapReduceResult();
         updateSigma();
         miniBatchIndex.set(0);
         currentEpoch.incrementAndGet();
+        batch = getTrainingBatch();
     }
 
-    private Optional<MiniBatchTrainingResult> getMapReduceResult()
-    {
-        return getTrainingBatch()
-                .parallelStream()
-                .limit(10)
-                .map( samples -> trainMiniBatch(samples))
-                .reduce(
-                        Optional.empty(),
-                        (sum, nextValue) -> sum.map(s -> s.apply(nextValue))
-                                               .orElse(nextValue)
-                       );
+    private void getMapReduceResult() {
+        if (prev != null) {
+            batch.parallelStream()
+                    .limit(1)
+                    .map(prev::eval)
+                    .map(this::trainMiniBatch)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .peek(this::updateLayerData)
+                    .count();
+        } else {
+            batch.parallelStream()
+                    .limit(1)
+                    .map(samples -> trainMiniBatch(samples))
+                    .peek(tbr -> updateLayerData(tbr.get()))
+                    .collect(Collectors.counting());
+        }
+        //.reduce(
+        //      Optional.empty(),
+        //    (sum, nextValue) -> sum.map(s -> s.apply(nextValue))
+        //          .orElse(nextValue)
+        //);
     }
 
-    private void updateSigma()
-    {
+    private void updateSigma() {
         if (sigma > 0.05)
             sigma = sigma * cfg.sigmaDecay();
     }
 
-    private void updateLayerData(MiniBatchTrainingResult delta)
-    {
-        layer.W = layer.W.matrixAdd(delta.getW());
-        layer.hbias = layer.hbias.matrixAdd(delta.getHbias());
-        layer.vbias = layer.vbias.matrixAdd(delta.getVbias());
+    private void updateLayerData(MiniBatchTrainingResult delta) {
+        synchronized (layer) {
+            layer.W = layer.W.matrixAdd(delta.getW());
+            layer.hbias = layer.hbias.matrixAdd(delta.getHbias());
+            layer.vbias = layer.vbias.matrixAdd(delta.getVbias());
+        }
     }
 
 
-    private Optional<MiniBatchTrainingResult> trainMiniBatch(Matrix X)
-    {
+    private Optional<MiniBatchTrainingResult> trainMiniBatch(Matrix X) {
         final int batchIndex = miniBatchIndex.getAndIncrement();
         timer.set(new Timer());
         timer.get().start();
+
         Matrix poshidprobs = getHidProbs(X);
         Matrix poshidstates = getHidStates(poshidprobs);
-        Matrix negdata = getNegData(poshidstates);
+        Matrix negdata = getNegData(poshidprobs);
         Matrix neghidprobs = getNegHidProbs(negdata);
+
+
         Matrix Wdelta = updateWeights(X, poshidprobs, negdata, neghidprobs);
         Matrix vBiasDelta = updateVBias(X, negdata);
         updateError(X, negdata);
         Matrix hBiasDelta = getHBiasDelta(X);
 
-        System.out.printf("E %s/%s | %s | %s %n", batchIndex * cfg.batchSize(), currentEpoch, layer.error, timer.get().toString());
+        System.out.printf("E %s/%s | %s | %s %n",
+                batchIndex * cfg.batchSize(),
+                currentEpoch,
+                layer.error,
+                timer.get().toString());
         datavis datavis = new datavis(
                 X,
                 batchIndex,
                 layer,
                 poshidprobs,
                 poshidstates,
-                negdata ,
-                neghidprobs ,
-                Wdelta ,
-                vBiasDelta ,
+                negdata,
+                neghidprobs,
+                Wdelta,
+                vBiasDelta,
                 hBiasDelta
         );
         draw(datavis);
-        timer.remove();
+        //timer.remove();
         return Optional.of(new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta));
     }
 
-    protected boolean isConverged()
-    {
-        return currentEpoch.get() < cfg.numberOfEpochs();
+    protected boolean isConverged() {
+        return currentEpoch.get() > cfg.numberOfEpochs() || layer.error < 0.03;
     }
 
 }

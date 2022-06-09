@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -43,7 +44,7 @@ public abstract class SRBM {
     final NegativePhaseComputations negativePhaseComputations;
     final HiddenBiasAdaptation hiddenBiasAdaptation;
 
-    final ThreadLocal<Timer> timer = new ThreadLocal();
+    final AtomicReference<Timer> timer = new AtomicReference();
     final AtomicInteger currentEpoch = new AtomicInteger(0);
     final AtomicInteger miniBatchIndex = new AtomicInteger(0);
 
@@ -55,6 +56,8 @@ public abstract class SRBM {
     protected double  sigma = cfg.sigmaInit();
 
     public abstract void train();
+
+    public abstract void setNext(SRBM next);
 
     public SRBM() throws IOException, InterruptedException {
         this.layer = new Layer(cfg.numdims(), cfg.numhid());
@@ -306,4 +309,5 @@ public abstract class SRBM {
     }
 
 
+    abstract public Matrix eval(Matrix matrix);
 }

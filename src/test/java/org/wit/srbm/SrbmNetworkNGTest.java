@@ -5,6 +5,7 @@
  */
 package org.wit.srbm;
 
+import org.testng.annotations.Test;
 import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
 
@@ -46,6 +47,14 @@ public class SrbmNetworkNGTest {
         
         
         
+    }
+
+    @Test
+    public void testDBN() throws IOException, InterruptedException {
+        SRBM v1 = new SRBMMapReduceJSA();
+        SRBM v2 = new SRBMMapReduceJSA(v1);
+
+        v1.train();
     }
     
 }
