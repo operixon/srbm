@@ -14,24 +14,8 @@ import java.util.List;
 
 public class PositivePhaseTest {
 
-    private static Configuration cfg = new CfgForPositivePhase();
 
 
-    @Test
-    void testEquation3(){
-        // Given
-        ActivationFunction activationFunction = new SigmoidFunction();
-        Layer layer = new Layer(cfg.numdims(),cfg.numhid());
-        Equation3 eq = new Equation3(cfg, layer, activationFunction);
-        List<Double> sample = Matrix2D.createFilledMatrix(1, 0, 1).getColumn(0);
-        Double value = eq.evaluate(0, sample, 0.5);
-    }
 
-    @Test
-    void t1()
-    {
-        //PositivePhaseComputations computations = new PositivePhaseComputations(new Configuration(), )
-
-    }
 
 }

@@ -1,6 +1,6 @@
 package org.wit.snr.nn.srbm;
 
-public class CfgForPositivePhase extends Configuration {
+public class CfgForPositivePhase {
 
 
     // Orginalne stałe z algorytmu
@@ -21,63 +21,4 @@ public class CfgForPositivePhase extends Configuration {
     public final boolean saveVisualization = true;
 
 
-    @Override
-    public int numdims() {
-        return numdims;
-    }
-
-    @Override
-    public int numhid() {
-        return numhid;
-    }
-
-    @Override
-    public double alpha() {
-        return alpha;
-    }
-
-    @Override
-    public int batchSize() {
-        return batchSize;
-    }
-
-    @Override
-    public double mi() {
-        return mi;
-    }
-
-    @Override
-    public double lambda() {
-        return lambda;
-    }
-
-    @Override
-    public int numberOfEpochs() {
-        return numberOfEpochs;
-    }
-
-    @Override
-    public double sparsneseFactor() {
-        return sparsneseFactor;
-    }
-
-    @Override
-    public double sigmaInit() {
-        return sigmaInit;
-    }
-
-    @Override
-    public double sigmaDecay() {
-        return sigmaDecay;
-    }
-
-    @Override
-    public String visualizationOutDirectory() {
-        return visualizationOutDirectory;
-    }
-
-    @Override
-    public boolean saveVisualization() {
-        return saveVisualization;
-    }
 }

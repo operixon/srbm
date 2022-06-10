@@ -6,17 +6,17 @@
 package org.wit.srbm;
 
 import org.testng.annotations.Test;
+import org.wit.snr.nn.srbm.Configuration;
 import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
 
 import java.io.IOException;
 
 /**
- *
  * @author koperix
  */
 public class SrbmNetworkNGTest {
-    
+
     public SrbmNetworkNGTest() {
     }
 
@@ -39,22 +39,29 @@ public class SrbmNetworkNGTest {
     /**
      * Test of main method, of class SRBM.
      */
-    @org.testng.annotations.Test
-    public void testLearning() throws IOException, InterruptedException {
 
-        SRBM algorithm = new SRBMMapReduceJSA();
-        algorithm.train();
-        
-        
-        
-    }
 
     @Test
     public void testDBN() throws IOException, InterruptedException {
-        SRBM v1 = new SRBMMapReduceJSA();
-        SRBM v2 = new SRBMMapReduceJSA(v1);
-
+        SRBM v1 = new SRBMMapReduceJSA(
+                new Configuration()
+                        .setBatchSize(200)
+                        .setNumdims(784)
+                        .setNumhid(784)
+                        .setNumberOfEpochs(10));
+        SRBM v2 = new SRBMMapReduceJSA(v1,
+                new Configuration()
+                        .setBatchSize(200)
+                        .setNumdims(784)
+                        .setNumhid(784 )
+                        .setNumberOfEpochs(10));
+        SRBM v3 = new SRBMMapReduceJSA(v2,
+                new Configuration()
+                        .setBatchSize(200)
+                        .setNumdims(784)
+                        .setNumhid(784/28)
+                        .setNumberOfEpochs(100));
         v1.train();
     }
-    
+
 }

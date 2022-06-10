@@ -9,7 +9,7 @@ package org.wit.snr.nn.srbm;
  *
  * @author koperix
  */
-public class ConfigurationSRBM extends Configuration {
+public class ConfigurationSRBM  {
 
     // Orginalne stałe z algorytmu
     public final int numdims = 784; //# of visible units
@@ -28,64 +28,4 @@ public class ConfigurationSRBM extends Configuration {
     public final String visualizationOutDirectory = "/home/artur/srbm";
     public final boolean saveVisualization = false;
 
-
-    @Override
-    public int numdims() {
-        return numdims;
-    }
-
-    @Override
-    public int numhid() {
-        return numhid;
-    }
-
-    @Override
-    public double alpha() {
-        return alpha;
-    }
-
-    @Override
-    public int batchSize() {
-        return batchSize;
-    }
-
-    @Override
-    public double mi() {
-        return mi;
-    }
-
-    @Override
-    public double lambda() {
-        return lambda;
-    }
-
-    @Override
-    public int numberOfEpochs() {
-        return numberOfEpochs;
-    }
-
-    @Override
-    public double sparsneseFactor() {
-        return sparsneseFactor;
-    }
-
-    @Override
-    public double sigmaInit() {
-        return sigmaInit;
-    }
-
-    @Override
-    public double sigmaDecay() {
-        return sigmaDecay;
-    }
-
-    @Override
-    public String visualizationOutDirectory() {
-        return visualizationOutDirectory;
-    }
-
-    @Override
-    public boolean saveVisualization() {
-        return saveVisualization;
-    }
 }

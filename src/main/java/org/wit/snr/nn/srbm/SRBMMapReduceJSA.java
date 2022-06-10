@@ -15,8 +15,8 @@ public class SRBMMapReduceJSA extends SRBM {
     private SRBM prev;
     private SRBM next;
 
-    public SRBMMapReduceJSA() throws IOException, InterruptedException {
-        super();
+    public SRBMMapReduceJSA(Configuration cfg) throws IOException, InterruptedException {
+        super(cfg);
         batch = getTrainingBatch();
     }
 
@@ -29,8 +29,8 @@ public class SRBMMapReduceJSA extends SRBM {
         }
     }
 
-    public SRBMMapReduceJSA(SRBM v1) throws IOException, InterruptedException {
-        super();
+    public SRBMMapReduceJSA(SRBM v1,Configuration cfg) throws IOException, InterruptedException {
+        super(cfg);
         batch = getTrainingBatch();
         this.prev = v1;
         v1.setNext(this);
@@ -66,7 +66,7 @@ public class SRBMMapReduceJSA extends SRBM {
     private void getMapReduceResult() {
         if (prev != null) {
             batch.parallelStream()
-                    .limit(1)
+                   // .limit(1)
                     .map(prev::eval)
                     .map(this::trainMiniBatch)
                     .filter(Optional::isPresent)
@@ -75,7 +75,7 @@ public class SRBMMapReduceJSA extends SRBM {
                     .count();
         } else {
             batch.parallelStream()
-                    .limit(1)
+                  //  .limit(1)
                     .map(samples -> trainMiniBatch(samples))
                     .peek(tbr -> updateLayerData(tbr.get()))
                     .collect(Collectors.counting());

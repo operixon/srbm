@@ -5,32 +5,127 @@
  */
 package org.wit.snr.nn.srbm;
 
-/**
- * @author koperix
- */
-public abstract class Configuration {
+public class Configuration {
 
-    abstract public int numdims();
+    private int numdims = 784; //# of visible units
+    private int numhid = 784; //# of hidden units
+    private double alpha = 0.005; // Learning rate, recomended value is 0.01
+    private int batchSize = 20;
+    // Dodaane zmienne
+    private double mi = 0;
+    private double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
+    private int numberOfEpochs = 5;
+    private double sparsneseFactor = 0.06; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+    private double sigmaInit = 0.5;
+    private double sigmaDecay = 0.99;
+    private String visualizationOutDirectory = "/home/artur/srbm";
+    private boolean saveVisualization = false;
 
-    abstract public int numhid();
+    public Configuration setNumdims(int numdims) {
+        this.numdims = numdims;
+        return this;
+    }
 
-    abstract public double alpha();
+    public Configuration setNumhid(int numhid) {
+        this.numhid = numhid;
+        return this;
+    }
 
-    abstract public int batchSize();
+    public Configuration setAlpha(double alpha) {
+        this.alpha = alpha;
+        return this;
+    }
 
-    abstract public double mi();
+    public Configuration setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+        return this;
+    }
 
-    abstract public double lambda();
+    public Configuration setMi(double mi) {
+        this.mi = mi;
+        return this;
+    }
 
-    abstract public int numberOfEpochs();
+    public Configuration setLambda(double lambda) {
+        this.lambda = lambda;
+        return this;
+    }
 
-    abstract public double sparsneseFactor();
+    public Configuration setNumberOfEpochs(int numberOfEpochs) {
+        this.numberOfEpochs = numberOfEpochs;
+        return this;
+    }
 
-    abstract public double sigmaInit();
+    public Configuration setSparsneseFactor(double sparsneseFactor) {
+        this.sparsneseFactor = sparsneseFactor;
+        return this;
+    }
 
-    abstract public double sigmaDecay();
+    public Configuration setSigmaInit(double sigmaInit) {
+        this.sigmaInit = sigmaInit;
+        return this;
+    }
 
-    abstract public String visualizationOutDirectory();
+    public Configuration setSigmaDecay(double sigmaDecay) {
+        this.sigmaDecay = sigmaDecay;
+        return this;
+    }
 
-    abstract public boolean saveVisualization();
+    public Configuration setVisualizationOutDirectory(String visualizationOutDirectory) {
+        this.visualizationOutDirectory = visualizationOutDirectory;
+        return this;
+    }
+
+    public Configuration setSaveVisualization(boolean saveVisualization) {
+        this.saveVisualization = saveVisualization;
+        return this;
+    }
+
+    public int numdims() {
+        return numdims;
+    }
+
+    public int numhid() {
+        return numhid;
+    }
+
+    public double alpha() {
+        return alpha;
+    }
+
+    public int batchSize() {
+        return batchSize;
+    }
+
+    public double mi() {
+        return mi;
+    }
+
+    public double lambda() {
+        return lambda;
+    }
+
+    public int numberOfEpochs() {
+        return numberOfEpochs;
+    }
+
+    public double sparsneseFactor() {
+        return sparsneseFactor;
+    }
+
+    public double sigmaInit() {
+        return sigmaInit;
+    }
+
+    public double sigmaDecay() {
+        return sigmaDecay;
+    }
+
+    public String visualizationOutDirectory() {
+        return visualizationOutDirectory;
+    }
+
+    public boolean saveVisualization() {
+        return saveVisualization;
+    }
 }
