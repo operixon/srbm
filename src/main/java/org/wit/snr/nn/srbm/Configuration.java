@@ -15,11 +15,21 @@ public class Configuration {
     private double mi = 0;
     private double lambda = 1; // Zgodnie z dokumentem zawsze ustawione na 1
     private int numberOfEpochs = 5;
-    private double sparsneseFactor = 0.06; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
+    private double sparsneseFactor = 0.5; // Wspolczynnik P regulojacy rzadkość reprezentacji (7.2)
     private double sigmaInit = 0.5;
     private double sigmaDecay = 0.99;
     private String visualizationOutDirectory = "/home/artur/srbm";
     private boolean saveVisualization = false;
+    private double acceptedError = 0.03;
+
+    public Configuration setAcceptedError(double acceptedError) {
+        this.acceptedError = acceptedError;
+        return this;
+    }
+
+    public double acceptedError() {
+        return acceptedError;
+    }
 
     public Configuration setNumdims(int numdims) {
         this.numdims = numdims;

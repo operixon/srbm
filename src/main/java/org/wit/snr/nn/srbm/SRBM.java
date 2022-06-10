@@ -21,7 +21,9 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,7 +41,7 @@ public abstract class SRBM {
     final NegativePhaseComputations negativePhaseComputations;
     final HiddenBiasAdaptation hiddenBiasAdaptation;
 
-    final AtomicReference<Timer> timer = new AtomicReference();
+    final ThreadLocal<Timer> timer = ThreadLocal.withInitial(Timer::new);
     final AtomicInteger currentEpoch = new AtomicInteger(0);
     final AtomicInteger miniBatchIndex = new AtomicInteger(0);
 
@@ -307,4 +309,13 @@ public abstract class SRBM {
 
 
     abstract public Matrix eval(Matrix matrix);
+
+    public void persist(String s) {
+        try (FileOutputStream fos = new FileOutputStream(s);
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(layer);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 }

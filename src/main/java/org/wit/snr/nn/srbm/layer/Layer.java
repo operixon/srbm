@@ -3,9 +3,10 @@ package org.wit.snr.nn.srbm.layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Layer {
+public class Layer implements Serializable {
     // W := randn(numdims, numhid)
     public Matrix W;
     public Matrix vbias; // ci

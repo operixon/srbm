@@ -3,11 +3,12 @@ package org.wit.snr.nn.srbm.math.collection;
 import org.ojalgo.matrix.BasicMatrix;
 import org.ojalgo.matrix.PrimitiveMatrix;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-public abstract class Matrix {
+public abstract class Matrix implements Serializable {
 
 
     public String toFullString() {

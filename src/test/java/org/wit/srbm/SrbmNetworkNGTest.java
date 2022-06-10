@@ -45,23 +45,33 @@ public class SrbmNetworkNGTest {
     public void testDBN() throws IOException, InterruptedException {
         SRBM v1 = new SRBMMapReduceJSA(
                 new Configuration()
-                        .setBatchSize(200)
+                        .setBatchSize(50)
                         .setNumdims(784)
                         .setNumhid(784)
-                        .setNumberOfEpochs(10));
+                        .setSparsneseFactor(0.1)
+                        .setNumberOfEpochs(0)
+                        .setAcceptedError(0.06)
+        );
         SRBM v2 = new SRBMMapReduceJSA(v1,
                 new Configuration()
-                        .setBatchSize(200)
+                        .setBatchSize(50)
                         .setNumdims(784)
-                        .setNumhid(784 )
-                        .setNumberOfEpochs(10));
+                        .setNumhid(784)
+                        .setNumberOfEpochs(1)
+                        .setAcceptedError(0.0035)
+        );
         SRBM v3 = new SRBMMapReduceJSA(v2,
                 new Configuration()
-                        .setBatchSize(200)
+                        .setBatchSize(50)
                         .setNumdims(784)
-                        .setNumhid(784/28)
-                        .setNumberOfEpochs(100));
+                        .setNumhid(784 / 28)
+                        .setNumberOfEpochs(1)
+                        .setAcceptedError(0.001)
+        );
         v1.train();
+        v1.persist("/dane/v1-srbm-layer.data");
+        v2.persist("/dane/v2-srbm-layer.data");
+        v3.persist("/dane/v3-srbm-layer.data");
     }
 
 }

@@ -23,9 +23,9 @@ public class SRBMMapReduceJSA extends SRBM {
     @Override
     public Matrix eval(Matrix matrix) {
         if (prev != null) {
-            return getHidStates(getHidProbs(prev.eval(matrix)));
+            return getHidProbs(prev.eval(matrix));
         } else {
-            return getHidStates(getHidProbs(matrix));
+            return getHidProbs(matrix);
         }
     }
 
@@ -66,7 +66,7 @@ public class SRBMMapReduceJSA extends SRBM {
     private void getMapReduceResult() {
         if (prev != null) {
             batch.parallelStream()
-                   // .limit(1)
+                    .limit(1)
                     .map(prev::eval)
                     .map(this::trainMiniBatch)
                     .filter(Optional::isPresent)
@@ -75,7 +75,7 @@ public class SRBMMapReduceJSA extends SRBM {
                     .count();
         } else {
             batch.parallelStream()
-                  //  .limit(1)
+                    .limit(1)
                     .map(samples -> trainMiniBatch(samples))
                     .peek(tbr -> updateLayerData(tbr.get()))
                     .collect(Collectors.counting());
@@ -103,7 +103,7 @@ public class SRBMMapReduceJSA extends SRBM {
 
     private Optional<MiniBatchTrainingResult> trainMiniBatch(Matrix X) {
         final int batchIndex = miniBatchIndex.getAndIncrement();
-        timer.set(new Timer());
+       // timer.set(new Timer());
         timer.get().start();
 
         Matrix poshidprobs = getHidProbs(X);
@@ -135,12 +135,12 @@ public class SRBMMapReduceJSA extends SRBM {
                 hBiasDelta
         );
         draw(datavis);
-        //timer.remove();
+        timer.remove();
         return Optional.of(new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta));
     }
 
     protected boolean isConverged() {
-        return currentEpoch.get() > cfg.numberOfEpochs() || layer.error < 0.03;
+        return currentEpoch.get() > cfg.numberOfEpochs() || layer.error < cfg.acceptedError();
     }
 
 }
