@@ -20,14 +20,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 /**
  * @author koperix
@@ -35,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class SRBM {
 
     final Configuration cfg;
-    final Layer layer;
+    Layer layer;
     final TrainingSet trainingSet;
     final PositivePhaseComputations positivePhaseComputations;
     final NegativePhaseComputations negativePhaseComputations;
@@ -50,7 +48,7 @@ public abstract class SRBM {
 
     final String sessionId = "srbm-" + System.currentTimeMillis();
 
-    protected double sigma ;
+    protected double sigma;
 
 
     public abstract void train();
@@ -316,6 +314,15 @@ public abstract class SRBM {
             oos.writeObject(layer);
         } catch (IOException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public void load(String s) throws IOException, ClassNotFoundException {
+        try (FileInputStream in = new FileInputStream(s)) {
+            ObjectInputStream o = new ObjectInputStream(in);
+            this.layer = (Layer) o.readObject();
+        } catch (FileNotFoundException e) {
+            Logger.getLogger(SRBM.class.getName()).info("File "+s+" not found. Starting from begining.");
         }
     }
 }
