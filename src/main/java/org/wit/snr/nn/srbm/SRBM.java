@@ -71,7 +71,7 @@ public abstract class SRBM {
     }
 
     private void initCanvas() {
-        frame = new JFrame("sRBM");
+        frame = new JFrame("sRBM-"+sessionId);
         frame.setSize(1500, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
