@@ -44,29 +44,29 @@ public class SrbmNetworkNGTest {
 
         SRBM v1 = new SRBMMapReduceJSA(
                 new RbmCfg().setBatchSize(200)
-                        .numdims(784)
-                        .numhid(784)
-                        .setSparsneseFactor(0.5)
-                        .setNumberOfEpochs(15)
-                        .setAcceptedError(0.03)
+                            .numdims(784)
+                            .numhid(784)
+                            .setSparsneseFactor(0.5)
+                            .setNumberOfEpochs(15)
+                            .setAcceptedError(0.03)
         );
         v1.load("/dane/2v1-srbm-layer.data");
         SRBM v2 = new SRBMMapReduceJSA(v1,
-                new RbmCfg()
-                        .setBatchSize(200)
-                        .numdims(784)
-                        .numhid(500)
-                        .setNumberOfEpochs(10)
-                        .setAcceptedError(0.0035)
+                                       new RbmCfg()
+                                               .setBatchSize(200)
+                                               .numdims(784)
+                                               .numhid(500)
+                                               .setNumberOfEpochs(10)
+                                               .setAcceptedError(0.0035)
         );
         v2.load("/dane/2v2-srbm-layer.data");
         SRBM v3 = new SRBMMapReduceJSA(v2,
-                new RbmCfg()
-                        .setBatchSize(200)
-                        .numdims(500)
-                        .numhid(10)
-                        .setNumberOfEpochs(10)
-                        .setAcceptedError(0.001)
+                                       new RbmCfg()
+                                               .setBatchSize(200)
+                                               .numdims(500)
+                                               .numhid(10)
+                                               .setNumberOfEpochs(10)
+                                               .setAcceptedError(0.001)
         );
         v3.load("/dane/2v3-srbm-layer.data");
 
@@ -83,11 +83,11 @@ public class SrbmNetworkNGTest {
 
         SRBM v1 = new SRBMMapReduceJSA(
                 new RbmCfg().setBatchSize(10)
-                        .numdims(784)
-                        .numhid(784 / 16)
-                        .setSparsneseFactor(0.1)
-                        .setNumberOfEpochs(1)
-                        .setAcceptedError(0.04)
+                            .numdims(784)
+                            .numhid(784 / 16)
+                            .setSparsneseFactor(0.1)
+                            .setNumberOfEpochs(1)
+                            .setAcceptedError(0.04)
         );
         v1.train();
         v1.persist("/dane/v1-single-srbm-layer.data");
@@ -100,7 +100,7 @@ public class SrbmNetworkNGTest {
         RbmCfg cfg = new RbmCfg()
                 .setBatchSize(10)
                 .setSparsneseFactor(0.1)
-                .setNumberOfEpochs(1)
+                .setNumberOfEpochs(8)
                 .setAcceptedError(0.04)
                 .load(true)
                 .persist(true)
@@ -108,25 +108,25 @@ public class SrbmNetworkNGTest {
                 .showViz(false)
                 .workDir("/dane/");
 
-
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
-        autoencoder.fit();
 
+        autoencoder.fit();
         TrainingSetMinst tset = new TrainingSetMinst();
         List<Matrix> trainingBatch = tset.getTrainingBatch(10);
         Matrix sample = trainingBatch.get(0);
 
         Matrix result = autoencoder.transform(sample);
 
-        MatrixRendererIF diag = new ManyMatrixInFrame(result.splitToColumnVectors()
-                                                            .stream()
-                                                            .map(m -> m.reshape(28)
-                                                                       .transpose())
-                                                            .collect(Collectors.toList()));
-
+        MatrixRendererIF diag = new OneMatrixInFrame(result.splitToColumnVectors()
+                                                           .get(0)
+                                                           .reshape(28)
+                                                           .transpose());
+        MatrixRendererIF diag2 = new OneMatrixInFrame(sample.reshape(28)
+                                                            .transpose());
 
         diag.render();
+        diag2.render();
         Thread.sleep(Long.MAX_VALUE);
     }
 

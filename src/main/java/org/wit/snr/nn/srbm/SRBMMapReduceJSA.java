@@ -67,7 +67,7 @@ public class SRBMMapReduceJSA extends SRBM {
     private void getMapReduceResult() {
         if (prev != null) {
             batch.parallelStream()
-                 //.limit(1)
+                 .limit(10)
                  .map(prev::eval)
                  .map(this::trainMiniBatch)
                  .filter(Optional::isPresent)
@@ -76,7 +76,7 @@ public class SRBMMapReduceJSA extends SRBM {
                  .count();
         } else {
             batch.parallelStream()
-                 //.limit(1)
+                 .limit(10)
                  .map(this::trainMiniBatch)
                  .filter(Optional::isPresent)
                  .map(Optional::get)

@@ -1,13 +1,14 @@
 package org.wit.snr.nn.dbn;
 
 import org.wit.snr.nn.srbm.RbmCfg;
-import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public class DbnAutoencoder {
@@ -18,6 +19,8 @@ public class DbnAutoencoder {
     private final RbmCfg cfg;
     private final int[] topology;
     private final List<SRBMMapReduceJSA> layers = new LinkedList<SRBMMapReduceJSA>();
+    private List<Consumer<DbnAutoencoder>> epochHandlersList;
+
 
     public DbnAutoencoder(String name, RbmCfg cfg, int[] topology) throws IllegalAccessException {
 
@@ -30,7 +33,7 @@ public class DbnAutoencoder {
     }
 
 
-    public void buildTopology() throws IOException, InterruptedException, CloneNotSupportedException, ClassNotFoundException {
+    public void buildTopology() throws IOException, InterruptedException, CloneNotSupportedException {
         for (int i = 0; i < topology.length - 1; i++) {
             RbmCfg newLayerCfg = ((RbmCfg) cfg.clone()).numdims(topology[i])
                                                        .numhid(topology[i + 1])
@@ -40,13 +43,16 @@ public class DbnAutoencoder {
                                         : new SRBMMapReduceJSA(layers.get(layers.size() - 1), newLayerCfg);
             layers.add(newLayer);
         }
+
+    }
+
+    public void load() throws IOException, ClassNotFoundException {
         if (cfg.load()) {
             for (int i = 0; i < layers.size(); i++) {
                 layers.get(i).load(cfg.workDir() + "/" + name + "-" + i);
             }
         }
     }
-
 
 
     public void fit()  {
@@ -86,5 +92,9 @@ public class DbnAutoencoder {
 
     public Matrix transform(Matrix sample) {
         return layers.get(layers.size()-1).eval(sample);
+    }
+
+    public void addEpochHandler(Consumer<DbnAutoencoder> c) {
+        epochHandlersList.add(c);
     }
 }
