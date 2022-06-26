@@ -4,24 +4,23 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferStrategy;
 import java.util.List;
 
 // auto update driven by matrix change
 // time trigered update
 // border for pixel, magnification of matrix visualization
-public class OneMatrixInFrame implements MatrixRendererIF {
+public class WeightsInFrame implements MatrixRendererIF {
 
 
-    public static final int CELL_SIZE = 2;
-    public static final int CELL_SPACE = 1;
+    public static final int CELL_SIZE = 1;
+    public static final int CELL_SPACE = 0;
     final JFrame frame; // TODO : refactor
     final Matrix m;
     final private int x;
     final private int y;
 
 
-    public OneMatrixInFrame(Matrix m) {
+    public WeightsInFrame(Matrix m) {
         frame = new JFrame("Matrix rows:" + m.getRowsNumber() + ", cols: " + m.getColumnsNumber());
         //int width = m.getColumnsNumber() * CELL_SIZE + m.getColumnsNumber() * CELL_SPACE;
        // int height = m.getRowsNumber() * CELL_SIZE + m.getRowsNumber() * CELL_SPACE;
@@ -54,23 +53,18 @@ public class OneMatrixInFrame implements MatrixRendererIF {
                     2000,
                     0,
                     0);
-            final List<List<Double>> data = m.normalize(0, 255).getMatrixAsCollection();
-            final int cols = data.size();
-            for (int col = 0; col < cols; col++) {
-                for (int row = 0; row < data.get(col).size(); row++) {
-                    double cell = data.get(col).get(row);
-                    int c = (int) Math.round(cell);
-                    g.setColor(new Color(c, c, c));
-                    int pixelX = row * CELL_SIZE + row * CELL_SPACE + y;
-                    int pixelY = col * CELL_SIZE + col * CELL_SPACE + x;
-                    g.fillRoundRect(
-                            pixelX,
-                            pixelY,
-                            CELL_SIZE,
-                            CELL_SIZE,
-                            0,
-                            0);
+            int colidx = 0;
+            for (List<Double> column : m.normalize(0, 255).getMatrixAsCollection()) {
+                for (int i = 0; i < 28; i++) {
+                    for (int j = 0; j < 28; j++) {
+                        int c = (int) Math.round(column.get(i * 28 + j));
+                        g.setColor(new Color(c, c, c));
+                        int offset_i = x + 28 * (colidx % 20) + 2 * (colidx % 20);
+                        int offset_j = y + 28 * (Math.round(colidx / 20)) + 2 * (Math.round(colidx / 20));
+                        g.drawLine(i + offset_i, j + offset_j, i + offset_i, j + offset_j);
+                    }
                 }
+                colidx++;
             }
         }
     };

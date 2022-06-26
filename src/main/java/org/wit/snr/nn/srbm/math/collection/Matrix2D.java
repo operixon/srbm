@@ -207,6 +207,13 @@ public class Matrix2D extends Matrix {
         return new Matrix2D(values);
     }
 
+    @Override
+    public List<Matrix> splitToColumnVectors() {
+        return columnsList.stream()
+                .map(column -> Matrix2D.createColumnVector(column))
+                .collect(Collectors.toList());
+    }
+
 
     private double getMinValue() {
         return getDataAsList().stream().mapToDouble(d -> d).min().getAsDouble();

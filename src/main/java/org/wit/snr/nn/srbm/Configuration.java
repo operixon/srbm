@@ -21,6 +21,16 @@ public class Configuration {
     private String visualizationOutDirectory = "/home/artur/srbm";
     private boolean saveVisualization = false;
     private double acceptedError = 0.03;
+    private boolean showVisualizationWindow = false;
+
+    public boolean showVisualizationWindow() {
+        return showVisualizationWindow;
+    }
+
+    public Configuration setShowVisualizationWindow(boolean showVisualizationWindow) {
+        this.showVisualizationWindow = showVisualizationWindow;
+        return this;
+    }
 
     public Configuration setAcceptedError(double acceptedError) {
         this.acceptedError = acceptedError;
@@ -137,5 +147,9 @@ public class Configuration {
 
     public boolean saveVisualization() {
         return saveVisualization;
+    }
+
+    public boolean visualizationWindow() {
+        return showVisualizationWindow;
     }
 }

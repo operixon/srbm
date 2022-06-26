@@ -53,7 +53,7 @@ public abstract class SRBM {
 
     public abstract void train();
 
-    public abstract void setNext(SRBM next);
+    public abstract SRBM setNext(SRBM next);
 
     public SRBM(Configuration cfg) throws IOException, InterruptedException {
         this.cfg = cfg;
@@ -67,7 +67,9 @@ public abstract class SRBM {
                 new Equation2(this.cfg, layer, new SigmoidFunction()),
                 this.cfg
         );
-        initCanvas();
+        if(cfg.visualizationWindow()) {
+            initCanvas();
+        }
     }
 
     private void initCanvas() {
@@ -89,8 +91,12 @@ public abstract class SRBM {
     }
 
     void draw(datavis datavis) {
-        displayVisualizationOnScreen(datavis);
-        if (cfg.saveVisualization()) saveVisualizationToFile(datavis);
+        if(cfg.showVisualizationWindow()) {
+            displayVisualizationOnScreen(datavis);
+        }
+        if (cfg.saveVisualization()){
+            saveVisualizationToFile(datavis);
+        }
     }
 
     private void displayVisualizationOnScreen(datavis d) {
@@ -325,4 +331,10 @@ public abstract class SRBM {
             Logger.getLogger(SRBM.class.getName()).info("File "+s+" not found. Starting from begining.");
         }
     }
+
+    public Matrix W() {
+        return layer.W;
+    }
+
+    public abstract SRBM autoencoderMirror() throws IOException, InterruptedException;
 }

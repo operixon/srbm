@@ -4,32 +4,30 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferStrategy;
 import java.util.List;
+import java.util.stream.Collectors;
 
 // auto update driven by matrix change
 // time trigered update
 // border for pixel, magnification of matrix visualization
-public class OneMatrixInFrame implements MatrixRendererIF {
+public class ManyMatrixInFrame implements MatrixRendererIF {
 
 
     public static final int CELL_SIZE = 2;
-    public static final int CELL_SPACE = 1;
+    public static final int CELL_SPACE = 0;
     final JFrame frame; // TODO : refactor
-    final Matrix m;
+    final List<Matrix> m;
     final private int x;
     final private int y;
 
 
-    public OneMatrixInFrame(Matrix m) {
-        frame = new JFrame("Matrix rows:" + m.getRowsNumber() + ", cols: " + m.getColumnsNumber());
-        //int width = m.getColumnsNumber() * CELL_SIZE + m.getColumnsNumber() * CELL_SPACE;
-       // int height = m.getRowsNumber() * CELL_SIZE + m.getRowsNumber() * CELL_SPACE;
-        frame.setSize(500, 500);
+    public ManyMatrixInFrame(List<Matrix> m) {
+        frame = new JFrame("Many Matrix size:" + m.size());
+        frame.setSize(700, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-   //     frame.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null);
         frame.setResizable(true);
-     frame.setBackground(Color.BLACK);
+        frame.setBackground(Color.BLACK);
         x = 0;
         y = 0;
         this.m = m;
@@ -38,12 +36,26 @@ public class OneMatrixInFrame implements MatrixRendererIF {
 
     @Override
     public void render() {
-        paintPanel.setBackground(Color.BLACK);
-        frame.add(paintPanel);
+        Container pane = frame.getContentPane();
+        pane.setLayout(new GridLayout(20,20));
+        List<MatrixPanel> collect = m.stream()
+                .map(MatrixPanel::new)
+               // .peek(p -> p.setAlignmentX(Component.CENTER_ALIGNMENT))
+               // .peek(p->p.setSize(28,28))
+                .peek(pane::add)
+                .collect(Collectors.toList());
+        frame.pack();
         frame.setVisible(true);
     }
 
-    final JPanel paintPanel = new JPanel() {
+    final private class MatrixPanel extends JPanel {
+
+        Matrix matrix;
+
+        public MatrixPanel(Matrix matrix) {
+            this.matrix = matrix;
+        }
+
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             g.setColor(Color.BLACK);
@@ -54,7 +66,7 @@ public class OneMatrixInFrame implements MatrixRendererIF {
                     2000,
                     0,
                     0);
-            final List<List<Double>> data = m.normalize(0, 255).getMatrixAsCollection();
+            final List<List<Double>> data = matrix.normalize(0, 255).getMatrixAsCollection();
             final int cols = data.size();
             for (int col = 0; col < cols; col++) {
                 for (int row = 0; row < data.get(col).size(); row++) {
@@ -73,7 +85,9 @@ public class OneMatrixInFrame implements MatrixRendererIF {
                 }
             }
         }
-    };
+    }
+
+    ;
 
 
 }

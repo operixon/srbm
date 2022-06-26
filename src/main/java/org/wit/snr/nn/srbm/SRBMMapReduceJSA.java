@@ -29,6 +29,15 @@ public class SRBMMapReduceJSA extends SRBM {
         }
     }
 
+    @Override
+    public SRBM autoencoderMirror() throws IOException, InterruptedException {
+        SRBM a = new SRBMMapReduceJSA(cfg);
+        a.layer.W = this.layer.W.transpose();
+        a.layer.hbias = this.layer.hbias.clone(); // w ma transpose a co z tym? pozamieniac miejscami ?
+        a.layer.vbias = this.layer.vbias.clone();
+        //a.layer.inputSize = this.layer.outputSize; // do konstruktora w cfg
+    }
+
     public SRBMMapReduceJSA(SRBM v1,Configuration cfg) throws IOException, InterruptedException {
         super(cfg);
         batch = getTrainingBatch();
@@ -42,8 +51,9 @@ public class SRBMMapReduceJSA extends SRBM {
         this.prev = prev;
     }
 
-    public void setNext(SRBM next) {
+    public SRBM setNext(SRBM next) {
         this.next = next;
+        return next;
     }
 
     public void train() {
@@ -122,6 +132,7 @@ public class SRBMMapReduceJSA extends SRBM {
                 currentEpoch,
                 layer.error,
                 timer.get().toString());
+
         datavis datavis = new datavis(
                 X,
                 batchIndex,

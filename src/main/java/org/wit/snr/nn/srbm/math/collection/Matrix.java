@@ -140,5 +140,7 @@ public abstract class Matrix implements Serializable {
 
     public abstract Matrix reshape(int columnLength);
 
+    public abstract List<Matrix> splitToColumnVectors();
+
 
 }
