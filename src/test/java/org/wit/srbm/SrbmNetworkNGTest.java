@@ -11,9 +11,11 @@ import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
+import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 import org.wit.snr.nn.srbm.visualization.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -92,7 +94,7 @@ public class SrbmNetworkNGTest {
     }
 
     @Test
-    public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException {
+    public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException, IllegalAccessException {
 
         int[] topology = {784, 500, 10, 500, 784};
         RbmCfg cfg = new RbmCfg()
@@ -101,38 +103,30 @@ public class SrbmNetworkNGTest {
                 .setNumberOfEpochs(1)
                 .setAcceptedError(0.04)
                 .load(true)
+                .persist(true)
                 .setSaveVisualization(false)
-                .showViz(false);
+                .showViz(false)
+                .workDir("/dane/");
 
 
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
         autoencoder.fit();
 
-        dnnAuto.add(topology[0], cfg.cl);
+        TrainingSetMinst tset = new TrainingSetMinst();
+        List<Matrix> trainingBatch = tset.getTrainingBatch(10);
+        Matrix sample = trainingBatch.get(0);
+
+        Matrix result = autoencoder.transform(sample);
+
+        MatrixRendererIF diag = new ManyMatrixInFrame(result.splitToColumnVectors()
+                                                            .stream()
+                                                            .map(m -> m.reshape(28)
+                                                                       .transpose())
+                                                            .collect(Collectors.toList()));
 
 
-        SRBM v1 = new SRBMMapReduceJSA(RbmCfg.defaults1().name("ae-v1").numdims(topology[0]).numhid(topology[1]));
-        SRBM v2 = v1.addLayer( topology[1]);
-        SRBM v3 = new SRBMMapReduceJSA(v2, RbmCfg.defaults1().name("ae-v3").numdims(topology[2]).numhid(topology[3]));
-
-        SRBM t1 =
-                SRBM v2 = v2.autoencoderMirror();
-        SRBM v3 = v1.autoencoderMirror();
-
-        v3t.
-
-
-                v1.setNext(v2).setNext(v3).setNext(v3t).setNext(v2t).setNext(v1t);
-
-
-        Matrix filter = v1.W().splitToColumnVectors().get(6).reshape(28);
-        //MatrixRendererIF r = new WeightsInFrame(v1.W());
-        //MatrixRendererIF r2 = new OneMatrixInFrame(filter);
-        MatrixRendererIF r3 = new ManyMatrixInFrame(v1.W().splitToColumnVectors().stream().map(m -> m.reshape(28).transpose()).collect(Collectors.toList()));
-        //r.render();
-        //r2.render();
-        r3.render();
+        diag.render();
         Thread.sleep(Long.MAX_VALUE);
     }
 

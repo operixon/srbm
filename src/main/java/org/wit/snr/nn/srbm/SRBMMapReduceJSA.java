@@ -29,13 +29,7 @@ public class SRBMMapReduceJSA extends SRBM {
         }
     }
 
-    //
-    @Override
-    public SRBM autoencoderMirror() throws IOException, InterruptedException {
 
-
-
-    }
 
     public SRBMMapReduceJSA(SRBM v1, RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
@@ -59,9 +53,7 @@ public class SRBMMapReduceJSA extends SRBM {
         while (!isConverged()) {
             epoch();
         }
-        if (next != null) {
-            next.train();
-        }
+
     }
 
     private void epoch() {
@@ -75,19 +67,21 @@ public class SRBMMapReduceJSA extends SRBM {
     private void getMapReduceResult() {
         if (prev != null) {
             batch.parallelStream()
-                //    .limit(1)
-                    .map(prev::eval)
-                    .map(this::trainMiniBatch)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .peek(this::updateLayerData)
-                    .count();
+                 //.limit(1)
+                 .map(prev::eval)
+                 .map(this::trainMiniBatch)
+                 .filter(Optional::isPresent)
+                 .map(Optional::get)
+                 .peek(this::updateLayerData)
+                 .count();
         } else {
             batch.parallelStream()
-               //     .limit(1)
-                    .map(samples -> trainMiniBatch(samples))
-                    .peek(tbr -> updateLayerData(tbr.get()))
-                    .collect(Collectors.counting());
+                 //.limit(1)
+                 .map(this::trainMiniBatch)
+                 .filter(Optional::isPresent)
+                 .map(Optional::get)
+                 .peek(this::updateLayerData)
+                 .count();
         }
         //.reduce(
         //      Optional.empty(),
@@ -112,7 +106,7 @@ public class SRBMMapReduceJSA extends SRBM {
 
     private Optional<MiniBatchTrainingResult> trainMiniBatch(Matrix X) {
         final int batchIndex = miniBatchIndex.getAndIncrement();
-       // timer.set(new Timer());
+        // timer.set(new Timer());
         timer.get().start();
 
         Matrix poshidprobs = getHidProbs(X);
@@ -127,10 +121,10 @@ public class SRBMMapReduceJSA extends SRBM {
         Matrix hBiasDelta = getHBiasDelta(X);
 
         System.out.printf("E %s/%s | %s | %s %n",
-                batchIndex * cfg.batchSize(),
-                currentEpoch,
-                layer.error,
-                timer.get().toString());
+                          batchIndex * cfg.batchSize(),
+                          currentEpoch,
+                          layer.error,
+                          timer.get().toString());
 
         datavis datavis = new datavis(
                 X,

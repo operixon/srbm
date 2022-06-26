@@ -9,6 +9,9 @@ public class RbmCfg implements Cloneable {
 
     private String name;
     private boolean load;
+    private String workDir;
+    private boolean persist;
+
     private int numdims = 784; //# of visible units
     private int numhid = 784; //# of hidden units
     private double alpha = 0.005; // Learning rate, recomended value is 0.01
@@ -24,7 +27,6 @@ public class RbmCfg implements Cloneable {
     private boolean saveVisualization = false;
     private double acceptedError = 0.03;
     private boolean showVisualizationWindow = false;
-
 
 
     public boolean showVisualizationWindow() {
@@ -177,8 +179,36 @@ public class RbmCfg implements Cloneable {
         return showVisualizationWindow;
     }
 
+    public boolean load() {
+        return load;
+    }
+
+    public RbmCfg setLoad(boolean load) {
+        this.load = load;
+        return this;
+    }
+
+    public boolean persist() {
+        return persist;
+    }
+
+    public RbmCfg persist(boolean persist) {
+        this.persist = persist;
+        return this;
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    public RbmCfg workDir(String s) {
+        this.workDir = s;
+        return this;
+    }
+
+
+    public String workDir() {
+        return this.workDir;
     }
 }

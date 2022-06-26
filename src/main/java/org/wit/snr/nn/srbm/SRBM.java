@@ -335,5 +335,4 @@ public abstract class SRBM {
         return layer.W;
     }
 
-    public abstract SRBM autoencoderMirror() throws IOException, InterruptedException;
 }
