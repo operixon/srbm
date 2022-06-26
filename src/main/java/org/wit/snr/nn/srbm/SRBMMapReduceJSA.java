@@ -1,5 +1,6 @@
 package org.wit.snr.nn.srbm;
 
+import org.wit.snr.nn.srbm.layer.Layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import java.io.IOException;
@@ -152,4 +153,7 @@ public class SRBMMapReduceJSA extends SRBM {
         return currentEpoch.get() > cfg.numberOfEpochs() || layer.error < cfg.acceptedError();
     }
 
+    public Layer getLayer() {
+        return this.layer;
+    }
 }

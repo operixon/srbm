@@ -6,6 +6,7 @@
 package org.wit.srbm;
 
 import org.testng.annotations.Test;
+import org.wit.snr.nn.dbn.DbnAutoencoder;
 import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
