@@ -31,44 +31,25 @@ public class DbnAutoencoder {
 
 
     public void buildTopology() throws IOException, InterruptedException, CloneNotSupportedException, ClassNotFoundException {
-        initEncoder();
-        initDecoder();
+        for (int i = 0; i < topology.length - 1; i++) {
+            RbmCfg newLayerCfg = ((RbmCfg) cfg.clone()).numdims(topology[i])
+                                                       .numhid(topology[i + 1])
+                                                       .name(this.name + "-" + i);
+            SRBMMapReduceJSA newLayer = layers.size() == 0
+                                        ? new SRBMMapReduceJSA(newLayerCfg)
+                                        : new SRBMMapReduceJSA(layers.get(layers.size() - 1), newLayerCfg);
+            layers.add(newLayer);
+        }
         if (cfg.load()) {
             for (int i = 0; i < layers.size(); i++) {
                 layers.get(i).load(cfg.workDir() + "/" + name + "-" + i);
             }
-        } else {
-            // na poczatek uczymy tylko pierwszą połowę enkodera
-            initEncoder();
-            log.info("Autoencoder has ben prepared with " + layers.size() + " rbm machines. Total topology size is " + topology.length);
         }
     }
 
-    private void initEncoder() throws IOException, InterruptedException, CloneNotSupportedException {
-        for (int i = 0; i <= (topology.length - 1) / 2; i++) {
-            RbmCfg newLayerCfg = ((RbmCfg) cfg.clone()).numdims(topology[i])
-                                                       .numhid(topology[i + 1])
-                                                       .name(this.name + "-" + i);
-            SRBMMapReduceJSA newLayer = layers.size() == 0
-                                        ? new SRBMMapReduceJSA(newLayerCfg)
-                                        : new SRBMMapReduceJSA(layers.get(layers.size() - 1), newLayerCfg);
-            layers.add(newLayer);
-        }
-    }
 
-    private void initDecoder() throws CloneNotSupportedException, IOException, InterruptedException {
-        for (int i = (topology.length - 1) / 2; i < topology.length; i++) {
-            RbmCfg newLayerCfg = ((RbmCfg) cfg.clone()).numdims(topology[i])
-                                                       .numhid(topology[i + 1])
-                                                       .name(this.name + "-" + i);
-            SRBMMapReduceJSA newLayer = layers.size() == 0
-                                        ? new SRBMMapReduceJSA(newLayerCfg)
-                                        : new SRBMMapReduceJSA(layers.get(layers.size() - 1), newLayerCfg);
-            layers.add(newLayer);
-        }
-    }
 
-    public void fit() throws CloneNotSupportedException, IOException, InterruptedException {
+    public void fit()  {
         // na poczatek uczymy tylko pierwszą połowę enkodera
         for (int i=0; i < layers.size() / 2; i++) {
             layers.get(i).train();
