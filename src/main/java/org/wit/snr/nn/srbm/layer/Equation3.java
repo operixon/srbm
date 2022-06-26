@@ -1,17 +1,17 @@
 package org.wit.snr.nn.srbm.layer;
 
-import org.wit.snr.nn.srbm.Configuration;
+import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.math.ActivationFunction;
 
 import java.util.List;
 
 public class Equation3 {
 
-    final Configuration cfg;
+    final RbmCfg cfg;
     final Layer layer;
     final ActivationFunction activationFunction;
 
-    public Equation3(Configuration cfg, Layer layer, ActivationFunction activationFunction) {
+    public Equation3(RbmCfg cfg, Layer layer, ActivationFunction activationFunction) {
         this.cfg = cfg;
         this.layer = layer;
         this.activationFunction = activationFunction;

@@ -5,8 +5,10 @@
  */
 package org.wit.snr.nn.srbm;
 
-public class Configuration {
+public class RbmCfg implements Cloneable {
 
+    private String name;
+    private boolean load;
     private int numdims = 784; //# of visible units
     private int numhid = 784; //# of hidden units
     private double alpha = 0.005; // Learning rate, recomended value is 0.01
@@ -23,16 +25,38 @@ public class Configuration {
     private double acceptedError = 0.03;
     private boolean showVisualizationWindow = false;
 
+
+
     public boolean showVisualizationWindow() {
         return showVisualizationWindow;
     }
 
-    public Configuration setShowVisualizationWindow(boolean showVisualizationWindow) {
+    public static RbmCfg build(){
+        return new RbmCfg();
+    }
+
+    public static RbmCfg defaults1(){
+        return new RbmCfg().showViz(false).load(true);
+    }
+
+
+    public RbmCfg load(boolean l) {
+        this.load = l;
+        return this;
+    }
+
+    public RbmCfg name(String n) {
+        this.name = n;
+        return this;
+    }
+
+
+    public RbmCfg showViz(boolean showVisualizationWindow) {
         this.showVisualizationWindow = showVisualizationWindow;
         return this;
     }
 
-    public Configuration setAcceptedError(double acceptedError) {
+    public RbmCfg setAcceptedError(double acceptedError) {
         this.acceptedError = acceptedError;
         return this;
     }
@@ -41,62 +65,62 @@ public class Configuration {
         return acceptedError;
     }
 
-    public Configuration setNumdims(int numdims) {
+    public RbmCfg numdims(int numdims) {
         this.numdims = numdims;
         return this;
     }
 
-    public Configuration setNumhid(int numhid) {
+    public RbmCfg numhid(int numhid) {
         this.numhid = numhid;
         return this;
     }
 
-    public Configuration setAlpha(double alpha) {
+    public RbmCfg setAlpha(double alpha) {
         this.alpha = alpha;
         return this;
     }
 
-    public Configuration setBatchSize(int batchSize) {
+    public RbmCfg setBatchSize(int batchSize) {
         this.batchSize = batchSize;
         return this;
     }
 
-    public Configuration setMi(double mi) {
+    public RbmCfg setMi(double mi) {
         this.mi = mi;
         return this;
     }
 
-    public Configuration setLambda(double lambda) {
+    public RbmCfg setLambda(double lambda) {
         this.lambda = lambda;
         return this;
     }
 
-    public Configuration setNumberOfEpochs(int numberOfEpochs) {
+    public RbmCfg setNumberOfEpochs(int numberOfEpochs) {
         this.numberOfEpochs = numberOfEpochs;
         return this;
     }
 
-    public Configuration setSparsneseFactor(double sparsneseFactor) {
+    public RbmCfg setSparsneseFactor(double sparsneseFactor) {
         this.sparsneseFactor = sparsneseFactor;
         return this;
     }
 
-    public Configuration setSigmaInit(double sigmaInit) {
+    public RbmCfg setSigmaInit(double sigmaInit) {
         this.sigmaInit = sigmaInit;
         return this;
     }
 
-    public Configuration setSigmaDecay(double sigmaDecay) {
+    public RbmCfg setSigmaDecay(double sigmaDecay) {
         this.sigmaDecay = sigmaDecay;
         return this;
     }
 
-    public Configuration setVisualizationOutDirectory(String visualizationOutDirectory) {
+    public RbmCfg setVisualizationOutDirectory(String visualizationOutDirectory) {
         this.visualizationOutDirectory = visualizationOutDirectory;
         return this;
     }
 
-    public Configuration setSaveVisualization(boolean saveVisualization) {
+    public RbmCfg setSaveVisualization(boolean saveVisualization) {
         this.saveVisualization = saveVisualization;
         return this;
     }
@@ -151,5 +175,10 @@ public class Configuration {
 
     public boolean visualizationWindow() {
         return showVisualizationWindow;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

@@ -1,6 +1,6 @@
 package org.wit.snr.nn.srbm.layer;
 
-import org.wit.snr.nn.srbm.Configuration;
+import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
@@ -12,9 +12,9 @@ import static java.util.stream.Collectors.toList;
 public class PositivePhaseComputations {
 
     private final Equation3 equation3;
-    private final Configuration cfg;
+    private final RbmCfg cfg;
 
-    public PositivePhaseComputations(Equation3 equation3, Configuration cfg) {
+    public PositivePhaseComputations(Equation3 equation3, RbmCfg cfg) {
         this.equation3 = equation3;
         this.cfg = cfg;
     }

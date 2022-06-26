@@ -1,7 +1,6 @@
 package org.wit.snr.nn.srbm;
 
 import org.wit.snr.nn.srbm.math.collection.Matrix;
-import org.wit.snr.nn.srbm.monitoring.Timer;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,7 +14,7 @@ public class SRBMMapReduceJSA extends SRBM {
     private SRBM prev;
     private SRBM next;
 
-    public SRBMMapReduceJSA(Configuration cfg) throws IOException, InterruptedException {
+    public SRBMMapReduceJSA(RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
         batch = getTrainingBatch();
     }
@@ -29,16 +28,15 @@ public class SRBMMapReduceJSA extends SRBM {
         }
     }
 
+    //
     @Override
     public SRBM autoencoderMirror() throws IOException, InterruptedException {
-        SRBM a = new SRBMMapReduceJSA(cfg);
-        a.layer.W = this.layer.W.transpose();
-        a.layer.hbias = this.layer.hbias.clone(); // w ma transpose a co z tym? pozamieniac miejscami ?
-        a.layer.vbias = this.layer.vbias.clone();
-        //a.layer.inputSize = this.layer.outputSize; // do konstruktora w cfg
+
+
+
     }
 
-    public SRBMMapReduceJSA(SRBM v1,Configuration cfg) throws IOException, InterruptedException {
+    public SRBMMapReduceJSA(SRBM v1, RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
         batch = getTrainingBatch();
         this.prev = v1;

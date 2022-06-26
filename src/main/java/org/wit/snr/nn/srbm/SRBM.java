@@ -24,7 +24,6 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 /**
@@ -32,7 +31,7 @@ import java.util.logging.Logger;
  */
 public abstract class SRBM {
 
-    final Configuration cfg;
+    final RbmCfg cfg;
     Layer layer;
     final TrainingSet trainingSet;
     final PositivePhaseComputations positivePhaseComputations;
@@ -55,7 +54,7 @@ public abstract class SRBM {
 
     public abstract SRBM setNext(SRBM next);
 
-    public SRBM(Configuration cfg) throws IOException, InterruptedException {
+    public SRBM(RbmCfg cfg) throws IOException, InterruptedException {
         this.cfg = cfg;
         sigma = cfg.sigmaInit();
         this.layer = new Layer(this.cfg.numdims(), this.cfg.numhid());
