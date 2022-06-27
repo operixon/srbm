@@ -15,7 +15,7 @@ public class WeightsInFrame implements MatrixRendererIF {
     public static final int CELL_SIZE = 1;
     public static final int CELL_SPACE = 0;
     final JFrame frame; // TODO : refactor
-    final Matrix m;
+    Matrix m;
     final private int x;
     final private int y;
 
@@ -40,6 +40,11 @@ public class WeightsInFrame implements MatrixRendererIF {
         paintPanel.setBackground(Color.BLACK);
         frame.add(paintPanel);
         frame.setVisible(true);
+    }
+
+    public void render(Matrix w){
+        this.m = w;
+        render();
     }
 
     final JPanel paintPanel = new JPanel() {

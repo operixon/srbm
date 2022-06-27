@@ -99,7 +99,7 @@ public class SrbmNetworkNGTest {
         List<List<Double>> x = tset.getSamples();
         x =x.subList(0,5000);
 
-        int[] topology = {784, 500, 400, 200,
+        int[] topology = {784, 10, 400, 200,
                           10,
                           200, 400, 500, 784};
         RbmCfg cfg = new RbmCfg()
@@ -114,8 +114,8 @@ public class SrbmNetworkNGTest {
 
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
-        MatrixRendererIF diagW = new WeightsInFrame("Weights for rbm 1", autoencoder.getLayers().get(0).W());
-        autoencoder.addEpochHandler(a-> diagW.render());
+        WeightsInFrame diagW = new WeightsInFrame("Weights for rbm 1", autoencoder.getLayers().get(0).W());
+        autoencoder.addHook(l-> diagW.render(l.W));
         autoencoder.fit(x);
 
 

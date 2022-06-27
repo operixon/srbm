@@ -1,15 +1,14 @@
 package org.wit.snr.nn.srbm;
 
+import org.wit.snr.nn.dbn.DbnAutoencoder;
 import org.wit.snr.nn.srbm.layer.Layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SRBMMapReduceJSA extends SRBM {
@@ -17,6 +16,7 @@ public class SRBMMapReduceJSA extends SRBM {
 
     private SRBM prev;
     private SRBM next;
+    private List<Consumer<Layer>> epochHandlersList = new LinkedList<>();
 
     public SRBMMapReduceJSA(RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
@@ -73,6 +73,7 @@ public class SRBMMapReduceJSA extends SRBM {
         updateSigma();
         miniBatchIndex.set(0);
         currentEpoch.incrementAndGet();
+        epochHandlersList.forEach(h->h.accept(this.layer));
     }
 
     private void getMapReduceResult(List<Matrix> x) {
@@ -160,5 +161,9 @@ public class SRBMMapReduceJSA extends SRBM {
 
     public Layer getLayer() {
         return this.layer;
+    }
+
+    public void addHook(Consumer<Layer> c) {
+        this.epochHandlersList.add(c);
     }
 }

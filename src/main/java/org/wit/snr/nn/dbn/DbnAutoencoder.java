@@ -2,13 +2,13 @@ package org.wit.snr.nn.dbn;
 
 import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
+import org.wit.snr.nn.srbm.layer.Layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public class DbnAutoencoder {
@@ -19,7 +19,7 @@ public class DbnAutoencoder {
     private final RbmCfg cfg;
     private final int[] topology;
     private final List<SRBMMapReduceJSA> layers = new LinkedList<SRBMMapReduceJSA>();
-    private List<Consumer<DbnAutoencoder>> epochHandlersList = new LinkedList<>();
+
 
 
     public DbnAutoencoder(String name, RbmCfg cfg, int[] topology) throws IllegalAccessException {
@@ -58,9 +58,7 @@ public class DbnAutoencoder {
     public void fit(List<List<Double>> x) {
         // na poczatek uczymy tylko pierwszą połowę enkodera
         for (int i = 0; i < layers.size() / 2; i++) {
-            epochHandlersList.forEach(h -> h.accept(this));
             layers.get(i).train(x);
-            epochHandlersList.forEach(h -> h.accept(this));
         }
         log.info("Training of encoder end.");
         // podmieniamy flaki w warstwach mirror
@@ -96,7 +94,7 @@ public class DbnAutoencoder {
         return layers.get(layers.size() - 1).eval(sample);
     }
 
-    public void addEpochHandler(Consumer<DbnAutoencoder> c) {
-        epochHandlersList.add(c);
+    public void addHook(Consumer<Layer> c) {
+        layers.forEach(l->l.addHook(c));
     }
 }
