@@ -57,7 +57,6 @@ public abstract class SRBM {
         this.cfg = cfg;
         sigma = cfg.sigmaInit();
         this.layer = new Layer(this.cfg.numdims(), this.cfg.numhid());
-        trainingSet = new TrainingSetMinst();
         Equation3 equation3 = new Equation3(this.cfg, layer, new SigmoidFunction());
         positivePhaseComputations = new PositivePhaseComputations(equation3, this.cfg);
         hiddenBiasAdaptation = new HiddenBiasAdaptation(equation3);
@@ -157,10 +156,6 @@ public abstract class SRBM {
         return negData;
     }
 
-    protected List<Matrix> getTrainingBatch() {
-        List<Matrix> trainingBatch = trainingSet.getTrainingBatch(cfg.batchSize());
-        return trainingBatch;
-    }
 
     protected List<Matrix> getTrainingBatch2() {
         List<Matrix> trainingSet = new LinkedList<>();
