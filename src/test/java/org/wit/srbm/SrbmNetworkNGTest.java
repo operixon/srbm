@@ -104,6 +104,7 @@ public class SrbmNetworkNGTest {
                           200, 400, 500, 784};
         RbmCfg cfg = new RbmCfg()
                 .setBatchSize(20)
+                .learningRate(0.01)
                 .setSparsneseFactor(0.1)
                 .setNumberOfEpochs(30)
                 .setAcceptedError(0.004)

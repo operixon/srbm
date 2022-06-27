@@ -77,7 +77,7 @@ public class RbmCfg implements Cloneable {
         return this;
     }
 
-    public RbmCfg setAlpha(double alpha) {
+    public RbmCfg learningRate(double alpha) {
         this.alpha = alpha;
         return this;
     }

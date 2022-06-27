@@ -23,26 +23,27 @@ public class WeightsInFrame implements MatrixRendererIF {
     public WeightsInFrame(String title, Matrix m) {
         frame = new JFrame("Matrix rows:" + m.getRowsNumber() + ", cols: " + m.getColumnsNumber());
         //int width = m.getColumnsNumber() * CELL_SIZE + m.getColumnsNumber() * CELL_SPACE;
-       // int height = m.getRowsNumber() * CELL_SIZE + m.getRowsNumber() * CELL_SPACE;
+        // int height = m.getRowsNumber() * CELL_SIZE + m.getRowsNumber() * CELL_SPACE;
         frame.setSize(500, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-   frame.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null);
         frame.setResizable(true);
-     frame.setBackground(Color.BLACK);
+        frame.setBackground(Color.BLACK);
         x = 0;
         y = 0;
         this.m = m;
-    }
-
-
-    @Override
-    public void render() {
         paintPanel.setBackground(Color.BLACK);
         frame.add(paintPanel);
         frame.setVisible(true);
     }
 
-    public void render(Matrix w){
+
+    @Override
+    public void render() {
+        paintPanel.repaint();
+    }
+
+    public void render(Matrix w) {
         this.m = w;
         render();
     }

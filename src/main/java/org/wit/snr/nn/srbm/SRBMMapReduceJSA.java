@@ -73,7 +73,7 @@ public class SRBMMapReduceJSA extends SRBM {
         updateSigma();
         miniBatchIndex.set(0);
         currentEpoch.incrementAndGet();
-        epochHandlersList.forEach(h->h.accept(this.layer));
+
     }
 
     private void getMapReduceResult(List<Matrix> x) {
@@ -152,6 +152,7 @@ public class SRBMMapReduceJSA extends SRBM {
         );
         draw(datavis);
         timer.remove();
+        epochHandlersList.forEach(h->h.accept(this.layer));
         return Optional.of(new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta));
     }
 
