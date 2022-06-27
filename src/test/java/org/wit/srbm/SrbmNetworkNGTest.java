@@ -120,9 +120,9 @@ public class SrbmNetworkNGTest {
 
         Matrix result = autoencoder.transform(sample);
 
-        MatrixRendererIF diag = new OneMatrixInFrame(result.splitToColumnVectors().get(0).reshape(28).transpose());
-        MatrixRendererIF diag2 = new OneMatrixInFrame(sample.reshape(28).transpose());
-        MatrixRendererIF diagW = new WeightsInFrame(autoencoder.getLayers().get(0).W());
+        MatrixRendererIF diag2 = new OneMatrixInFrame("test sample", sample.reshape(28).transpose());
+        MatrixRendererIF diag = new OneMatrixInFrame("evaluation result", result.reshape(28).transpose());
+        MatrixRendererIF diagW = new WeightsInFrame("Weights for rbm 1", autoencoder.getLayers().get(0).W());
         diag.render();
         diag2.render();
         diagW.render();

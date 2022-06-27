@@ -21,7 +21,7 @@ public class OneMatrixInFrame implements MatrixRendererIF {
     final private int y;
 
 
-    public OneMatrixInFrame(Matrix m) {
+    public OneMatrixInFrame(String title, Matrix m) {
         frame = new JFrame("Matrix rows:" + m.getRowsNumber() + ", cols: " + m.getColumnsNumber());
         //int width = m.getColumnsNumber() * CELL_SIZE + m.getColumnsNumber() * CELL_SPACE;
        // int height = m.getRowsNumber() * CELL_SIZE + m.getRowsNumber() * CELL_SPACE;
@@ -29,6 +29,7 @@ public class OneMatrixInFrame implements MatrixRendererIF {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setResizable(true);
+        frame.setTitle(title);
      frame.setBackground(Color.BLACK);
         x = 0;
         y = 0;
