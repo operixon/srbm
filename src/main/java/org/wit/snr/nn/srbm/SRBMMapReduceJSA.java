@@ -6,18 +6,15 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class SRBMMapReduceJSA extends SRBM {
 
 
-    private List<Matrix> batch;
     private SRBM prev;
     private SRBM next;
 
     public SRBMMapReduceJSA(RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
-        batch = getTrainingBatch();
     }
 
     @Override
@@ -33,7 +30,6 @@ public class SRBMMapReduceJSA extends SRBM {
 
     public SRBMMapReduceJSA(SRBM v1, RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
-        batch = getTrainingBatch();
         this.prev = v1;
         v1.setNext(this);
 
@@ -49,25 +45,24 @@ public class SRBMMapReduceJSA extends SRBM {
         return next;
     }
 
-    public void train() {
+    public void train(List<Matrix> x) {
         while (!isConverged()) {
-            epoch();
+            epoch(x);
         }
 
     }
 
-    private void epoch() {
-        getMapReduceResult();
+    private void epoch(List<Matrix> x) {
+        getMapReduceResult(x);
         updateSigma();
         miniBatchIndex.set(0);
         currentEpoch.incrementAndGet();
-        batch = getTrainingBatch();
     }
 
-    private void getMapReduceResult() {
+    private void getMapReduceResult(List<Matrix> x) {
         if (prev != null) {
-            batch.parallelStream()
-                 .limit(10)
+            x.parallelStream()
+                 .limit(5)
                  .map(prev::eval)
                  .map(this::trainMiniBatch)
                  .filter(Optional::isPresent)
@@ -75,8 +70,8 @@ public class SRBMMapReduceJSA extends SRBM {
                  .peek(this::updateLayerData)
                  .count();
         } else {
-            batch.parallelStream()
-                 .limit(10)
+            x.parallelStream()
+                 .limit(5)
                  .map(this::trainMiniBatch)
                  .filter(Optional::isPresent)
                  .map(Optional::get)

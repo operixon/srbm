@@ -33,7 +33,6 @@ public abstract class SRBM {
 
     final RbmCfg cfg;
     Layer layer;
-    final TrainingSet trainingSet;
     final PositivePhaseComputations positivePhaseComputations;
     final NegativePhaseComputations negativePhaseComputations;
     final HiddenBiasAdaptation hiddenBiasAdaptation;
@@ -50,7 +49,7 @@ public abstract class SRBM {
     protected double sigma;
 
 
-    public abstract void train();
+    public abstract void train(List<Matrix> x);
 
     public abstract SRBM setNext(SRBM next);
 

@@ -40,7 +40,8 @@ public class SrbmNetworkNGTest {
 
     @Test
     public void testDBN() throws IOException, InterruptedException, ClassNotFoundException {
-
+        TrainingSetMinst tset = new TrainingSetMinst();
+        List<Matrix> x = tset.getTrainingBatch(10);
 
         SRBM v1 = new SRBMMapReduceJSA(
                 new RbmCfg().setBatchSize(200)
@@ -71,7 +72,7 @@ public class SrbmNetworkNGTest {
         v3.load("/dane/2v3-srbm-layer.data");
 
 
-        v1.train();
+        v1.train(x);
         v1.persist("/dane/2v1-srbm-layer.data");
         v2.persist("/dane/2v2-srbm-layer.data");
         v3.persist("/dane/2v3-srbm-layer.data");
@@ -79,7 +80,8 @@ public class SrbmNetworkNGTest {
 
     @Test
     public void testRBM() throws IOException, InterruptedException, ClassNotFoundException {
-
+        TrainingSetMinst tset = new TrainingSetMinst();
+        List<Matrix> x = tset.getTrainingBatch(10);
 
         SRBM v1 = new SRBMMapReduceJSA(
                 new RbmCfg().setBatchSize(10)
@@ -89,12 +91,15 @@ public class SrbmNetworkNGTest {
                             .setNumberOfEpochs(1)
                             .setAcceptedError(0.04)
         );
-        v1.train();
+        v1.train(x);
         v1.persist("/dane/v1-single-srbm-layer.data");
     }
 
     @Test
     public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException, IllegalAccessException {
+
+        TrainingSetMinst tset = new TrainingSetMinst();
+        List<Matrix> x = tset.getTrainingBatch(10);
 
         int[] topology = {784, 500, 10, 500, 784};
         RbmCfg cfg = new RbmCfg()
@@ -110,16 +115,14 @@ public class SrbmNetworkNGTest {
 
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
-        autoencoder.fit();
-        TrainingSetMinst tset = new TrainingSetMinst();
-        List<Matrix> trainingBatch = tset.getTrainingBatch(10);
-        Matrix sample = trainingBatch.get(0);
+        autoencoder.fit(x);
+        Matrix sample = x.get(0);
 
         Matrix result = autoencoder.transform(sample);
 
         MatrixRendererIF diag = new OneMatrixInFrame(result.splitToColumnVectors().get(0).reshape(28).transpose());
         MatrixRendererIF diag2 = new OneMatrixInFrame(sample.reshape(28).transpose());
-        MatrixRendererIF diagW = new OneMatrixInFrame(autoencoder.getLayers().get(0).W().reshape(28).transpose());
+        MatrixRendererIF diagW = new WeightsInFrame(autoencoder.getLayers().get(0).W());
         diag.render();
         diag2.render();
         diagW.render();
