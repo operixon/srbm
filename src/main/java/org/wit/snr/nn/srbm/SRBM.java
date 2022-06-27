@@ -157,41 +157,6 @@ public abstract class SRBM {
     }
 
 
-    protected List<Matrix> getTrainingBatch2() {
-        List<Matrix> trainingSet = new LinkedList<>();
-
-        for (int t = 0; t < 100; t++) {
-            List<List<Double>> batch = new LinkedList<>();
-            boolean s = true;
-            for (int imageIndex = 0; imageIndex < cfg.batchSize(); imageIndex++) {
-                List<Double> image = new LinkedList<>();
-                for (int i = 0; i < 28 / 4; i++) {
-                    List<Double> w = Matrix2D.createFilledMatrix(2, 28, 0).getDataAsList();
-                    List<Double> b = Matrix2D.createFilledMatrix(2, 28, 1).getDataAsList();
-                    image.addAll(w);
-                    image.addAll(b);
-                }
-                if (image.size() != 784) {
-                    throw new IllegalStateException();
-                }
-                if (s) {
-                    image = Matrix2D.createColumnVector(image).reshape(28).transpose().getDataAsList();
-                }
-                batch.add(image);
-
-                s = !s;
-            }
-            Matrix2D batchMatrix = new Matrix2D(batch);
-            if (batchMatrix.getColumnsNumber() != cfg.batchSize()) {
-                throw new IllegalStateException();
-            }
-            if (batchMatrix.getRowsNumber() != cfg.numdims()) {
-                throw new IllegalStateException();
-            }
-            trainingSet.add(batchMatrix);
-        }
-        return trainingSet;
-    }
 
     protected Matrix getHidStates(Matrix poshidprobs) {
         Matrix hidStates = positivePhaseComputations.getHidStates(poshidprobs);
