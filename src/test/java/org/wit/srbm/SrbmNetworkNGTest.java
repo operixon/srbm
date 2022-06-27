@@ -11,6 +11,7 @@ import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
+import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 import org.wit.snr.nn.srbm.visualization.*;
 
@@ -41,7 +42,7 @@ public class SrbmNetworkNGTest {
     @Test
     public void testDBN() throws IOException, InterruptedException, ClassNotFoundException {
         TrainingSetMinst tset = new TrainingSetMinst();
-        List<Matrix> x = tset.getTrainingBatch(10);
+        List<List<Double>> x = tset.getSamples();
 
         SRBM v1 = new SRBMMapReduceJSA(
                 new RbmCfg().setBatchSize(200)
@@ -77,8 +78,7 @@ public class SrbmNetworkNGTest {
     @Test
     public void testRBM() throws IOException, InterruptedException, ClassNotFoundException {
         TrainingSetMinst tset = new TrainingSetMinst();
-        List<Matrix> x = tset.getTrainingBatch(10);
-
+        List<List<Double>> x = tset.getSamples();
         SRBM v1 = new SRBMMapReduceJSA(
                 new RbmCfg().setBatchSize(10)
                             .numdims(784)
@@ -95,11 +95,11 @@ public class SrbmNetworkNGTest {
     public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException, IllegalAccessException {
 
         TrainingSetMinst tset = new TrainingSetMinst();
-        List<Matrix> x = tset.getTrainingBatch(10);
+        List<List<Double>> x = tset.getSamples();
 
         int[] topology = {784, 500, 10, 500, 784};
         RbmCfg cfg = new RbmCfg()
-                .setBatchSize(10)
+                .setBatchSize(200)
                 .setSparsneseFactor(0.1)
                 .setNumberOfEpochs(8)
                 .setAcceptedError(0.04)
@@ -112,7 +112,7 @@ public class SrbmNetworkNGTest {
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
         autoencoder.fit(x);
-        Matrix sample = x.get(0);
+        Matrix sample = new Matrix2D(x.subList(0,cfg.batchSize()-1));
 
         Matrix result = autoencoder.transform(sample);
 

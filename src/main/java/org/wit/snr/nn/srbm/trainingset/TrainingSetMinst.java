@@ -48,6 +48,9 @@ public class TrainingSetMinst implements TrainingSet {
         return collect;
     }
 
+    public List<List<Double>> getSamples(){
+        return images;
+    }
 
     private List<Double> getNormalizedImageData(byte[][] image) {
         List<Double> convertedSample = new LinkedList<>();

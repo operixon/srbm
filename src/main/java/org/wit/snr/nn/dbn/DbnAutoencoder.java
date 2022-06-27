@@ -55,7 +55,7 @@ public class DbnAutoencoder {
     }
 
 
-    public void fit(List<Matrix> x)  {
+    public void fit(List<List<Double>> x)  {
         // na poczatek uczymy tylko pierwszą połowę enkodera
         for (int i=0; i < layers.size() / 2; i++) {
             layers.get(i).train(x);

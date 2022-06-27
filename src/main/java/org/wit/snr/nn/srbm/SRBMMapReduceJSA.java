@@ -2,12 +2,15 @@ package org.wit.snr.nn.srbm;
 
 import org.wit.snr.nn.srbm.layer.Layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
+import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class SRBMMapReduceJSA extends SRBM {
 
@@ -29,7 +32,6 @@ public class SRBMMapReduceJSA extends SRBM {
     }
 
 
-
     public SRBMMapReduceJSA(SRBM v1, RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
         this.prev = v1;
@@ -47,11 +49,22 @@ public class SRBMMapReduceJSA extends SRBM {
         return next;
     }
 
-    public void train(List<Matrix> x) {
+    public void train(List<List<Double>> x) {
+
         while (!isConverged()) {
-            epoch(x);
+            epoch(splitToBatches(x));
         }
 
+    }
+
+    private List<Matrix> splitToBatches(List<List<Double>> x) {
+        final AtomicInteger counter = new AtomicInteger(0);
+        Collections.shuffle(x);
+        Collection<List<List<Double>>> minibatchesList = x
+                .stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / cfg.batchSize()))
+                .values();
+        return minibatchesList.stream().map(Matrix2D::new).collect(Collectors.toList());
     }
 
     private void epoch(List<Matrix> x) {
@@ -65,21 +78,21 @@ public class SRBMMapReduceJSA extends SRBM {
     private void getMapReduceResult(List<Matrix> x) {
         if (prev != null) {
             x.parallelStream()
-               //  .limit(5)
-                 .map(prev::eval)
-                 .map(this::trainMiniBatch)
-                 .filter(Optional::isPresent)
-                 .map(Optional::get)
-                 .peek(this::updateLayerData)
-                 .count();
+             //  .limit(5)
+             .map(prev::eval)
+             .map(this::trainMiniBatch)
+             .filter(Optional::isPresent)
+             .map(Optional::get)
+             .peek(this::updateLayerData)
+             .count();
         } else {
             x.parallelStream()
-              //   .limit(5)
-                 .map(this::trainMiniBatch)
-                 .filter(Optional::isPresent)
-                 .map(Optional::get)
-                 .peek(this::updateLayerData)
-                 .count();
+             //   .limit(5)
+             .map(this::trainMiniBatch)
+             .filter(Optional::isPresent)
+             .map(Optional::get)
+             .peek(this::updateLayerData)
+             .count();
         }
         //.reduce(
         //      Optional.empty(),

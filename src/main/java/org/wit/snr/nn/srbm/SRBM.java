@@ -49,7 +49,7 @@ public abstract class SRBM {
     protected double sigma;
 
 
-    public abstract void train(List<Matrix> x);
+    public abstract void train(List<List<Double>> x);
 
     public abstract SRBM setNext(SRBM next);
 
