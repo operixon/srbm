@@ -117,15 +117,12 @@ public class SrbmNetworkNGTest {
 
         Matrix result = autoencoder.transform(sample);
 
-        MatrixRendererIF diag = new OneMatrixInFrame(result.splitToColumnVectors()
-                                                           .get(0)
-                                                           .reshape(28)
-                                                           .transpose());
-        MatrixRendererIF diag2 = new OneMatrixInFrame(sample.reshape(28)
-                                                            .transpose());
-
+        MatrixRendererIF diag = new OneMatrixInFrame(result.splitToColumnVectors().get(0).reshape(28).transpose());
+        MatrixRendererIF diag2 = new OneMatrixInFrame(sample.reshape(28).transpose());
+        MatrixRendererIF diagW = new OneMatrixInFrame(autoencoder.getLayers().get(0).W().reshape(28).transpose());
         diag.render();
         diag2.render();
+        diagW.render();
         Thread.sleep(Long.MAX_VALUE);
     }
 
