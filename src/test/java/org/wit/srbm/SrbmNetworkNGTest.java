@@ -95,15 +95,18 @@ public class SrbmNetworkNGTest {
     public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException, IllegalAccessException {
 
         TrainingSetMinst tset = new TrainingSetMinst();
+        tset.load("C:\\Users\\artur.koperkiewicz\\Downloads\\train-images-idx3-ubyte\\train-images.idx3-ubyte");
         List<List<Double>> x = tset.getSamples();
+        x =x.subList(0,5000);
 
-        int[] topology = {784, 500, 10, 500, 784};
+        int[] topology = {784, 500, 400, 200,
+                          10,
+                          200, 400, 500, 784};
         RbmCfg cfg = new RbmCfg()
-                .setBatchSize(200)
+                .setBatchSize(20)
                 .setSparsneseFactor(0.1)
-                .setNumberOfEpochs(8)
-                .setAcceptedError(0.04)
-                .load(true)
+                .setNumberOfEpochs(30)
+                .setAcceptedError(0.004)
                 .persist(true)
                 .setSaveVisualization(false)
                 .showViz(false)
@@ -111,17 +114,17 @@ public class SrbmNetworkNGTest {
 
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
+        MatrixRendererIF diagW = new WeightsInFrame("Weights for rbm 1", autoencoder.getLayers().get(0).W());
+        autoencoder.addEpochHandler(a-> diagW.render());
         autoencoder.fit(x);
-        Matrix sample = new Matrix2D(x.subList(0,cfg.batchSize()-1));
 
+
+        Matrix sample = new Matrix2D(x.subList(0, cfg.batchSize() - 1));
         Matrix result = autoencoder.transform(sample);
-
         MatrixRendererIF diag2 = new OneMatrixInFrame("test sample", sample.reshape(28).transpose());
         MatrixRendererIF diag = new OneMatrixInFrame("evaluation result", result.reshape(28).transpose());
-        MatrixRendererIF diagW = new WeightsInFrame("Weights for rbm 1", autoencoder.getLayers().get(0).W());
         diag.render();
         diag2.render();
-        diagW.render();
         Thread.sleep(Long.MAX_VALUE);
     }
 

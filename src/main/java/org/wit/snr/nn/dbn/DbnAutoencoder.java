@@ -19,7 +19,7 @@ public class DbnAutoencoder {
     private final RbmCfg cfg;
     private final int[] topology;
     private final List<SRBMMapReduceJSA> layers = new LinkedList<SRBMMapReduceJSA>();
-    private List<Consumer<DbnAutoencoder>> epochHandlersList;
+    private List<Consumer<DbnAutoencoder>> epochHandlersList = new LinkedList<>();
 
 
     public DbnAutoencoder(String name, RbmCfg cfg, int[] topology) throws IllegalAccessException {
@@ -55,10 +55,12 @@ public class DbnAutoencoder {
     }
 
 
-    public void fit(List<List<Double>> x)  {
+    public void fit(List<List<Double>> x) {
         // na poczatek uczymy tylko pierwszą połowę enkodera
-        for (int i=0; i < layers.size() / 2; i++) {
+        for (int i = 0; i < layers.size() / 2; i++) {
+            epochHandlersList.forEach(h -> h.accept(this));
             layers.get(i).train(x);
+            epochHandlersList.forEach(h -> h.accept(this));
         }
         log.info("Training of encoder end.");
         // podmieniamy flaki w warstwach mirror
@@ -86,12 +88,12 @@ public class DbnAutoencoder {
         }
     }
 
-    public List<SRBMMapReduceJSA> getLayers(){
+    public List<SRBMMapReduceJSA> getLayers() {
         return layers;
     }
 
     public Matrix transform(Matrix sample) {
-        return layers.get(layers.size()-1).eval(sample);
+        return layers.get(layers.size() - 1).eval(sample);
     }
 
     public void addEpochHandler(Consumer<DbnAutoencoder> c) {

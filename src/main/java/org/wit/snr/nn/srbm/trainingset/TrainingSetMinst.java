@@ -17,16 +17,30 @@ import static java.util.stream.Collectors.toList;
 public class TrainingSetMinst implements TrainingSet {
 
     final static Random rnd = new Random();
-    final MinstImageLoader mil;
-    final List<List<Double>> images;
+    MinstImageLoader mil;
+    List<List<Double>> images;
 
-    public TrainingSetMinst() throws IOException {
+    public TrainingSetMinst() {
+
+    }
+
+
+    public TrainingSetMinst(String path) throws IOException {
+
+    }
+
+    public void loadTestFromResources() throws IOException {
+        load(getClass().getClassLoader().getResource("t10k-images-idx3-ubyte").getPath());
+    }
+
+    public void load(String path) throws IOException {
         String f = getClass().getClassLoader().getResource("t10k-images-idx3-ubyte").getPath();
         mil = new MinstImageLoader(f);
         images = Arrays.stream(mil.getImages())
-                .map(image -> getNormalizedImageData(image))
-                .collect(toList());
+                       .map(image -> getNormalizedImageData(image))
+                       .collect(toList());
     }
+
 
     @Override
     /**
