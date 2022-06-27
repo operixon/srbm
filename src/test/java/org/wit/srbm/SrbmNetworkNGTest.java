@@ -52,22 +52,18 @@ public class SrbmNetworkNGTest {
                             .setAcceptedError(0.03)
         );
         v1.load("/dane/2v1-srbm-layer.data");
-        SRBM v2 = new SRBMMapReduceJSA(v1,
-                                       new RbmCfg()
-                                               .setBatchSize(200)
-                                               .numdims(784)
-                                               .numhid(500)
-                                               .setNumberOfEpochs(10)
-                                               .setAcceptedError(0.0035)
+        SRBM v2 = new SRBMMapReduceJSA(v1, new RbmCfg().setBatchSize(200)
+                                                       .numdims(784)
+                                                       .numhid(500)
+                                                       .setNumberOfEpochs(10)
+                                                       .setAcceptedError(0.0035)
         );
         v2.load("/dane/2v2-srbm-layer.data");
-        SRBM v3 = new SRBMMapReduceJSA(v2,
-                                       new RbmCfg()
-                                               .setBatchSize(200)
-                                               .numdims(500)
-                                               .numhid(10)
-                                               .setNumberOfEpochs(10)
-                                               .setAcceptedError(0.001)
+        SRBM v3 = new SRBMMapReduceJSA(v2, new RbmCfg().setBatchSize(200)
+                                                       .numdims(500)
+                                                       .numhid(10)
+                                                       .setNumberOfEpochs(10)
+                                                       .setAcceptedError(0.001)
         );
         v3.load("/dane/2v3-srbm-layer.data");
 

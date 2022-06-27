@@ -4,6 +4,8 @@ import org.wit.snr.nn.srbm.layer.Layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +55,7 @@ public class SRBMMapReduceJSA extends SRBM {
     }
 
     private void epoch(List<Matrix> x) {
+        Collections.shuffle(x);
         getMapReduceResult(x);
         updateSigma();
         miniBatchIndex.set(0);
@@ -62,7 +65,7 @@ public class SRBMMapReduceJSA extends SRBM {
     private void getMapReduceResult(List<Matrix> x) {
         if (prev != null) {
             x.parallelStream()
-                 .limit(5)
+               //  .limit(5)
                  .map(prev::eval)
                  .map(this::trainMiniBatch)
                  .filter(Optional::isPresent)
@@ -71,7 +74,7 @@ public class SRBMMapReduceJSA extends SRBM {
                  .count();
         } else {
             x.parallelStream()
-                 .limit(5)
+              //   .limit(5)
                  .map(this::trainMiniBatch)
                  .filter(Optional::isPresent)
                  .map(Optional::get)
