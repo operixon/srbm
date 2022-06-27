@@ -110,7 +110,6 @@ public class SrbmNetworkNGTest {
 
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
-
         autoencoder.fit();
         TrainingSetMinst tset = new TrainingSetMinst();
         List<Matrix> trainingBatch = tset.getTrainingBatch(10);

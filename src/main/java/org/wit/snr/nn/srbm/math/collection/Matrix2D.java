@@ -132,7 +132,7 @@ public class Matrix2D extends Matrix {
                                 .stream()
                                 .map(cel -> cel > random.nextDouble() ? 1.0 : 0.0)
                                 .collect(toList())
-                ).collect(toList());
+                    ).collect(toList());
         return new Matrix2D(sampledMatrixData);
     }
 
@@ -145,7 +145,7 @@ public class Matrix2D extends Matrix {
                                 .stream()
                                 .map(cel -> cel > t ? 1.0 : 0.0)
                                 .collect(toList())
-                ).collect(toList());
+                    ).collect(toList());
         return new Matrix2D(sampledMatrixData);
     }
 
@@ -158,8 +158,8 @@ public class Matrix2D extends Matrix {
     public Matrix rowsum() {
         List<List<Double>> rowsList = getRowsList();
         List<Double> rowsum = rowsList.stream()
-                .map(row -> row.stream().collect(Collectors.summingDouble(Double::doubleValue)))
-                .collect(Collectors.toList());
+                                      .map(row -> row.stream().collect(Collectors.summingDouble(Double::doubleValue)))
+                                      .collect(Collectors.toList());
         return createColumnVector(rowsum);
     }
 
@@ -187,31 +187,30 @@ public class Matrix2D extends Matrix {
         }
 
         List<List<Double>> collect = this.columnsList.stream()
-                .map(
-                        column -> column.stream()
-                                .map(X -> a + ((X - min) * b_a) / (Xmax_Xmin))
-                                .collect(toList()))
-                .collect(toList());
+                                                     .map(
+                                                             column -> column.stream()
+                                                                             .map(X -> a + ((X - min) * b_a) / (Xmax_Xmin))
+                                                                             .collect(toList()))
+                                                     .collect(toList());
         return new Matrix2D(collect);
     }
 
     @Override
     public Matrix reshape(final int columnLength) {
-        final List<Double> columns = new ArrayList<>();
         List<Double> dataAsList = this.getDataAsList();
         final AtomicInteger counter = new AtomicInteger(0);
-        List<List<Double>> values = dataAsList
-                .stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / columnLength))
-                .values().stream().collect(Collectors.toList());
+        List<List<Double>> values =
+                new ArrayList<>(dataAsList.stream()
+                                          .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / columnLength))
+                                          .values());
         return new Matrix2D(values);
     }
 
     @Override
     public List<Matrix> splitToColumnVectors() {
         return columnsList.stream()
-                .map(column -> Matrix2D.createColumnVector(column))
-                .collect(Collectors.toList());
+                          .map(column -> Matrix2D.createColumnVector(column))
+                          .collect(Collectors.toList());
     }
 
 
@@ -234,7 +233,7 @@ public class Matrix2D extends Matrix {
                         .stream()
                         .map(Double::new)
                         .collect(toList())
-                ).collect(toList());
+                    ).collect(toList());
         return new Matrix2D(sampledMatrixData);
     }
 }
