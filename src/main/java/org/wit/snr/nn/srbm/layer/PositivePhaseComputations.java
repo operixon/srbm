@@ -1,6 +1,7 @@
 package org.wit.snr.nn.srbm.layer;
 
 import org.wit.snr.nn.srbm.RbmCfg;
+import org.wit.snr.nn.srbm.math.RandomSampler;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
@@ -13,6 +14,7 @@ public class PositivePhaseComputations {
 
     private final Equation3 equation3;
     private final RbmCfg cfg;
+    private RandomSampler sampler = new RandomSampler();
 
     public PositivePhaseComputations(Equation3 equation3, RbmCfg cfg) {
         this.equation3 = equation3;
@@ -25,8 +27,8 @@ public class PositivePhaseComputations {
      * @param poshidprobs
      * @return
      */
-    public Matrix getHidStates(Matrix poshidprobs) {
-        return poshidprobs.gibsSampling();
+    public List<Double> getHidStates(List<Double> poshidprobs) {
+        return sampler.sample(poshidprobs);
     }
 
     /**
@@ -36,17 +38,12 @@ public class PositivePhaseComputations {
      * @param X batch of samples
      * @return
      */
-    public Matrix getHidProbs(Matrix X,final double sigma) {
-        List<List<Double>> hiddenUnitsProbs = X
-                .getMatrixAsCollection()
-                .stream()
-                .map((List<Double> sample) -> computeAllUnitsProbabilitiesFromHiddenLayer(sample,sigma))
-                .collect(toList());
-        Matrix hp = new Matrix2D(hiddenUnitsProbs);
-        if (hp.getRowsNumber() != cfg.numhid() || hp.getColumnsNumber() != cfg.batchSize()) {
-            throw new IllegalStateException(String.format("Matrix incorrect size. Expected size %dx%d. Actual %s", cfg.numhid(), cfg.batchSize(), hp));
+    public List<Double> getHidProbs(List<Double> sample,final double sigma) {
+        List<Double> probs = computeAllUnitsProbabilitiesFromHiddenLayer(sample,sigma);
+        if (probs.size() != cfg.numhid() ) {
+            throw new IllegalStateException();
         }
-        return hp;
+        return probs;
     }
 
     /**

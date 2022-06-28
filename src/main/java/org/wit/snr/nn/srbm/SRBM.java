@@ -54,22 +54,22 @@ public abstract class SRBM {
     }
 
 
-    protected Matrix getNegData(Matrix poshidstates) {
-        Matrix negData = negativePhaseComputations.getNegData(poshidstates, sigma);
+    protected List<Double> getNegData(List<Double> poshidstates) {
+        var negData = negativePhaseComputations.getNegData(poshidstates, sigma);
         timer.get().mark("negdata");
         return negData;
     }
 
 
 
-    protected Matrix getHidStates(Matrix poshidprobs) {
-        Matrix hidStates = positivePhaseComputations.getHidStates(poshidprobs);
+    protected List<Double> getHidStates(List<Double> poshidprobs) {
+        var hidStates = positivePhaseComputations.getHidStates(poshidprobs);
         timer.get().mark("hidstates");
         return hidStates;
     }
 
-    protected Matrix getHidProbs(Matrix X) {
-        Matrix hidProbs = positivePhaseComputations.getHidProbs(X, sigma);
+    protected List<Double> getHidProbs(List<Double> sample) {
+        var hidProbs = positivePhaseComputations.getHidProbs(sample, sigma);
         timer.get().mark("hidprobs");
         return hidProbs;
     }
@@ -167,8 +167,8 @@ public abstract class SRBM {
      * @param negdata
      * @return
      */
-    protected Matrix getNegHidProbs(Matrix negdata) {
-        Matrix hidProbs = positivePhaseComputations.getHidProbs(negdata, sigma);
+    protected List<Double> getNegHidProbs(List<Double> negdata) {
+        var hidProbs = positivePhaseComputations.getHidProbs(negdata, sigma);
         timer.get().mark("neghidprobs");
         return hidProbs;
     }
