@@ -10,16 +10,6 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 import org.wit.snr.nn.srbm.math.function.SigmoidFunction;
 import org.wit.snr.nn.srbm.monitoring.Timer;
-import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
-import org.wit.snr.nn.srbm.visualization.MatrixRenderer;
-import org.wit.snr.nn.srbm.visualization.MatrixRendererHiddenUnits;
-import org.wit.snr.nn.srbm.visualization.MatrixRendererIF;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,13 +31,10 @@ public abstract class SRBM {
     final AtomicInteger currentEpoch = new AtomicInteger(0);
     final AtomicInteger miniBatchIndex = new AtomicInteger(0);
 
-    JFrame frame; // TODO : refactor
-    Canvas canvas; // TODO : refacotr
 
     final String sessionId = "srbm-" + System.currentTimeMillis();
 
     protected double sigma;
-
 
     public abstract void train(List<List<Double>> x);
 
@@ -64,91 +51,8 @@ public abstract class SRBM {
                 new Equation2(this.cfg, layer, new SigmoidFunction()),
                 this.cfg
         );
-        if(cfg.visualizationWindow()) {
-            initCanvas();
-        }
     }
 
-    private void initCanvas() {
-        frame = new JFrame("sRBM-"+sessionId);
-        frame.setSize(1500, 700);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(true);
-        frame.setVisible(true);
-        //Creating the canvas.
-        canvas = new Canvas();
-        canvas.setSize(700, 500);
-        canvas.setBackground(Color.BLACK);
-        canvas.setVisible(true);
-        canvas.setFocusable(false);
-        //Putting it all together.
-        frame.add(canvas);
-        canvas.createBufferStrategy(3);
-    }
-
-    void draw(datavis datavis) {
-        if(cfg.showVisualizationWindow()) {
-            displayVisualizationOnScreen(datavis);
-        }
-        if (cfg.saveVisualization()){
-            saveVisualizationToFile(datavis);
-        }
-    }
-
-    private void displayVisualizationOnScreen(datavis d) {
-        synchronized (canvas) {
-            BufferStrategy bufferStrategy = canvas.getBufferStrategy();
-            Graphics graphics = bufferStrategy.getDrawGraphics();
-            renderVisualizationOnGraphicsComponent(d, graphics);
-            bufferStrategy.show();
-            graphics.dispose();
-        }
-    }
-
-    private void renderVisualizationOnGraphicsComponent(datavis d, Graphics graphics) {
-        graphics.clearRect(0, 0, 1700, 1200);
-        MatrixRendererIF[] rlist = {
-                // Wagi
-                new MatrixRenderer(0, 10, d.layer.W, graphics),
-                // biasy
-                new MatrixRendererHiddenUnits(0, 1100, d.vBiasDelta.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(100, 1100, d.layer.vbias.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(0, 1000, d.hBiasDelta.reshape(7).transpose(), graphics),
-                new MatrixRendererHiddenUnits(100, 1000, d.layer.hbias.reshape(7).transpose(), graphics),
-                // data flow
-                new MatrixRendererHiddenUnits(200, 610, d.X.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(300, 610, d.poshidprobs.reshape(7).transpose(), graphics),
-                new MatrixRendererHiddenUnits(400, 610, d.poshidstates.reshape(7).transpose(), graphics),
-                new MatrixRendererHiddenUnits(500, 610, d.negdata.reshape(28).transpose(), graphics),
-                new MatrixRendererHiddenUnits(600, 610, d.neghidprobs.reshape(7).transpose(), graphics),
-
-        };
-
-        for (MatrixRendererIF matrixRendererIF : rlist) {
-            matrixRendererIF.render();
-        }
-
-    }
-
-    public void saveVisualizationToFile(datavis d) {
-        try {
-            BufferedImage image = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
-            Graphics2D graphics = image.createGraphics();
-            renderVisualizationOnGraphicsComponent(d, graphics);
-            graphics.dispose();
-            String pathname = cfg.visualizationOutDirectory()
-                              + File.separatorChar
-                              + sessionId
-                              + "-" + currentEpoch.get()
-                              + "-" + d.bathIdx
-                              + ".jpg";
-            ImageIO.write(image, "JPEG", new File(pathname));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     protected Matrix getNegData(Matrix poshidstates) {
         Matrix negData = negativePhaseComputations.getNegData(poshidstates, sigma);

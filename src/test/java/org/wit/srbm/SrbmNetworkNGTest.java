@@ -97,35 +97,24 @@ public class SrbmNetworkNGTest {
         TrainingSetMinst tset = new TrainingSetMinst();
         tset.load("C:\\Users\\artur.koperkiewicz\\Downloads\\train-images-idx3-ubyte\\train-images.idx3-ubyte");
         List<List<Double>> x = tset.getSamples();
-        x =x.subList(0,5000);
+        x =x.subList(0,30000);
 
-        int[] topology = {784, 10, 400, 200,
+        int[] topology = {784, 200, 400, 20,
                           10,
-                          200, 400, 500, 784};
+                          20, 400, 200, 784};
         RbmCfg cfg = new RbmCfg()
                 .setBatchSize(20)
                 .learningRate(0.01)
-                .setSparsneseFactor(0.1)
+                .setSparsneseFactor(0.65)
                 .setNumberOfEpochs(30)
                 .setAcceptedError(0.004)
                 .persist(true)
                 .setSaveVisualization(false)
                 .showViz(false)
                 .workDir("/dane/");
-
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
         autoencoder.buildTopology();
-        WeightsInFrame diagW = new WeightsInFrame("Weights for rbm 1", autoencoder.getLayers().get(0).W());
-        autoencoder.addHook(l-> diagW.render(l.W));
         autoencoder.fit(x);
-
-
-        Matrix sample = new Matrix2D(x.subList(0, cfg.batchSize() - 1));
-        Matrix result = autoencoder.transform(sample);
-        MatrixRendererIF diag2 = new OneMatrixInFrame("test sample", sample.reshape(28).transpose());
-        MatrixRendererIF diag = new OneMatrixInFrame("evaluation result", result.reshape(28).transpose());
-        diag.render();
-        diag2.render();
         Thread.sleep(Long.MAX_VALUE);
     }
 

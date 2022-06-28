@@ -52,6 +52,9 @@ public class RbmCfg implements Cloneable {
         return this;
     }
 
+    public String name() {
+        return this.name;
+    }
 
     public RbmCfg showViz(boolean showVisualizationWindow) {
         this.showVisualizationWindow = showVisualizationWindow;

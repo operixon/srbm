@@ -34,8 +34,8 @@ public class TrainingSetMinst implements TrainingSet {
     }
 
     public void load(String path) throws IOException {
-        String f = getClass().getClassLoader().getResource("t10k-images-idx3-ubyte").getPath();
-        mil = new MinstImageLoader(f);
+        //String f = getClass().getClassLoader().getResource("t10k-images-idx3-ubyte").getPath();
+        mil = new MinstImageLoader(path);
         images = Arrays.stream(mil.getImages())
                        .map(image -> getNormalizedImageData(image))
                        .collect(toList());

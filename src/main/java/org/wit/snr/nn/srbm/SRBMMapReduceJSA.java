@@ -17,6 +17,7 @@ public class SRBMMapReduceJSA extends SRBM {
     private SRBM prev;
     private SRBM next;
     private List<Consumer<Layer>> epochHandlersList = new LinkedList<>();
+    private int trainSetSize = 0;
 
     public SRBMMapReduceJSA(RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
@@ -50,7 +51,7 @@ public class SRBMMapReduceJSA extends SRBM {
     }
 
     public void train(List<List<Double>> x) {
-
+        trainSetSize = x.size();
         while (!isConverged()) {
             epoch(splitToBatches(x));
         }
@@ -123,7 +124,7 @@ public class SRBMMapReduceJSA extends SRBM {
 
         Matrix poshidprobs = getHidProbs(X);
         Matrix poshidstates = getHidStates(poshidprobs);
-        Matrix negdata = getNegData(poshidprobs);
+        Matrix negdata = getNegData(poshidstates);
         Matrix neghidprobs = getNegHidProbs(negdata);
 
 
@@ -132,27 +133,20 @@ public class SRBMMapReduceJSA extends SRBM {
         updateError(X, negdata);
         Matrix hBiasDelta = getHBiasDelta(X);
 
-        System.out.printf("E %s/%s | %s | %s %n",
+        System.out.printf("%s | sample : %s/%s | epoch : %s/%s | error: %.5f | Timer => %s %n",
+                          cfg.name(),
                           batchIndex * cfg.batchSize(),
+                          trainSetSize,
                           currentEpoch,
+                          cfg.numberOfEpochs(),
                           layer.error,
                           timer.get().toString());
 
-        datavis datavis = new datavis(
-                X,
-                batchIndex,
-                layer,
-                poshidprobs,
-                poshidstates,
-                negdata,
-                neghidprobs,
-                Wdelta,
-                vBiasDelta,
-                hBiasDelta
-        );
-        draw(datavis);
+
         timer.remove();
-        epochHandlersList.forEach(h->h.accept(this.layer));
+        synchronized (epochHandlersList) {
+            epochHandlersList.forEach(h -> h.accept(this.layer));
+        }
         return Optional.of(new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta));
     }
 
