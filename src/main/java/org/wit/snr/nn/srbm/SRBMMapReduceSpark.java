@@ -160,7 +160,7 @@ public class SRBMMapReduceSpark extends SRBM {
                           layer.error,
                           timer.toString());
         timer.reset();
-        synchronized (epochHandlersList) {
+        2synchronized (epochHandlersList) {
             epochHandlersList.forEach(h -> h.accept(this.layer));
         }
         return Optional.of(new MiniBatchTrainingResult(Wdelta, vBiasDelta, hBiasDelta));
