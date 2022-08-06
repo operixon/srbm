@@ -1,11 +1,12 @@
 package org.wit.snr.nn.srbm.monitoring;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Timer {
+public class Timer implements Serializable {
 
-    private class Marker {
+    private class Marker implements Serializable{
         final String description;
         final long timestamp;
 

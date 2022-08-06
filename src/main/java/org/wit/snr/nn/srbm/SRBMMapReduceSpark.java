@@ -138,7 +138,7 @@ public class SRBMMapReduceSpark extends SRBM {
 
         final int batchIndex = miniBatchIndex.getAndIncrement();
         // timer.set(new Timer());
-        timer.get().start();
+        timer.start();
 
         Matrix poshidprobs = getHidProbs(X);
         Matrix poshidstates = getHidStates(poshidprobs);
@@ -158,8 +158,8 @@ public class SRBMMapReduceSpark extends SRBM {
                           currentEpoch,
                           cfg.numberOfEpochs(),
                           layer.error,
-                          timer.get().toString());
-        timer.remove();
+                          timer.toString());
+        timer.reset();
         synchronized (epochHandlersList) {
             epochHandlersList.forEach(h -> h.accept(this.layer));
         }

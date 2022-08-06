@@ -28,7 +28,7 @@ public abstract class SRBM implements Serializable{
     final NegativePhaseComputations negativePhaseComputations;
     final HiddenBiasAdaptation hiddenBiasAdaptation;
 
-    final ThreadLocal<Timer> timer = ThreadLocal.withInitial(Timer::new);
+    final Timer timer = new Timer();
     final AtomicInteger currentEpoch = new AtomicInteger(0);
     final AtomicInteger miniBatchIndex = new AtomicInteger(0);
 
@@ -57,7 +57,7 @@ public abstract class SRBM implements Serializable{
 
     protected Matrix getNegData(Matrix poshidstates) {
         Matrix negData = negativePhaseComputations.getNegData(poshidstates, sigma);
-        timer.get().mark("negdata");
+        timer.mark("negdata");
         return negData;
     }
 
@@ -65,13 +65,13 @@ public abstract class SRBM implements Serializable{
 
     protected Matrix getHidStates(Matrix poshidprobs) {
         Matrix hidStates = positivePhaseComputations.getHidStates(poshidprobs);
-        timer.get().mark("hidstates");
+        timer.mark("hidstates");
         return hidStates;
     }
 
     protected Matrix getHidProbs(Matrix X) {
         Matrix hidProbs = positivePhaseComputations.getHidProbs(X, sigma);
-        timer.get().mark("hidprobs");
+        timer.mark("hidprobs");
         return hidProbs;
     }
 
@@ -91,7 +91,7 @@ public abstract class SRBM implements Serializable{
             );
             hBiasDelta.add(hiddenBiasUnitDelta);
         }
-        timer.get().mark("hbias");
+        timer.mark("hbias");
         return Matrix2D.createColumnVector(hBiasDelta);
     }
 
@@ -123,7 +123,7 @@ public abstract class SRBM implements Serializable{
             }
         }
         layer.error = error / (cfg.batchSize() * cfg.numdims());
-        timer.get().mark("error");
+        timer.mark("error");
     }
 
     /**
@@ -136,7 +136,7 @@ public abstract class SRBM implements Serializable{
         Matrix rowsum_X = X.rowsum();
         Matrix rowsum_negdata = negdata.rowsum();
         Matrix biasDelta = rowsum_X.subtract(rowsum_negdata).scalarMultiply(cfg.alpha() / (double) cfg.batchSize());
-        timer.get().mark("vbias");
+        timer.mark("vbias");
         return biasDelta;
     }
 
@@ -158,7 +158,7 @@ public abstract class SRBM implements Serializable{
         Matrix negdata_neghidprobsT = negdata.multiplication(neghidprobs.transpose());// negdata*neghidprobsT
         Matrix x_poshidprobsT_negdata_neghidprobsT = x_poshidprobsT.subtract(negdata_neghidprobsT);// (X*poshidprobsT – negdata*neghidprobsT)
         Matrix delta = x_poshidprobsT_negdata_neghidprobsT.scalarDivide((double) cfg.batchSize()).scalarMultiply(cfg.alpha());// a*(X*poshidprobsT – negdata*neghidprobsT)/bathSize
-        timer.get().mark("W");
+        timer.mark("W");
         return delta;
     }
 
@@ -170,7 +170,7 @@ public abstract class SRBM implements Serializable{
      */
     protected Matrix getNegHidProbs(Matrix negdata) {
         Matrix hidProbs = positivePhaseComputations.getHidProbs(negdata, sigma);
-        timer.get().mark("neghidprobs");
+        timer.mark("neghidprobs");
         return hidProbs;
     }
 
