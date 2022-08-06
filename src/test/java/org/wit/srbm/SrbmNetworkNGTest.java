@@ -95,9 +95,10 @@ public class SrbmNetworkNGTest {
     public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException, IllegalAccessException {
 
         TrainingSetMinst tset = new TrainingSetMinst();
-        tset.load("C:\\Users\\artur.koperkiewicz\\Downloads\\train-images-idx3-ubyte\\train-images.idx3-ubyte");
+        //tset.load("C:\\Users\\artur.koperkiewicz\\Downloads\\train-images-idx3-ubyte\\train-images.idx3-ubyte");
+        tset.loadTestFromResources();
         List<List<Double>> x = tset.getSamples();
-        x =x.subList(0,30000);
+        x =x.subList(0,2000);
 
         int[] topology = {784, 200, 400, 20,
                           10,
