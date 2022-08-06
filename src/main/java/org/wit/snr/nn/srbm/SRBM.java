@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
@@ -198,4 +199,7 @@ public abstract class SRBM {
         return layer.W;
     }
 
+    abstract public Layer getLayer();
+
+    abstract public void addHook(Consumer<Layer> c);
 }

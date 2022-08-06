@@ -10,12 +10,14 @@ import org.wit.snr.nn.dbn.DbnAutoencoder;
 import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
+import org.wit.snr.nn.srbm.SRBMMapReduceSpark;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
 import org.wit.snr.nn.srbm.visualization.*;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,7 +94,7 @@ public class SrbmNetworkNGTest {
     }
 
     @Test
-    public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException, IllegalAccessException {
+    public void autoencoder() throws IOException, InterruptedException, ClassNotFoundException, CloneNotSupportedException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException {
 
         TrainingSetMinst tset = new TrainingSetMinst();
         //tset.load("C:\\Users\\artur.koperkiewicz\\Downloads\\train-images-idx3-ubyte\\train-images.idx3-ubyte");
@@ -114,7 +116,7 @@ public class SrbmNetworkNGTest {
                 .showViz(false)
                 .workDir("/dane/");
         DbnAutoencoder autoencoder = new DbnAutoencoder("autoencoder", cfg, topology);
-        autoencoder.buildTopology();
+        autoencoder.buildTopology(SRBMMapReduceSpark.class);
         autoencoder.fit(x);
         Thread.sleep(Long.MAX_VALUE);
     }

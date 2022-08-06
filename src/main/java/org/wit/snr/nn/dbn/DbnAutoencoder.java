@@ -1,25 +1,26 @@
 package org.wit.snr.nn.dbn;
 
 import org.wit.snr.nn.srbm.RbmCfg;
+import org.wit.snr.nn.srbm.SRBM;
 import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
 import org.wit.snr.nn.srbm.layer.Layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-public class DbnAutoencoder {
+public class DbnAutoencoder<T extends SRBM> {
 
     static Logger log = Logger.getLogger(DbnAutoencoder.class.getName());
 
     private final String name;
     private final RbmCfg cfg;
     private final int[] topology;
-    private final List<SRBMMapReduceJSA> layers = new LinkedList<SRBMMapReduceJSA>();
-
+    private final List<T> layers = new LinkedList<T>();
 
 
     public DbnAutoencoder(String name, RbmCfg cfg, int[] topology) throws IllegalAccessException {
@@ -33,14 +34,15 @@ public class DbnAutoencoder {
     }
 
 
-    public void buildTopology() throws IOException, InterruptedException, CloneNotSupportedException {
+    public void buildTopology(Class<T> c) throws IOException, InterruptedException, CloneNotSupportedException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         for (int i = 0; i < topology.length - 1; i++) {
             RbmCfg newLayerCfg = ((RbmCfg) cfg.clone()).numdims(topology[i])
                                                        .numhid(topology[i + 1])
                                                        .name(this.name + "-" + i);
-            SRBMMapReduceJSA newLayer = layers.size() == 0
-                                        ? new SRBMMapReduceJSA(newLayerCfg)
-                                        : new SRBMMapReduceJSA(layers.get(layers.size() - 1), newLayerCfg);
+            T newLayer = layers.size() == 0
+                         ? c.getDeclaredConstructor(RbmCfg.class).newInstance(newLayerCfg)
+                         : c.getDeclaredConstructor(SRBM.class, RbmCfg.class)
+                            .newInstance(layers.get(layers.size() - 1), newLayerCfg);
             layers.add(newLayer);
         }
 
@@ -78,15 +80,15 @@ public class DbnAutoencoder {
 
     private void copyModelFromEncoderToDecoder() {
         for (int i = 0; i <= layers.size() / 2; i++) {
-            SRBMMapReduceJSA baseLayer = layers.get(i);
-            SRBMMapReduceJSA mirroredLayer = layers.get(layers.size() - i - 1);
+            T baseLayer = layers.get(i);
+            T mirroredLayer = layers.get(layers.size() - i - 1);
             mirroredLayer.getLayer().W = baseLayer.getLayer().W.transpose();
             mirroredLayer.getLayer().vbias = baseLayer.getLayer().hbias;
             mirroredLayer.getLayer().hbias = baseLayer.getLayer().vbias;
         }
     }
 
-    public List<SRBMMapReduceJSA> getLayers() {
+    public List<T> getLayers() {
         return layers;
     }
 
@@ -95,6 +97,6 @@ public class DbnAutoencoder {
     }
 
     public void addHook(Consumer<Layer> c) {
-        layers.forEach(l->l.addHook(c));
+        layers.forEach(l -> l.addHook(c));
     }
 }

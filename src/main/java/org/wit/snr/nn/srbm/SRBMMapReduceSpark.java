@@ -1,6 +1,7 @@
 package org.wit.snr.nn.srbm;
 
-import org.wit.snr.nn.dbn.DbnAutoencoder;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SparkSession;
 import org.wit.snr.nn.srbm.layer.Layer;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
@@ -11,16 +12,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class SRBMMapReduceJSA extends SRBM {
+public class SRBMMapReduceSpark extends SRBM {
 
 
     private SRBM prev;
     private SRBM next;
     private List<Consumer<Layer>> epochHandlersList = new LinkedList<>();
     private int trainSetSize = 0;
+    private JavaSparkContext sc;
 
-    public SRBMMapReduceJSA(RbmCfg cfg) throws IOException, InterruptedException {
+
+    public SRBMMapReduceSpark(RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
+        //
+        // The "modern" way to initialize Spark is to create a SparkSession
+        // although they really come from the world of Spark SQL, and Dataset
+        // and DataFrame.
+        //
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("RDD-Basic")
+                .master("local[8]")
+                .getOrCreate();
+        //
+        // Operating on a raw RDD actually requires access to the more low
+        // level SparkContext -- get the special Java version for convenience
+        //
+        sc = new JavaSparkContext(spark.sparkContext());
     }
 
     @Override
@@ -33,7 +51,9 @@ public class SRBMMapReduceJSA extends SRBM {
     }
 
 
-    public SRBMMapReduceJSA(SRBM v1, RbmCfg cfg) throws IOException, InterruptedException {
+
+
+    public SRBMMapReduceSpark(SRBM v1, RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
         this.prev = v1;
         v1.setNext(this);
@@ -79,22 +99,19 @@ public class SRBMMapReduceJSA extends SRBM {
 
     private void getMapReduceResult(List<Matrix> x) {
         if (prev != null) {
-            x.parallelStream()
-             //  .limit(5)
-             .map(prev::eval)
-             .map(this::trainMiniBatch)
-             .filter(Optional::isPresent)
-             .map(Optional::get)
-             .peek(this::updateLayerData)
-             .count();
+            sc.parallelize(x)
+              //  .limit(5)
+              .map(prev::eval)
+              .map(this::trainMiniBatch)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .foreach(this::updateLayerData);
         } else {
-            x.parallelStream()
-             //   .limit(5)
-             .map(this::trainMiniBatch)
-             .filter(Optional::isPresent)
-             .map(Optional::get)
-             .peek(this::updateLayerData)
-             .count();
+            sc.parallelize(x)
+              .map(this::trainMiniBatch)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .foreach(this::updateLayerData);
         }
         //.reduce(
         //      Optional.empty(),
@@ -141,8 +158,6 @@ public class SRBMMapReduceJSA extends SRBM {
                           cfg.numberOfEpochs(),
                           layer.error,
                           timer.get().toString());
-
-
         timer.remove();
         synchronized (epochHandlersList) {
             epochHandlersList.forEach(h -> h.accept(this.layer));
@@ -154,7 +169,6 @@ public class SRBMMapReduceJSA extends SRBM {
         return currentEpoch.get() > cfg.numberOfEpochs() || layer.error < cfg.acceptedError();
     }
 
-    @Override
     public Layer getLayer() {
         return this.layer;
     }
