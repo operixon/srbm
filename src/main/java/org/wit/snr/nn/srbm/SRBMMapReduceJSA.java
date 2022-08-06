@@ -122,10 +122,10 @@ public class SRBMMapReduceJSA extends SRBM {
         // timer.set(new Timer());
         timer.get().start();
 
-        var poshidprobs = getHidProbs(X);
-        var poshidstates = getHidStates(poshidprobs);
-        var negdata = getNegData(poshidstates);
-        var neghidprobs = getNegHidProbs(negdata);
+        Matrix poshidprobs = getHidProbs(X);
+        Matrix poshidstates = getHidStates(poshidprobs);
+        Matrix negdata = getNegData(poshidstates);
+        Matrix neghidprobs = getNegHidProbs(negdata);
 
 
         Matrix Wdelta = updateWeights(X, poshidprobs, negdata, neghidprobs);
