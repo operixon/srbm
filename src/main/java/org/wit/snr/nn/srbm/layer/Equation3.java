@@ -3,9 +3,10 @@ package org.wit.snr.nn.srbm.layer;
 import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.math.ActivationFunction;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Equation3 {
+public class Equation3 implements Serializable {
 
     final RbmCfg cfg;
     final Layer layer;

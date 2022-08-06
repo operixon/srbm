@@ -3,6 +3,7 @@ package org.wit.snr.nn.srbm.layer;
 
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 
+import java.io.Serializable;
 import java.util.stream.Stream;
 
 /**
@@ -30,7 +31,7 @@ import java.util.stream.Stream;
  * </pre>
  */
 
-public class HiddenBiasAdaptation {
+public class HiddenBiasAdaptation implements Serializable {
 
     final Equation3 equation3;
 

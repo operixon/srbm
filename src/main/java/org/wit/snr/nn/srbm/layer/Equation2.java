@@ -3,6 +3,7 @@ package org.wit.snr.nn.srbm.layer;
 import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.math.ActivationFunction;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -17,7 +18,7 @@ import java.util.List;
  *
  * @return Probabilities for visual units reconstruction
  */
-public class Equation2 {
+public class Equation2 implements Serializable {
 
     final RbmCfg cfg;
     final Layer layer;

@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 /**
  * @author koperix
  */
-public abstract class SRBM {
+public abstract class SRBM implements Serializable{
 
     final RbmCfg cfg;
     Layer layer;

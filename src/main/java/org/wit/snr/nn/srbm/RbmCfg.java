@@ -5,7 +5,9 @@
  */
 package org.wit.snr.nn.srbm;
 
-public class RbmCfg implements Cloneable {
+import java.io.Serializable;
+
+public class RbmCfg implements Cloneable , Serializable {
 
     private String name;
     private boolean load;

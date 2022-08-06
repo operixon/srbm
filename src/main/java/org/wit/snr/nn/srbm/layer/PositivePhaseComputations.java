@@ -4,12 +4,13 @@ import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public class PositivePhaseComputations {
+public class PositivePhaseComputations implements Serializable {
 
     private final Equation3 equation3;
     private final RbmCfg cfg;

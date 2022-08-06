@@ -7,6 +7,7 @@ import org.wit.snr.nn.srbm.math.collection.Matrix;
 import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -19,26 +20,10 @@ public class SRBMMapReduceSpark extends SRBM {
     private SRBM next;
     private List<Consumer<Layer>> epochHandlersList = new LinkedList<>();
     private int trainSetSize = 0;
-    private JavaSparkContext sc;
 
 
     public SRBMMapReduceSpark(RbmCfg cfg) throws IOException, InterruptedException {
         super(cfg);
-        //
-        // The "modern" way to initialize Spark is to create a SparkSession
-        // although they really come from the world of Spark SQL, and Dataset
-        // and DataFrame.
-        //
-        SparkSession spark = SparkSession
-                .builder()
-                .appName("RDD-Basic")
-                .master("local[8]")
-                .getOrCreate();
-        //
-        // Operating on a raw RDD actually requires access to the more low
-        // level SparkContext -- get the special Java version for convenience
-        //
-        sc = new JavaSparkContext(spark.sparkContext());
     }
 
     @Override
@@ -49,8 +34,6 @@ public class SRBMMapReduceSpark extends SRBM {
             return getHidProbs(matrix);
         }
     }
-
-
 
 
     public SRBMMapReduceSpark(SRBM v1, RbmCfg cfg) throws IOException, InterruptedException {
@@ -98,6 +81,23 @@ public class SRBMMapReduceSpark extends SRBM {
     }
 
     private void getMapReduceResult(List<Matrix> x) {
+        //
+        // The "modern" way to initialize Spark is to create a SparkSession
+        // although they really come from the world of Spark SQL, and Dataset
+        // and DataFrame.
+        //
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("RDD-Basic")
+                .master("local[8]")
+                .getOrCreate();
+        //
+        // Operating on a raw RDD actually requires access to the more low
+        // level SparkContext -- get the special Java version for convenience
+        //
+        JavaSparkContext sc = new JavaSparkContext(spark.sparkContext());
+
+
         if (prev != null) {
             sc.parallelize(x)
               //  .limit(5)
@@ -108,10 +108,10 @@ public class SRBMMapReduceSpark extends SRBM {
               .foreach(this::updateLayerData);
         } else {
             sc.parallelize(x)
-              .map(this::trainMiniBatch)
-              .filter(Optional::isPresent)
-              .map(Optional::get)
-              .foreach(this::updateLayerData);
+              .map(miniBatch -> trainMiniBatch(miniBatch))
+              .filter(trainResult -> trainResult.isPresent())
+              .map(r -> r.get())
+              .foreach(r -> updateLayerData(r));
         }
         //.reduce(
         //      Optional.empty(),
@@ -135,6 +135,7 @@ public class SRBMMapReduceSpark extends SRBM {
 
 
     private Optional<MiniBatchTrainingResult> trainMiniBatch(Matrix X) {
+
         final int batchIndex = miniBatchIndex.getAndIncrement();
         // timer.set(new Timer());
         timer.get().start();
