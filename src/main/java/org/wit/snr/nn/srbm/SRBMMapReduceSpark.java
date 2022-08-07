@@ -90,6 +90,7 @@ public class SRBMMapReduceSpark extends SRBM {
                 .builder()
                 .appName("RDD-Basic")
                 .master("local[8]")
+
                 .getOrCreate();
         //
         // Operating on a raw RDD actually requires access to the more low
