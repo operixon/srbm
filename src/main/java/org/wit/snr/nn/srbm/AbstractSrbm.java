@@ -6,10 +6,11 @@
 package org.wit.snr.nn.srbm;
 
 import org.apache.spark.mllib.linalg.Matrix;
+import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.rdd.RDD;
 import org.wit.snr.nn.srbm.layer.*;
 import org.wit.snr.nn.srbm.math.function.SigmoidFunction;
-import org.wit.snr.nn.srbm.monitoring.Timer;
+
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
 /**
  * @author koperix
  */
-public abstract class SrbmLayer {
+public abstract class AbstractSrbm {
 
     final RbmCfg cfg;
     final PositivePhaseComputations positivePhaseComputations;
@@ -27,24 +28,27 @@ public abstract class SrbmLayer {
     final HiddenBiasAdaptation hiddenBiasAdaptation;
     final AtomicInteger currentEpoch = new AtomicInteger(0);
     final AtomicInteger miniBatchIndex = new AtomicInteger(0);
+    long trainingSetSize;
+
+    Model model;
 
     final String sessionId = "srbm-" + System.currentTimeMillis();
 
     protected double sigma;
 
-    public abstract void train(RDD<Matrix> x);
+    public abstract void fit(RDD<Vector> x);
 
-    public abstract SrbmLayer setNext(SrbmLayer next);
+    public abstract AbstractSrbm setNext(AbstractSrbm next);
 
-    public SrbmLayer(RbmCfg cfg) throws IOException, InterruptedException {
+    public AbstractSrbm(RbmCfg cfg) throws IOException, InterruptedException {
         this.cfg = cfg;
         sigma = cfg.sigmaInit();
-        this.layer = new Layer(this.cfg.numdims(), this.cfg.numhid());
-        Equation3 equation3 = new Equation3(this.cfg, layer, new SigmoidFunction());
+        this.model = new Model(this.cfg.numdims(), this.cfg.numhid());
+        Equation3 equation3 = new Equation3(this.cfg, model, new SigmoidFunction());
         positivePhaseComputations = new PositivePhaseComputations(equation3, this.cfg);
         hiddenBiasAdaptation = new HiddenBiasAdaptation(equation3);
         negativePhaseComputations = new NegativePhaseComputations(
-                new Equation2(this.cfg, layer, new SigmoidFunction()),
+                new Equation2(this.cfg, model, new SigmoidFunction()),
                 this.cfg
         );
     }
@@ -181,9 +185,9 @@ public abstract class SrbmLayer {
     public void load(String s) throws IOException, ClassNotFoundException {
         try (FileInputStream in = new FileInputStream(s)) {
             ObjectInputStream o = new ObjectInputStream(in);
-            this.layer = (Layer) o.readObject();
+            this.layer = (Model) o.readObject();
         } catch (FileNotFoundException e) {
-            Logger.getLogger(SrbmLayer.class.getName()).info("File " + s + " not found. Starting from begining.");
+            Logger.getLogger(AbstractSrbm.class.getName()).info("File " + s + " not found. Starting from begining.");
         }
     }
 

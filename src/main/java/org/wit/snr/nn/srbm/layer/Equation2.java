@@ -20,10 +20,10 @@ import java.util.List;
 public class Equation2 {
 
     final RbmCfg cfg;
-    final Layer layer;
+    final Model layer;
     final ActivationFunction activationFunction;
 
-    public Equation2(RbmCfg cfg, Layer layer, ActivationFunction activationFunction) {
+    public Equation2(RbmCfg cfg, Model layer, ActivationFunction activationFunction) {
         this.cfg = cfg;
         this.layer = layer;
         this.activationFunction = activationFunction;

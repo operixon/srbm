@@ -3,7 +3,7 @@ package org.wit.snr.nn.srbm.layer;
 import java.io.Serializable;
 import java.util.List;
 
-public class Layer implements Serializable {
+public class Model implements Serializable {
     // W := randn(numdims, numhid)
     public Matrix W;
     public Matrix vbias; // ci
@@ -14,7 +14,7 @@ public class Layer implements Serializable {
     public double error= 1;
 
 
-    public Layer(int numdims, int numhid) {
+    public Model(int numdims, int numhid) {
         W = Matrix2D.createMatrixWithRandomValues(numdims, numhid);
         vbias = Matrix2D.createMatrixWithRandomValues(numdims, 1);
         hbias = Matrix2D.createMatrixWithRandomValues(numhid, 1);

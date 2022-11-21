@@ -2,7 +2,7 @@ package org.wit.snr.nn.dbn;
 
 import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.SrbmMapReduce;
-import org.wit.snr.nn.srbm.layer.Layer;
+import org.wit.snr.nn.srbm.layer.Model;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -93,7 +93,7 @@ public class DbnAutoencoder {
         return layers.get(layers.size() - 1).eval(sample);
     }
 
-    public void addHook(Consumer<Layer> c) {
+    public void addHook(Consumer<Model> c) {
         layers.forEach(l->l.addHook(c));
     }
 }

@@ -8,10 +8,10 @@ import java.util.List;
 public class Equation3 {
 
     final RbmCfg cfg;
-    final Layer layer;
+    final Model layer;
     final ActivationFunction activationFunction;
 
-    public Equation3(RbmCfg cfg, Layer layer, ActivationFunction activationFunction) {
+    public Equation3(RbmCfg cfg, Model layer, ActivationFunction activationFunction) {
         this.cfg = cfg;
         this.layer = layer;
         this.activationFunction = activationFunction;

@@ -5,16 +5,18 @@
  */
 package org.wit.srbm;
 
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.rdd.RDD;
+import org.apache.spark.sql.SparkSession;
 import org.testng.annotations.Test;
-import org.wit.snr.nn.dbn.DbnAutoencoder;
 import org.wit.snr.nn.srbm.RbmCfg;
-import org.wit.snr.nn.srbm.SrbmLayer;
 import org.wit.snr.nn.srbm.SrbmMapReduce;
 import org.wit.snr.nn.srbm.visualization.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author koperix
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 public class SrbmNetworkNGTest {
 
 
-    @Test
+  /*  @Test
     public void testDBN2() throws IOException, InterruptedException, ClassNotFoundException {
         SrbmLayer v1 = new SrbmMapReduce(new RbmCfg().showViz(false));
         v1.load("/dane/2v2-srbm-layer.data");
@@ -66,7 +68,7 @@ public class SrbmNetworkNGTest {
         v3.load("/dane/2v3-srbm-layer.data");
 
 
-        v1.train(x);
+        v1.fit(x);
         v1.persist("/dane/2v1-srbm-layer.data");
         v2.persist("/dane/2v2-srbm-layer.data");
         v3.persist("/dane/2v3-srbm-layer.data");
@@ -84,7 +86,7 @@ public class SrbmNetworkNGTest {
                             .setNumberOfEpochs(1)
                             .setAcceptedError(0.04)
         );
-        v1.train(x);
+        v1.fit(x);
         v1.persist("/dane/v1-single-srbm-layer.data");
     }
 
@@ -113,6 +115,49 @@ public class SrbmNetworkNGTest {
         autoencoder.buildTopology();
         autoencoder.fit(x);
         Thread.sleep(Long.MAX_VALUE);
+    }*/
+
+    @Test
+    void singleRBM() throws IOException, InterruptedException {
+
+
+        var cfg = new RbmCfg()
+                .setBatchSize(20)
+                .learningRate(0.01)
+                .setSparsneseFactor(0.65)
+                .setNumberOfEpochs(30)
+                .setAcceptedError(0.004)
+                .persist(true)
+                .setSaveVisualization(false)
+                .showViz(false)
+                .workDir("/dane/");
+        var srbm = new SrbmMapReduce(cfg);
+        RDD<Vector> trainigDataSet = getTrainigSetRDD();
+        srbm.fit(trainigDataSet);
+
+
+
+
+    }
+
+    private RDD<Vector> getTrainigSetRDD() {
+        SparkConf sparkConf = new SparkConf().setAppName("Read Text to RDD")
+                                             .setMaster("local[8]")
+                                             .set("spark.executor.memory", "4g");
+
+        JavaSparkContext sc = new JavaSparkContext(sparkConf);
+
+        var trainingSet =
+                sc.textFile("/home/artur/Pobrane/mnist/mnist_train.csv")
+                            .map(csvLineString -> {
+                                var imageData = csvLineString.split(",");
+                                     double[] values = new double[imageData.length - 1];
+                                     for (int i = 0; i < values.length; i++) {
+                                        values[i] = Double.parseDouble(imageData[i + 1]);
+                                    }
+                                   return Vectors.dense(values);
+                            });
+        return trainingSet.rdd();
     }
 
 }
