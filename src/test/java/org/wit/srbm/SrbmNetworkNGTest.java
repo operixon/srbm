@@ -8,11 +8,8 @@ package org.wit.srbm;
 import org.testng.annotations.Test;
 import org.wit.snr.nn.dbn.DbnAutoencoder;
 import org.wit.snr.nn.srbm.RbmCfg;
-import org.wit.snr.nn.srbm.SRBM;
-import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
-import org.wit.snr.nn.srbm.math.collection.Matrix;
-import org.wit.snr.nn.srbm.math.collection.Matrix2D;
-import org.wit.snr.nn.srbm.trainingset.TrainingSetMinst;
+import org.wit.snr.nn.srbm.SrbmLayer;
+import org.wit.snr.nn.srbm.SrbmMapReduce;
 import org.wit.snr.nn.srbm.visualization.*;
 
 import java.io.IOException;
@@ -27,7 +24,7 @@ public class SrbmNetworkNGTest {
 
     @Test
     public void testDBN2() throws IOException, InterruptedException, ClassNotFoundException {
-        SRBM v1 = new SRBMMapReduceJSA(new RbmCfg().showViz(false));
+        SrbmLayer v1 = new SrbmMapReduce(new RbmCfg().showViz(false));
         v1.load("/dane/2v2-srbm-layer.data");
         Matrix filter = v1.W().splitToColumnVectors().get(6).reshape(28);
         //MatrixRendererIF r = new WeightsInFrame(v1.W());
@@ -44,7 +41,7 @@ public class SrbmNetworkNGTest {
         TrainingSetMinst tset = new TrainingSetMinst();
         List<List<Double>> x = tset.getSamples();
 
-        SRBM v1 = new SRBMMapReduceJSA(
+        SrbmLayer v1 = new SrbmMapReduce(
                 new RbmCfg().setBatchSize(200)
                             .numdims(784)
                             .numhid(784)
@@ -53,18 +50,18 @@ public class SrbmNetworkNGTest {
                             .setAcceptedError(0.03)
         );
         v1.load("/dane/2v1-srbm-layer.data");
-        SRBM v2 = new SRBMMapReduceJSA(v1, new RbmCfg().setBatchSize(200)
-                                                       .numdims(784)
-                                                       .numhid(500)
-                                                       .setNumberOfEpochs(10)
-                                                       .setAcceptedError(0.0035)
+        SrbmLayer v2 = new SrbmMapReduce(v1, new RbmCfg().setBatchSize(200)
+                                                         .numdims(784)
+                                                         .numhid(500)
+                                                         .setNumberOfEpochs(10)
+                                                         .setAcceptedError(0.0035)
         );
         v2.load("/dane/2v2-srbm-layer.data");
-        SRBM v3 = new SRBMMapReduceJSA(v2, new RbmCfg().setBatchSize(200)
-                                                       .numdims(500)
-                                                       .numhid(10)
-                                                       .setNumberOfEpochs(10)
-                                                       .setAcceptedError(0.001)
+        SrbmLayer v3 = new SrbmMapReduce(v2, new RbmCfg().setBatchSize(200)
+                                                         .numdims(500)
+                                                         .numhid(10)
+                                                         .setNumberOfEpochs(10)
+                                                         .setAcceptedError(0.001)
         );
         v3.load("/dane/2v3-srbm-layer.data");
 
@@ -79,7 +76,7 @@ public class SrbmNetworkNGTest {
     public void testRBM() throws IOException, InterruptedException, ClassNotFoundException {
         TrainingSetMinst tset = new TrainingSetMinst();
         List<List<Double>> x = tset.getSamples();
-        SRBM v1 = new SRBMMapReduceJSA(
+        SrbmLayer v1 = new SrbmMapReduce(
                 new RbmCfg().setBatchSize(10)
                             .numdims(784)
                             .numhid(784 / 16)

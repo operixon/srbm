@@ -1,7 +1,7 @@
 package org.wit.snr.nn.srbm.layer;
 
 
-import org.wit.snr.nn.srbm.math.collection.Matrix;
+import org.apache.spark.mllib.linalg.Matrix;
 
 import java.util.stream.Stream;
 
@@ -64,7 +64,10 @@ public class HiddenBiasAdaptation {
         final double sum_E_hj_v =
                 Stream.iterate(0, i -> i = i + 1)
                         .limit(m)
-                        .mapToDouble(i -> equation3.evaluate(j, vSamples.getColumn(i), sigma))
+                        .mapToDouble(i -> equation3.evaluate(
+                                j,
+                                vSamples,
+                                sigma))
                         .sum();
         return -ni * ((sum_E_hj_v / (double) m) - p);
     }

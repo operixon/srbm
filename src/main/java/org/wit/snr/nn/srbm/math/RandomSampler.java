@@ -1,8 +1,5 @@
 package org.wit.snr.nn.srbm.math;
 
-import org.wit.snr.nn.srbm.math.collection.Matrix;
-import org.wit.snr.nn.srbm.math.collection.Matrix2D;
-
 import java.util.List;
 import java.util.Random;
 

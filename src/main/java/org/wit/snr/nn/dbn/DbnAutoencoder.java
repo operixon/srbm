@@ -1,9 +1,8 @@
 package org.wit.snr.nn.dbn;
 
 import org.wit.snr.nn.srbm.RbmCfg;
-import org.wit.snr.nn.srbm.SRBMMapReduceJSA;
+import org.wit.snr.nn.srbm.SrbmMapReduce;
 import org.wit.snr.nn.srbm.layer.Layer;
-import org.wit.snr.nn.srbm.math.collection.Matrix;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -18,7 +17,7 @@ public class DbnAutoencoder {
     private final String name;
     private final RbmCfg cfg;
     private final int[] topology;
-    private final List<SRBMMapReduceJSA> layers = new LinkedList<SRBMMapReduceJSA>();
+    private final List<SrbmMapReduce> layers = new LinkedList<SrbmMapReduce>();
 
 
 
@@ -38,9 +37,9 @@ public class DbnAutoencoder {
             RbmCfg newLayerCfg = ((RbmCfg) cfg.clone()).numdims(topology[i])
                                                        .numhid(topology[i + 1])
                                                        .name(this.name + "-" + i);
-            SRBMMapReduceJSA newLayer = layers.size() == 0
-                                        ? new SRBMMapReduceJSA(newLayerCfg)
-                                        : new SRBMMapReduceJSA(layers.get(layers.size() - 1), newLayerCfg);
+            SrbmMapReduce newLayer = layers.size() == 0
+                                        ? new SrbmMapReduce(newLayerCfg)
+                                        : new SrbmMapReduce(layers.get(layers.size() - 1), newLayerCfg);
             layers.add(newLayer);
         }
 
@@ -78,15 +77,15 @@ public class DbnAutoencoder {
 
     private void copyModelFromEncoderToDecoder() {
         for (int i = 0; i <= layers.size() / 2; i++) {
-            SRBMMapReduceJSA baseLayer = layers.get(i);
-            SRBMMapReduceJSA mirroredLayer = layers.get(layers.size() - i - 1);
+            SrbmMapReduce baseLayer = layers.get(i);
+            SrbmMapReduce mirroredLayer = layers.get(layers.size() - i - 1);
             mirroredLayer.getLayer().W = baseLayer.getLayer().W.transpose();
             mirroredLayer.getLayer().vbias = baseLayer.getLayer().hbias;
             mirroredLayer.getLayer().hbias = baseLayer.getLayer().vbias;
         }
     }
 
-    public List<SRBMMapReduceJSA> getLayers() {
+    public List<SrbmMapReduce> getLayers() {
         return layers;
     }
 

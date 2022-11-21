@@ -1,7 +1,5 @@
 package org.wit.snr.nn.srbm;
 
-import org.wit.snr.nn.srbm.math.collection.Matrix;
-
 import java.util.Optional;
 
 public class MiniBatchTrainingResult

@@ -2,8 +2,6 @@ package org.wit.snr.nn.srbm.layer;
 
 import org.wit.snr.nn.srbm.RbmCfg;
 import org.wit.snr.nn.srbm.math.RandomSampler;
-import org.wit.snr.nn.srbm.math.collection.Matrix;
-import org.wit.snr.nn.srbm.math.collection.Matrix2D;
 
 import java.util.List;
 import java.util.stream.Stream;
